@@ -20,24 +20,42 @@ export default function DocumentPage() {
         .eq('id', id)
         .single()
 
-      if (!error && data) setDoc(data as Document)
+      if (!error && data) {
+        console.log('Loaded document:', data)
+        setDoc(data as Document)
+      } else {
+        console.error('Error loading document:', error)
+      }
       setLoading(false)
     }
     fetchDoc()
   }, [id])
 
   const generatePaymentLink = async () => {
+    if (!doc) return
     setGeneratingLink(true)
     try {
+      const payload = {
+        documentId: id,
+        amount: doc.price,
+        description: `${doc.doc_type} from ${doc.business_name}`,
+        clientEmail: doc.client_email,
+      }
+      console.log('Sending payment link request:', payload)
       const res = await fetch('/api/payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId: id }),
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
-      if (data.url) {
-        setDoc((prev) => prev ? { ...prev, stripe_payment_link: data.url } : prev)
+      console.log('Payment link response:', data)
+      if (data.paymentLink) {
+        setDoc((prev) => prev ? { ...prev, stripe_payment_link: data.paymentLink } : prev)
+      } else {
+        console.error('No payment link in response:', data)
       }
+    } catch (error) {
+      console.error('Payment link error:', error)
     } finally {
       setGeneratingLink(false)
     }

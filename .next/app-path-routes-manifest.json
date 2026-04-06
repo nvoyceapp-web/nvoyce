@@ -1,0 +1,12 @@
+{
+  "/api/generate/route": "/api/generate",
+  "/api/webhooks/stripe/route": "/api/webhooks/stripe",
+  "/api/payment-link/route": "/api/payment-link",
+  "/_not-found/page": "/_not-found",
+  "/dashboard/documents/[id]/page": "/dashboard/documents/[id]",
+  "/dashboard/page": "/dashboard",
+  "/page": "/",
+  "/sign-in/[[...sign-in]]/page": "/sign-in/[[...sign-in]]",
+  "/sign-up/[[...sign-up]]/page": "/sign-up/[[...sign-up]]",
+  "/dashboard/new/page": "/dashboard/new"
+}

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useAuth } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
 
 interface Stats {
@@ -11,15 +12,22 @@ interface Stats {
 }
 
 export default function DashboardPage() {
+  const { userId } = useAuth()
   const [stats, setStats] = useState<Stats>({ totalSent: 0, outstanding: 0, collected: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchStats() {
+      if (!userId) {
+        setLoading(false)
+        return
+      }
+
       try {
         const { data, error } = await supabase
           .from('documents')
           .select('price, status')
+          .eq('user_id', userId)
 
         if (error) throw error
 
@@ -42,7 +50,7 @@ export default function DashboardPage() {
     }
 
     fetchStats()
-  }, [])
+  }, [userId])
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -223,12 +223,6 @@ export default function DashboardPage() {
             <Link href="/dashboard/new" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
               + New Document
             </Link>
-            <Link href="/dashboard/invoices" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-              Invoices
-            </Link>
-            <Link href="/dashboard/proposals" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-              Proposals
-            </Link>
           </nav>
           <div className="border-t border-gray-100 pt-4">
             <div className="flex items-center gap-3 px-2">

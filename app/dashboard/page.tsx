@@ -36,6 +36,61 @@ export default function DashboardPage() {
     documents: []
   })
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterClient, setFilterClient] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+
+  // Filter documents based on search and filters
+  const filteredDocuments = stats.documents.filter((doc) => {
+    const matchesSearch = doc.client_name.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesClient = !filterClient || doc.client_name === filterClient
+    const docDate = new Date(doc.created_at)
+    const matchesDateFrom = !dateFrom || docDate >= new Date(dateFrom)
+    const matchesDateTo = !dateTo || docDate <= new Date(dateTo)
+    return matchesSearch && matchesClient && matchesDateFrom && matchesDateTo
+  })
+
+  // Get unique client names for filter dropdown
+  const uniqueClients = Array.from(new Set(stats.documents.map((doc) => doc.client_name)))
+
+  // Export to Excel
+  const exportToExcel = () => {
+    if (filteredDocuments.length === 0) {
+      alert('No documents to export')
+      return
+    }
+
+    // Prepare data for export
+    const exportData = filteredDocuments.map((doc) => {
+      const createdDate = new Date(doc.created_at)
+      const daysOld = Math.floor((new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
+      return {
+        'Client Name': doc.client_name,
+        'Type': doc.doc_type.toUpperCase(),
+        'Amount': `$${doc.price.toLocaleString()}`,
+        'Status': doc.status,
+        'Date Sent': createdDate.toLocaleDateString(),
+        'Days Outstanding': doc.status === 'paid' ? '—' : daysOld,
+      }
+    })
+
+    // Create CSV content
+    const headers = Object.keys(exportData[0])
+    const csvContent = [
+      headers.join(','),
+      ...exportData.map((row) => headers.map((h) => `"${row[h as keyof typeof row]}"`).join(',')),
+    ].join('\n')
+
+    // Create and download blob
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `nvoyce-invoices-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    window.URL.revokeObjectURL(url)
+  }
 
   useEffect(() => {
     async function fetchStats() {
@@ -173,8 +228,57 @@ export default function DashboardPage() {
 
             {stats.documents.length > 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-100">
-                  <h2 className="text-lg font-semibold text-gray-900">Invoices & Proposals</h2>
+                <div className="p-6 border-b border-gray-100 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-gray-900">Invoices & Proposals</h2>
+                    <button
+                      onClick={exportToExcel}
+                      className="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                    >
+                      ⬇️ Export to CSV
+                    </button>
+                  </div>
+
+                  {/* Filters */}
+                  <div className="grid grid-cols-4 gap-3">
+                    <input
+                      type="text"
+                      placeholder="Search client..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                    />
+                    <select
+                      value={filterClient}
+                      onChange={(e) => setFilterClient(e.target.value)}
+                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                    >
+                      <option value="">All clients</option>
+                      {uniqueClients.map((client) => (
+                        <option key={client} value={client}>
+                          {client}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                    />
+                    <input
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                    />
+                  </div>
+
+                  {filteredDocuments.length !== stats.documents.length && (
+                    <div className="text-xs text-gray-500">
+                      Showing {filteredDocuments.length} of {stats.documents.length} documents
+                    </div>
+                  )}
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -189,7 +293,8 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {stats.documents.map((doc) => {
+                      {filteredDocuments.length > 0 ? (
+                        filteredDocuments.map((doc) => {
                         const createdDate = new Date(doc.created_at)
                         const daysOld = Math.floor((new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
                         const statusColors: Record<string, string> = {
@@ -217,7 +322,14 @@ export default function DashboardPage() {
                             </td>
                           </tr>
                         )
-                      })}
+                      })
+                      ) : (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                            No documents found. Try adjusting your filters.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

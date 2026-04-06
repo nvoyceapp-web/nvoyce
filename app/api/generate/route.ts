@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
+import { createPaymentLink } from '@/lib/stripe'
+import { sendInvoiceEmail } from '@/lib/email'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -121,7 +123,41 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
     }
 
     console.log('Document saved successfully:', data.id)
-    return NextResponse.json({ id: data.id, document: generatedDoc })
+
+    // 6. Create payment link
+    let paymentLink = ''
+    try {
+      const documentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${data.id}`
+      paymentLink = await createPaymentLink({
+        documentId: data.id,
+        amount: parseFloat(price.replace(',', '')),
+        description: `${docType} from ${businessName}`,
+        clientEmail: clientEmail,
+      })
+      console.log('Payment link created:', paymentLink)
+    } catch (paymentError) {
+      console.error('Payment link creation error:', paymentError)
+      // Don't fail the whole request if payment link fails
+    }
+
+    // 7. Send email to client
+    try {
+      const documentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${data.id}`
+      await sendInvoiceEmail({
+        clientEmail: clientEmail,
+        clientName: clientName,
+        invoiceLink: documentUrl,
+        paymentLink: paymentLink,
+        businessName: businessName,
+        amount: parseFloat(price.replace(',', '')),
+      })
+      console.log('Invoice email sent to:', clientEmail)
+    } catch (emailError) {
+      console.error('Email sending error:', emailError)
+      // Don't fail the whole request if email fails
+    }
+
+    return NextResponse.json({ id: data.id, document: generatedDoc, paymentLink })
   } catch (err: any) {
     console.error('Generation error full:', JSON.stringify(err?.error || err, null, 2))
     console.error('Status:', err?.status)

@@ -1,6 +1,49 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+
+interface Stats {
+  totalSent: number
+  outstanding: number
+  collected: number
+}
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<Stats>({ totalSent: 0, outstanding: 0, collected: 0 })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const { data, error } = await supabase
+          .from('documents')
+          .select('price, status')
+
+        if (error) throw error
+
+        if (data) {
+          const totalSent = data.length
+          const outstanding = data
+            .filter((doc) => doc.status !== 'paid')
+            .reduce((sum, doc) => sum + (doc.price || 0), 0)
+          const collected = data
+            .filter((doc) => doc.status === 'paid')
+            .reduce((sum, doc) => sum + (doc.price || 0), 0)
+
+          setStats({ totalSent, outstanding, collected })
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen">
@@ -41,9 +84,9 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-3 gap-5 mb-10">
               {[
-                { label: 'Total Sent', value: '0', sub: 'invoices & proposals' },
-                { label: 'Outstanding', value: '$0', sub: 'awaiting payment' },
-                { label: 'Collected', value: '$0', sub: 'this month' },
+                { label: 'Total Sent', value: loading ? '-' : stats.totalSent.toString(), sub: 'invoices & proposals' },
+                { label: 'Outstanding', value: loading ? '-' : `$${stats.outstanding.toLocaleString()}`, sub: 'awaiting payment' },
+                { label: 'Collected', value: loading ? '-' : `$${stats.collected.toLocaleString()}`, sub: 'all time' },
               ].map(({ label, value, sub }) => (
                 <div key={label} className="bg-white rounded-xl border border-gray-100 p-6">
                   <div className="text-sm text-gray-500 mb-1">{label}</div>

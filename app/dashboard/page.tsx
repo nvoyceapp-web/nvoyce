@@ -153,16 +153,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchStats() {
-      if (!userId) {
-        setLoading(false)
-        return
-      }
-
       try {
         const { data, error } = await supabase
           .from('documents')
           .select('id, client_name, doc_type, price, status, created_at')
-          .eq('user_id', userId)
+          .eq('user_id', 'test-user')
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -209,7 +204,7 @@ export default function DashboardPage() {
     }
 
     fetchStats()
-  }, [userId])
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">

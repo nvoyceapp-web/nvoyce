@@ -40,19 +40,69 @@ export default function DashboardPage() {
   const [filterClient, setFilterClient] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [sortBy, setSortBy] = useState<'client' | 'amount' | 'date' | 'status' | 'days'>('date')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
-  // Filter documents based on search and filters
-  const filteredDocuments = stats.documents.filter((doc) => {
-    const matchesSearch = doc.client_name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesClient = !filterClient || doc.client_name === filterClient
-    const docDate = new Date(doc.created_at)
-    const matchesDateFrom = !dateFrom || docDate >= new Date(dateFrom)
-    const matchesDateTo = !dateTo || docDate <= new Date(dateTo)
-    return matchesSearch && matchesClient && matchesDateFrom && matchesDateTo
-  })
+  // Filter and sort documents
+  const filteredDocuments = stats.documents
+    .filter((doc) => {
+      const matchesSearch = doc.client_name.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesClient = !filterClient || doc.client_name === filterClient
+      const docDate = new Date(doc.created_at)
+      const matchesDateFrom = !dateFrom || docDate >= new Date(dateFrom)
+      const matchesDateTo = !dateTo || docDate <= new Date(dateTo)
+      return matchesSearch && matchesClient && matchesDateFrom && matchesDateTo
+    })
+    .sort((a, b) => {
+      let aVal: any, bVal: any
+
+      switch (sortBy) {
+        case 'client':
+          aVal = a.client_name.toLowerCase()
+          bVal = b.client_name.toLowerCase()
+          break
+        case 'amount':
+          aVal = a.price
+          bVal = b.price
+          break
+        case 'status':
+          aVal = a.status
+          bVal = b.status
+          break
+        case 'days':
+          aVal = Math.floor((new Date().getTime() - new Date(a.created_at).getTime()) / (1000 * 60 * 60 * 24))
+          bVal = Math.floor((new Date().getTime() - new Date(b.created_at).getTime()) / (1000 * 60 * 60 * 24))
+          break
+        case 'date':
+        default:
+          aVal = new Date(a.created_at).getTime()
+          bVal = new Date(b.created_at).getTime()
+      }
+
+      if (typeof aVal === 'string') {
+        return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+      }
+      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal
+    })
 
   // Get unique client names for filter dropdown
   const uniqueClients = Array.from(new Set(stats.documents.map((doc) => doc.client_name)))
+
+  // Sort toggle function
+  const toggleSort = (field: 'client' | 'amount' | 'date' | 'status' | 'days') => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortOrder('asc')
+    }
+  }
+
+  // Get sort indicator
+  const getSortIndicator = (field: string) => {
+    if (sortBy !== field) return ' ⇅'
+    return sortOrder === 'asc' ? ' ↑' : ' ↓'
+  }
 
   // Export to Excel
   const exportToExcel = () => {
@@ -284,11 +334,31 @@ export default function DashboardPage() {
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-100">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600">Client</th>
+                        <th
+                          onClick={() => toggleSort('client')}
+                          className="px-6 py-3 text-left text-xs font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                        >
+                          Client{getSortIndicator('client')}
+                        </th>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600">Type</th>
-                        <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600">Amount</th>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600">Status</th>
-                        <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600">Days Outstanding</th>
+                        <th
+                          onClick={() => toggleSort('amount')}
+                          className="px-6 py-3 text-right text-xs font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                        >
+                          Amount{getSortIndicator('amount')}
+                        </th>
+                        <th
+                          onClick={() => toggleSort('status')}
+                          className="px-6 py-3 text-left text-xs font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                        >
+                          Status{getSortIndicator('status')}
+                        </th>
+                        <th
+                          onClick={() => toggleSort('days')}
+                          className="px-6 py-3 text-right text-xs font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                        >
+                          Days Outstanding{getSortIndicator('days')}
+                        </th>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600">Action</th>
                       </tr>
                     </thead>

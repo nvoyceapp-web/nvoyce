@@ -249,15 +249,15 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {/* Urgency Summary Card */}
+            {/* Urgency Summary Card - Navy Blue with Orange Accents */}
             {stats.outstanding > 0 && (
-              <div className="bg-black text-white rounded-xl p-6 mb-10">
+              <div className="bg-gradient-to-r from-blue-950 to-blue-900 text-white rounded-xl p-6 mb-10 border border-blue-800">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-sm text-gray-300 mb-1">You're owed</div>
+                    <div className="text-sm text-blue-200 mb-1">You're owed</div>
                     <div className="text-4xl font-bold mb-2">${stats.outstanding.toLocaleString()}</div>
-                    <div className="text-sm text-gray-400">
-                      {stats.overdue > 0 && <span className="text-red-400 font-semibold">🚨 {stats.overdue} overdue • </span>}
+                    <div className="text-sm text-blue-300">
+                      {stats.overdue > 0 && <span className="text-orange-400 font-semibold">🚨 {stats.overdue} overdue • </span>}
                       {stats.documents.filter((d) => d.status !== 'paid').length} invoices pending
                     </div>
                   </div>
@@ -271,9 +271,9 @@ export default function DashboardPage() {
                       const daysOld = Math.floor((new Date().getTime() - new Date(oldest.created_at).getTime()) / (1000 * 60 * 60 * 24))
                       return (
                         <div>
-                          <div className="text-sm text-gray-300 mb-1">Oldest unpaid</div>
-                          <div className="text-2xl font-bold">{daysOld} days</div>
-                          <div className="text-xs text-gray-400 mt-1">{oldest.client_name}</div>
+                          <div className="text-sm text-blue-200 mb-1">Oldest unpaid</div>
+                          <div className="text-2xl font-bold text-orange-400">{daysOld} days</div>
+                          <div className="text-xs text-blue-300 mt-1">{oldest.client_name}</div>
                         </div>
                       )
                     })()}
@@ -333,7 +333,7 @@ export default function DashboardPage() {
                     <h2 className="text-lg font-semibold text-gray-900">Invoices & Proposals</h2>
                     <button
                       onClick={exportToExcel}
-                      className="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                      className="text-sm bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition font-semibold"
                     >
                       ⬇️ Export to CSV
                     </button>
@@ -441,7 +441,7 @@ export default function DashboardPage() {
                                     // Mark as paid (will implement API call)
                                     console.log('Mark as paid:', doc.id)
                                   }}
-                                  className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                                  className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 hover:bg-orange-200 transition"
                                 >
                                   Mark Paid
                                 </button>

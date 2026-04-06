@@ -104,6 +104,15 @@ export default function DashboardPage() {
     return sortOrder === 'asc' ? ' ↑' : ' ↓'
   }
 
+  // Get row urgency color
+  const getRowColor = (doc: Document) => {
+    if (doc.status === 'paid') return 'bg-green-50'
+    const daysOld = Math.floor((new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    if (daysOld > 30) return 'bg-red-50'
+    if (daysOld > 14) return 'bg-yellow-50'
+    return 'hover:bg-gray-50'
+  }
+
   // Export to Excel
   const exportToExcel = () => {
     if (filteredDocuments.length === 0) {
@@ -240,13 +249,54 @@ export default function DashboardPage() {
               </Link>
             </div>
 
+            {/* Urgency Summary Card */}
+            {stats.outstanding > 0 && (
+              <div className="bg-black text-white rounded-xl p-6 mb-10">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-sm text-gray-300 mb-1">You're owed</div>
+                    <div className="text-4xl font-bold mb-2">${stats.outstanding.toLocaleString()}</div>
+                    <div className="text-sm text-gray-400">
+                      {stats.overdue > 0 && <span className="text-red-400 font-semibold">🚨 {stats.overdue} overdue • </span>}
+                      {stats.documents.filter((d) => d.status !== 'paid').length} invoices pending
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {(() => {
+                      const unpaidDocs = stats.documents.filter((d) => d.status !== 'paid')
+                      if (unpaidDocs.length === 0) return null
+                      const oldest = unpaidDocs.reduce((oldest, current) => {
+                        return new Date(current.created_at) < new Date(oldest.created_at) ? current : oldest
+                      })
+                      const daysOld = Math.floor((new Date().getTime() - new Date(oldest.created_at).getTime()) / (1000 * 60 * 60 * 24))
+                      return (
+                        <div>
+                          <div className="text-sm text-gray-300 mb-1">Oldest unpaid</div>
+                          <div className="text-2xl font-bold">{daysOld} days</div>
+                          <div className="text-xs text-gray-400 mt-1">{oldest.client_name}</div>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-5 mb-10">
               <div className="grid grid-cols-3 gap-5 col-span-2">
-                {[
-                  { label: 'Total Sent', value: loading ? '-' : stats.totalSent.toString(), sub: 'invoices & proposals' },
-                  { label: 'Outstanding', value: loading ? '-' : `$${stats.outstanding.toLocaleString()}`, sub: 'awaiting payment' },
-                  { label: 'Collected', value: loading ? '-' : `$${stats.collected.toLocaleString()}`, sub: 'all time' },
-                ].map(({ label, value, sub }) => (
+                {(() => {
+                  const now = new Date()
+                  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+                  const thisMonthRevenue = stats.documents
+                    .filter((d) => d.status === 'paid' && new Date(d.created_at) >= thisMonthStart)
+                    .reduce((sum, d) => sum + (d.price || 0), 0)
+
+                  return [
+                    { label: 'This Month', value: loading ? '-' : `$${thisMonthRevenue.toLocaleString()}`, sub: 'revenue collected' },
+                    { label: 'Total Sent', value: loading ? '-' : stats.totalSent.toString(), sub: 'invoices & proposals' },
+                    { label: 'Outstanding', value: loading ? '-' : `$${stats.outstanding.toLocaleString()}`, sub: 'awaiting payment' },
+                  ]
+                })().map(({ label, value, sub }) => (
                   <div key={label} className="bg-white rounded-xl border border-gray-100 p-6">
                     <div className="text-sm text-gray-500 mb-1">{label}</div>
                     <div className="text-3xl font-bold text-gray-900">{value}</div>
@@ -373,19 +423,51 @@ export default function DashboardPage() {
                           paid: 'bg-green-100 text-green-700',
                           overdue: 'bg-red-100 text-red-700',
                         }
+                        const isOverdue = doc.status !== 'paid' && daysOld > 30
 
                         return (
-                          <tr key={doc.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <tr key={doc.id} className={`border-b border-gray-100 ${getRowColor(doc)} transition`}>
                             <td className="px-6 py-4 text-gray-900 font-medium">{doc.client_name}</td>
                             <td className="px-6 py-4 text-gray-600 capitalize">{doc.doc_type}</td>
                             <td className="px-6 py-4 text-right text-gray-900 font-semibold">${doc.price.toLocaleString()}</td>
                             <td className="px-6 py-4">
-                              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${statusColors[doc.status] || statusColors.draft}`}>
-                                {doc.status}
-                              </span>
+                              {doc.status === 'paid' ? (
+                                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
+                                  ✓ Paid
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    // Mark as paid (will implement API call)
+                                    console.log('Mark as paid:', doc.id)
+                                  }}
+                                  className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                                >
+                                  Mark Paid
+                                </button>
+                              )}
                             </td>
-                            <td className="px-6 py-4 text-right text-gray-600">{doc.status === 'paid' ? '—' : `${daysOld} days`}</td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 text-right text-gray-600">
+                              {doc.status === 'paid' ? '—' : (
+                                <span className={isOverdue ? 'text-red-600 font-semibold' : ''}>
+                                  {daysOld} days {isOverdue && '🚨'}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 flex gap-2">
+                              {doc.status !== 'paid' && daysOld > 14 && (
+                                <button
+                                  onClick={() => {
+                                    // Send reminder (will implement email)
+                                    console.log('Send reminder to:', doc.client_name)
+                                    alert(`Reminder would be sent to ${doc.client_name}`)
+                                  }}
+                                  className="text-xs bg-orange-600 text-white px-2.5 py-1 rounded hover:bg-orange-700 transition"
+                                  title="Send payment reminder"
+                                >
+                                  📧 Remind
+                                </button>
+                              )}
                               <Link href={`/dashboard/documents/${doc.id}`} className="text-blue-600 hover:text-blue-700 text-xs font-semibold">
                                 View
                               </Link>

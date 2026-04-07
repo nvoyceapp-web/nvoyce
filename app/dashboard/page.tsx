@@ -280,6 +280,14 @@ export default function DashboardPage() {
     }
   }
 
+  // Determine what types of documents are selected
+  const getSelectedDocumentTypes = () => {
+    const selectedDocuments = stats.documents.filter((d) => selectedDocs.has(d.id))
+    const hasInvoices = selectedDocuments.some((d) => d.doc_type.toLowerCase() !== 'proposal')
+    const hasProposals = selectedDocuments.some((d) => d.doc_type.toLowerCase() === 'proposal')
+    return { hasInvoices, hasProposals, hasMixed: hasInvoices && hasProposals, selectedDocuments }
+  }
+
   // Check payment status of selected documents
   const getSelectedPaymentStatus = () => {
     const selected = Array.from(selectedDocs)
@@ -864,38 +872,69 @@ export default function DashboardPage() {
             {stats.documents.length > 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
                 {selectedDocs.size > 0 && (() => {
-                  const { paidCount, unpaidCount, hasMixed } = getSelectedPaymentStatus()
+                  const { hasInvoices, hasProposals, hasMixed, selectedDocuments } = getSelectedDocumentTypes()
+                  const invoiceCount = selectedDocuments.filter((d) => d.doc_type.toLowerCase() !== 'proposal').length
+                  const proposalCount = selectedDocuments.filter((d) => d.doc_type.toLowerCase() === 'proposal').length
+
                   return (
                     <div className="bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between">
                       <div className="text-sm font-semibold text-blue-900">
                         {selectedDocs.size} document{selectedDocs.size !== 1 ? 's' : ''} selected
-                        {hasMixed && <span className="text-xs text-gray-600 ml-2">({unpaidCount} unpaid, {paidCount} paid)</span>}
+                        {hasMixed && <span className="text-xs text-gray-600 ml-2">({invoiceCount} invoices, {proposalCount} proposals)</span>}
                       </div>
                       <div className="flex gap-2">
-                        {(unpaidCount > 0 || !hasMixed) && unpaidCount >= 0 && (
-                          <button
-                            onClick={markSelectedAsPaid}
-                            className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold"
-                            title={hasMixed ? `Mark ${unpaidCount} unpaid invoice(s) as paid` : 'Mark as paid'}
-                          >
-                            ✓ Mark as Paid
-                          </button>
+                        {hasProposals && !hasMixed && (
+                          <>
+                            <button
+                              onClick={() => {
+                                console.log('Mark proposals as agreed:', Array.from(selectedDocs))
+                                alert('Mark as agreed: coming soon!')
+                              }}
+                              className="text-sm bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition font-semibold"
+                              title="Mark selected proposals as agreed"
+                            >
+                              ✓ Mark as Agreed
+                            </button>
+                            <button
+                              onClick={() => {
+                                console.log('Generate invoices from proposals:', Array.from(selectedDocs))
+                                alert('Generate invoices: coming soon!')
+                              }}
+                              className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold"
+                              title="Auto-generate invoices from selected proposals"
+                            >
+                              🚀 Generate Invoices
+                            </button>
+                          </>
                         )}
-                        {(paidCount > 0 || !hasMixed) && paidCount >= 0 && (
-                          <button
-                            onClick={unmarkSelectedAsPaid}
-                            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition font-semibold"
-                            title={hasMixed ? `Unmark ${paidCount} paid invoice(s)` : 'Unmark as paid'}
-                          >
-                            ↩ Unmark as Paid
-                          </button>
+                        {hasInvoices && !hasMixed && (
+                          <>
+                            <button
+                              onClick={markSelectedAsPaid}
+                              className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold"
+                              title="Mark selected invoices as paid"
+                            >
+                              ✓ Mark as Paid
+                            </button>
+                            <button
+                              onClick={unmarkSelectedAsPaid}
+                              className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition font-semibold"
+                              title="Unmark selected invoices as paid"
+                            >
+                              ↩ Unmark as Paid
+                            </button>
+                            <button
+                              onClick={sendRemindersToSelected}
+                              className="text-sm bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition font-semibold"
+                              title="Send payment reminders"
+                            >
+                              📧 Send Reminders
+                            </button>
+                          </>
                         )}
-                        <button
-                          onClick={sendRemindersToSelected}
-                          className="text-sm bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition font-semibold"
-                        >
-                          📧 Send Reminders
-                        </button>
+                        {hasMixed && (
+                          <span className="text-xs text-gray-600 italic">Cannot batch act on mixed document types. Select invoices or proposals separately.</span>
+                        )}
                         <button
                           onClick={() => setSelectedDocs(new Set())}
                           className="text-sm bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-300 transition"

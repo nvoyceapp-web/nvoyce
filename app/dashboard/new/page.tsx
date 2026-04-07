@@ -35,12 +35,6 @@ function NewDocumentContent() {
     notes: '',
   })
 
-  // Auto-advance to step 2 if type is pre-selected from URL
-  useEffect(() => {
-    if (typeParam && ['invoice', 'proposal'].includes(typeParam)) {
-      setStep(2)
-    }
-  }, [typeParam])
 
   const update = (field: keyof FormData, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }))

@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [dateTo, setDateTo] = useState('')
   const [sortBy, setSortBy] = useState<'client' | 'amount' | 'date' | 'status' | 'days'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [chartView, setChartView] = useState<'week' | 'month'>('week')
 
   // Filter and sort documents
   const filteredDocuments = stats.documents
@@ -98,22 +99,46 @@ export default function DashboardPage() {
     }
   }
 
-  // Calculate monthly revenue for chart
-  const getMonthlyRevenue = () => {
-    const monthlyData: { [key: string]: number } = {}
-    stats.documents.forEach((doc) => {
-      if (doc.status === 'paid') {
-        const date = new Date(doc.created_at)
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-        monthlyData[monthKey] = (monthlyData[monthKey] || 0) + doc.price
-      }
-    })
-    return Object.entries(monthlyData)
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([month, revenue]) => ({
-        month: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' }),
-        revenue
-      }))
+  // Calculate revenue for chart (weekly or monthly)
+  const getChartData = () => {
+    if (chartView === 'week') {
+      const weeklyData: { [key: string]: number } = {}
+      stats.documents.forEach((doc) => {
+        if (doc.status === 'paid') {
+          const date = new Date(doc.created_at)
+          const weekStart = new Date(date)
+          weekStart.setDate(date.getDate() - date.getDay())
+          const weekKey = weekStart.toISOString().split('T')[0]
+          weeklyData[weekKey] = (weeklyData[weekKey] || 0) + doc.price
+        }
+      })
+      return Object.entries(weeklyData)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([week, revenue]) => {
+          const weekStart = new Date(week)
+          const weekEnd = new Date(weekStart)
+          weekEnd.setDate(weekEnd.getDate() + 6)
+          return {
+            label: `${weekStart.getMonth() + 1}/${weekStart.getDate()}`,
+            revenue
+          }
+        })
+    } else {
+      const monthlyData: { [key: string]: number } = {}
+      stats.documents.forEach((doc) => {
+        if (doc.status === 'paid') {
+          const date = new Date(doc.created_at)
+          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+          monthlyData[monthKey] = (monthlyData[monthKey] || 0) + doc.price
+        }
+      })
+      return Object.entries(monthlyData)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([month, revenue]) => ({
+          label: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+          revenue
+        }))
+    }
   }
 
   // Get sort indicator
@@ -337,21 +362,45 @@ export default function DashboardPage() {
 
               {/* Right: Revenue Trend Chart - Full Height */}
               {(() => {
-                const chartData = getMonthlyRevenue()
+                const chartData = getChartData()
                 if (chartData.length === 0) return null
                 const maxRevenue = Math.max(...chartData.map((d) => d.revenue), 1)
                 return (
-                  <div className="bg-white rounded-xl border border-gray-100 p-6">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-6">Revenue Trend</h3>
-                    <div className="flex items-end justify-between gap-2 h-64">
+                  <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setChartView('week')}
+                          className={`text-xs px-3 py-1 rounded-lg transition ${
+                            chartView === 'week'
+                              ? 'bg-orange-600 text-white'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          Week
+                        </button>
+                        <button
+                          onClick={() => setChartView('month')}
+                          className={`text-xs px-3 py-1 rounded-lg transition ${
+                            chartView === 'month'
+                              ? 'bg-orange-600 text-white'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          Month
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex items-end justify-between gap-2">
                       {chartData.slice(-6).map((data) => (
-                        <div key={data.month} className="flex-1 flex flex-col items-center gap-2">
+                        <div key={data.label} className="flex-1 flex flex-col items-center gap-2">
                           <div
                             className="w-full bg-gradient-to-t from-orange-600 to-orange-500 rounded-t-lg transition-all hover:from-orange-700 hover:to-orange-600 cursor-pointer"
                             style={{ height: `${Math.max((data.revenue / maxRevenue) * 100, 8)}%` }}
-                            title={`${data.month}: $${(data.revenue / 1000).toFixed(1)}k`}
+                            title={`$${(data.revenue / 1000).toFixed(1)}k`}
                           />
-                          <div className="text-xs font-medium text-gray-600 text-center">{data.month}</div>
+                          <div className="text-xs font-medium text-gray-600 text-center">{data.label}</div>
                           <div className="text-xs text-gray-500">${(data.revenue / 1000).toFixed(1)}k</div>
                         </div>
                       ))}

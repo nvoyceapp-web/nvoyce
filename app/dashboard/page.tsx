@@ -49,6 +49,7 @@ export default function DashboardPage() {
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
   const [sidebarTab, setSidebarTab] = useState<'about-nvoyce' | 'about-payme'>('about-nvoyce')
   const [dismissedRecommendations, setDismissedRecommendations] = useState<Set<string>>(new Set())
+  const [expandPayme, setExpandPayme] = useState(false)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -562,12 +563,12 @@ export default function DashboardPage() {
                     <div className="text-2xl">💰</div>
                     <div className="flex-1">
                       <h3 className="font-semibold mb-1">Payme</h3>
-                      <p className="text-sm text-purple-200">Your payment smart assistant — Payme suggests:</p>
+                      <p className="text-sm text-purple-200">Your payment smart assistant</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    {recs.slice(0, 3).map((rec, idx) => (
+                    {recs.slice(0, expandPayme ? 3 : 1).map((rec, idx) => (
                       <div key={idx} className="bg-white/10 rounded-lg p-3 border border-purple-600/40 flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="text-sm font-medium text-purple-100">{rec.text}</div>
@@ -613,6 +614,15 @@ export default function DashboardPage() {
                       </div>
                     ))}
                   </div>
+
+                  {recs.length > 1 && (
+                    <button
+                      onClick={() => setExpandPayme(!expandPayme)}
+                      className="text-sm text-purple-200 hover:text-white mt-3 transition"
+                    >
+                      {expandPayme ? '▲ Show less' : `▼ Show ${recs.length - 1} more action${recs.length - 1 !== 1 ? 's' : ''}`}
+                    </button>
+                  )}
                 </div>
               )
             })()}

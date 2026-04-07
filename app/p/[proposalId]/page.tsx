@@ -224,6 +224,13 @@ export default function PublicProposalPage() {
   const formData = proposal.form_data || {}
   const createdDate = new Date(proposal.created_at)
 
+  // Calculate days remaining until proposal expires
+  const expirationDays = parseInt(formData.expirationDays || '7', 10)
+  const daysSinceSent = Math.floor((new Date().getTime() - new Date(proposal.created_at).getTime()) / (1000 * 60 * 60 * 24))
+  const daysRemaining = Math.max(0, expirationDays - daysSinceSent)
+  const isExpiringSoon = daysRemaining <= 2
+  const isExpired = daysRemaining === 0
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
@@ -275,6 +282,39 @@ export default function PublicProposalPage() {
             </div>
           </div>
 
+          {/* Expiration Notice */}
+          <div className={`mb-8 pb-8 border-b border-gray-100 p-4 rounded-lg ${
+            isExpired
+              ? 'bg-red-50 border-l-4 border-l-red-500'
+              : isExpiringSoon
+              ? 'bg-amber-50 border-l-4 border-l-amber-500'
+              : 'bg-blue-50 border-l-4 border-l-blue-500'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Proposal Expires In</h3>
+                <div className={`text-2xl font-bold ${
+                  isExpired
+                    ? 'text-red-600'
+                    : isExpiringSoon
+                    ? 'text-amber-600'
+                    : 'text-blue-600'
+                }`}>
+                  {isExpired ? 'Expired' : `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`}
+                </div>
+              </div>
+              <div className="text-5xl">
+                {isExpired ? '⏰' : isExpiringSoon ? '⚠️' : '📅'}
+              </div>
+            </div>
+            {isExpired && (
+              <p className="text-sm text-red-700 mt-2">This proposal has expired. Please contact {proposal.business_name} to discuss.</p>
+            )}
+            {isExpiringSoon && !isExpired && (
+              <p className="text-sm text-amber-700 mt-2">This proposal expires soon. Make your decision to avoid missing out.</p>
+            )}
+          </div>
+
           {/* Payment Terms */}
           {formData.paymentTerms && (
             <div className="mb-8 pb-8 border-b border-gray-100">
@@ -299,34 +339,43 @@ export default function PublicProposalPage() {
 
         {/* Action Section */}
         <div className="text-center">
-          <div className="flex gap-4 justify-center mb-6">
-            <button
-              onClick={handleAccept}
-              disabled={accepting}
-              className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
-                accepting && lastAction === 'accept'
-                  ? 'bg-green-400 cursor-not-allowed opacity-75'
-                  : 'bg-green-600 hover:bg-green-700 cursor-pointer'
-              }`}
-            >
-              {accepting && lastAction === 'accept' ? '⏳ Processing...' : '✓ Accept'}
-            </button>
-            <button
-              onClick={handleDecline}
-              disabled={accepting}
-              className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
-                accepting && lastAction === 'decline'
-                  ? 'bg-red-400 cursor-not-allowed opacity-75'
-                  : 'bg-red-600 hover:bg-red-700 cursor-pointer'
-              }`}
-            >
-              {accepting && lastAction === 'decline' ? '⏳ Processing...' : '✗ Decline'}
-            </button>
-          </div>
+          {isExpired ? (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+              <p className="text-red-700 font-semibold">This proposal has expired.</p>
+              <p className="text-red-600 text-sm mt-2">Please reach out to {proposal.business_name} to discuss renewal or next steps.</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex gap-4 justify-center mb-6">
+                <button
+                  onClick={handleAccept}
+                  disabled={accepting}
+                  className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
+                    accepting && lastAction === 'accept'
+                      ? 'bg-green-400 cursor-not-allowed opacity-75'
+                      : 'bg-green-600 hover:bg-green-700 cursor-pointer'
+                  }`}
+                >
+                  {accepting && lastAction === 'accept' ? '⏳ Processing...' : '✓ Accept'}
+                </button>
+                <button
+                  onClick={handleDecline}
+                  disabled={accepting}
+                  className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
+                    accepting && lastAction === 'decline'
+                      ? 'bg-red-400 cursor-not-allowed opacity-75'
+                      : 'bg-red-600 hover:bg-red-700 cursor-pointer'
+                  }`}
+                >
+                  {accepting && lastAction === 'decline' ? '⏳ Processing...' : '✗ Decline'}
+                </button>
+              </div>
 
-          <p className="text-sm text-gray-600">
-            By accepting, you agree to the terms above. An invoice will be generated immediately.
-          </p>
+              <p className="text-sm text-gray-600">
+                By accepting, you agree to the terms above. An invoice will be generated immediately.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

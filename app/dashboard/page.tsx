@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
+import { getTopPaymeActions, PaymeAction } from '@/lib/payme-scoring'
 
 interface Document {
   id: string
@@ -51,6 +52,7 @@ export default function DashboardPage() {
   const [dismissedRecommendations, setDismissedRecommendations] = useState<Set<string>>(new Set())
   const [expandPayme, setExpandPayme] = useState(false)
   const [showCreateDropdown, setShowCreateDropdown] = useState(false)
+  const [documentTab, setDocumentTab] = useState<'invoices' | 'proposals'>('invoices')
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -77,7 +79,10 @@ export default function DashboardPage() {
       const docDate = new Date(doc.created_at)
       const matchesDateFrom = !dateFrom || docDate >= new Date(dateFrom)
       const matchesDateTo = !dateTo || docDate <= new Date(dateTo)
-      return matchesSearch && matchesClient && matchesDateFrom && matchesDateTo
+      // Filter by document type based on active tab
+      const docTypeNormalized = doc.doc_type.toLowerCase() === 'proposal' ? 'proposal' : 'invoice'
+      const matchesTab = documentTab === 'invoices' ? docTypeNormalized === 'invoice' : docTypeNormalized === 'proposal'
+      return matchesSearch && matchesClient && matchesDateFrom && matchesDateTo && matchesTab
     })
     .sort((a, b) => {
       let aVal: any, bVal: any
@@ -229,66 +234,23 @@ export default function DashboardPage() {
 
   // Generate smart recommendations
   const getRecommendations = () => {
-    const recommendations: { type: string; text: string; action: string; count?: number; urgency: 'high' | 'medium' | 'low' }[] = []
+    // Convert documents to Payme format (map doc_type to invoice/proposal)
+    const docsForScoring = stats.documents.map((doc) => ({
+      ...doc,
+      doc_type: (doc.doc_type.toLowerCase() === 'proposal' ? 'proposal' : 'invoice') as 'invoice' | 'proposal',
+    }))
 
-    // 1. Overdue invoices (primary)
-    const overdueCount = stats.overdue
-    if (overdueCount > 0) {
-      recommendations.push({
-        type: 'overdue',
-        text: `${overdueCount} invoice${overdueCount !== 1 ? 's' : ''} overdue 20+ days`,
-        action: 'send-reminders',
-        count: overdueCount,
-        urgency: 'high',
-      })
-    }
+    // Get top 3 actions using unified scoring algorithm
+    const paymeActions = getTopPaymeActions(docsForScoring, 3)
 
-    // 2. Collection rate trend
-    const trend = getCollectionTrend()
-    if (trend.trend > 0) {
-      recommendations.push({
-        type: 'trend-positive',
-        text: `Collection rate up ${trend.trend}% this month (${trend.current}%)`,
-        action: 'celebrate',
-        urgency: 'low',
-      })
-    } else if (trend.trend < 0 && trend.current < 50) {
-      recommendations.push({
-        type: 'trend-negative',
-        text: `Collection rate down ${Math.abs(trend.trend)}% — follow up on pending`,
-        action: 'none',
-        urgency: 'high',
-      })
-    }
-
-    // 3. Top client insight
-    const topClients = getTopClients()
-    if (topClients.length > 0) {
-      const fastestClient = topClients.reduce((a, b) => (a.avgDays < b.avgDays ? a : b))
-      const slowestUnpaid = stats.documents
-        .filter((d) => d.status !== 'paid')
-        .reduce((a, b) => {
-          const aDays = Math.floor((new Date().getTime() - new Date(a.created_at).getTime()) / (1000 * 60 * 60 * 24))
-          const bDays = Math.floor((new Date().getTime() - new Date(b.created_at).getTime()) / (1000 * 60 * 60 * 24))
-          return aDays > bDays ? a : b
-        }, stats.documents[0])
-
-      if (slowestUnpaid && slowestUnpaid.status !== 'paid') {
-        const slowDays = Math.floor((new Date().getTime() - new Date(slowestUnpaid.created_at).getTime()) / (1000 * 60 * 60 * 24))
-        recommendations.push({
-          type: 'at-risk',
-          text: `${slowestUnpaid.client_name} hasn't paid in ${slowDays} days (vs ${fastestClient.name} pays in ${fastestClient.avgDays})`,
-          action: 'follow-up',
-          urgency: slowDays > 30 ? 'high' : 'medium',
-        })
-      }
-    }
-
-    return recommendations
-      .sort((a, b) => {
-        const urgencyOrder = { high: 0, medium: 1, low: 2 }
-        return urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
-      })
+    // Convert PaymeAction to recommendation format for UI
+    return paymeActions.map((action) => ({
+      type: `${action.type}-${action.id}`,
+      text: action.action_text,
+      action: action.type === 'invoice' ? 'send-reminders' : 'follow-up',
+      urgency: action.urgency === 'critical' ? 'high' : action.urgency === 'high' ? 'high' : 'medium',
+      paymeAction: action,
+    }))
       .filter((rec) => !dismissedRecommendations.has(rec.type))
   }
 
@@ -614,32 +576,29 @@ export default function DashboardPage() {
                       <div key={idx} className="bg-white/10 rounded-lg p-3 border border-purple-600/40 flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="text-sm font-medium text-purple-100">{rec.text}</div>
-                          <div className={`text-xs mt-1 ${rec.urgency === 'high' ? 'text-orange-300' : rec.urgency === 'medium' ? 'text-yellow-300' : 'text-green-300'}`}>
-                            {rec.urgency === 'high' ? '🔴 Urgent' : rec.urgency === 'medium' ? '🟡 Important' : '🟢 Good progress'}
+                          <div className={`text-xs mt-1 ${rec.paymeAction?.type === 'invoice' ? 'text-red-300' : 'text-yellow-300'}`}>
+                            {rec.paymeAction?.icon} {rec.paymeAction?.type === 'invoice' ? 'Invoice - ' : 'Proposal - '}
+                            {rec.urgency === 'high' ? 'Urgent' : 'Important'}
                           </div>
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {rec.action === 'send-reminders' && (
                             <button
                               onClick={() => {
-                                // Filter to overdue and trigger batch action
-                                const overdueIds = stats.documents
-                                  .filter((d) => {
-                                    if (d.status === 'paid') return false
-                                    const daysOld = Math.floor((new Date().getTime() - new Date(d.created_at).getTime()) / (1000 * 60 * 60 * 24))
-                                    return daysOld > 30
-                                  })
-                                  .map((d) => d.id)
-                                setSelectedDocs(new Set(overdueIds))
+                                // Select this specific overdue invoice
+                                setSelectedDocs(new Set([rec.paymeAction?.id]))
                               }}
                               className="text-xs bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
                             >
-                              Send
+                              Send Reminder
                             </button>
                           )}
                           {rec.action === 'follow-up' && (
                             <button
-                              onClick={() => alert('Open details for this client in the table below')}
+                              onClick={() => {
+                                // Filter table to show this proposal
+                                setFilterClient(rec.paymeAction?.client_name || '')
+                              }}
                               className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
                             >
                               Review
@@ -999,6 +958,31 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Document Type Tabs */}
+                <div className="flex gap-1 border-b border-gray-200 mb-4">
+                  <button
+                    onClick={() => setDocumentTab('invoices')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                      documentTab === 'invoices'
+                        ? 'border-orange-600 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    🧾 Invoices ({stats.documents.filter((d) => d.doc_type.toLowerCase() !== 'proposal').length})
+                  </button>
+                  <button
+                    onClick={() => setDocumentTab('proposals')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                      documentTab === 'proposals'
+                        ? 'border-purple-600 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    📋 Proposals ({stats.documents.filter((d) => d.doc_type.toLowerCase() === 'proposal').length})
+                  </button>
+                </div>
+
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-100">

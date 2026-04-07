@@ -44,6 +44,7 @@ export default function DashboardPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [chartView, setChartView] = useState<'week' | 'month'>('week')
   const [timePeriod, setTimePeriod] = useState<'all' | 'ytd' | '30days' | 'thisMonth'>('thisMonth')
+  const [selectedMetric, setSelectedMetric] = useState<'avgInvoice' | 'thisMonth' | 'clientCount'>('thisMonth')
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -117,50 +118,24 @@ export default function DashboardPage() {
     }
   }
 
-  // Calculate revenue for chart (weekly or monthly)
+  // Calculate revenue for chart (monthly)
   const getChartData = () => {
     const dateFrom = getDateRange()
-    if (chartView === 'week') {
-      const weeklyData: { [key: string]: number } = {}
-      stats.documents.forEach((doc) => {
-        if (doc.status === 'paid') {
-          const date = new Date(doc.created_at)
-          if (dateFrom && date < dateFrom) return
-          const weekStart = new Date(date)
-          weekStart.setDate(date.getDate() - date.getDay())
-          const weekKey = weekStart.toISOString().split('T')[0]
-          weeklyData[weekKey] = (weeklyData[weekKey] || 0) + doc.price
-        }
-      })
-      return Object.entries(weeklyData)
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([week, revenue]) => {
-          const weekStart = new Date(week)
-          const weekEnd = new Date(weekStart)
-          weekEnd.setDate(weekEnd.getDate() + 6)
-          return {
-            label: `${weekStart.getMonth() + 1}/${weekStart.getDate()}`,
-            revenue
-          }
-        })
-    } else {
-      const monthlyData: { [key: string]: number } = {}
-      const dateFrom = getDateRange()
-      stats.documents.forEach((doc) => {
-        if (doc.status === 'paid') {
-          const date = new Date(doc.created_at)
-          if (dateFrom && date < dateFrom) return
-          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-          monthlyData[monthKey] = (monthlyData[monthKey] || 0) + doc.price
-        }
-      })
-      return Object.entries(monthlyData)
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([month, revenue]) => ({
-          label: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' }),
-          revenue
-        }))
-    }
+    const monthlyData: { [key: string]: number } = {}
+    stats.documents.forEach((doc) => {
+      if (doc.status === 'paid') {
+        const date = new Date(doc.created_at)
+        if (dateFrom && date < dateFrom) return
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        monthlyData[monthKey] = (monthlyData[monthKey] || 0) + doc.price
+      }
+    })
+    return Object.entries(monthlyData)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, revenue]) => ({
+        label: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+        revenue
+      }))
   }
 
   // Get invoice status breakdown
@@ -362,9 +337,9 @@ export default function DashboardPage() {
             )}
 
             <div className="grid grid-cols-2 gap-8 mb-10 auto-rows-max">
-              {/* Left: KPI Cards */}
+              {/* Left: Metrics Block with Dropdown */}
               <div className="col-span-1 space-y-4 h-fit">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
                   {(() => {
                     const now = new Date()
                     const dateFrom = getDateRange()
@@ -382,34 +357,70 @@ export default function DashboardPage() {
                     const collectionRate = totalInvoicesInPeriod > 0 ? ((paidDocs / totalInvoicesInPeriod) * 100).toFixed(0) : 0
                     const avgInvoiceValue = totalInvoicesInPeriod > 0 ? (totalRevenueInPeriod / totalInvoicesInPeriod).toFixed(0) : 0
 
-                    return [
-                      { label: 'This Month', value: loading ? '-' : `$${thisMonthRevenue.toLocaleString()}`, sub: 'revenue collected' },
+                    // Primary metrics (always visible)
+                    const primary = [
+                      { label: 'Period Revenue', value: loading ? '-' : `$${totalRevenueInPeriod.toLocaleString()}`, sub: 'for selected period' },
                       { label: 'Total Sent', value: loading ? '-' : stats.totalSent.toString(), sub: 'invoices & proposals' },
                       { label: 'Collection Rate', value: loading ? '-' : `${collectionRate}%`, sub: 'of invoices paid' },
-                      { label: 'Avg Invoice Value', value: loading ? '-' : `$${Number(avgInvoiceValue).toLocaleString()}`, sub: 'per invoice' },
-                      { label: 'Client Count', value: loading ? '-' : uniqueClients.toString(), sub: 'unique clients' },
-                      { label: 'Period Revenue', value: loading ? '-' : `$${totalRevenueInPeriod.toLocaleString()}`, sub: 'for selected period' },
                     ]
-                  })().map(({ label, value, sub }) => (
-                    <div key={label} className="bg-white rounded-xl border border-gray-100 p-4">
-                      <div className="text-xs text-gray-500 mb-1">{label}</div>
-                      <div className="text-2xl font-bold text-gray-900">{value}</div>
-                      <div className="text-xs text-gray-400 mt-1">{sub}</div>
-                    </div>
-                  ))}
-                </div>
 
-                <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Pending Proposals</div>
-                    <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
-                    <div className="text-xs text-gray-400 mt-1">awaiting approval</div>
-                  </div>
-                  <div className="border-t border-gray-100 pt-3">
-                    <div className="text-sm text-gray-500 mb-1">Avg Days to Payment</div>
-                    <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.avgDaysToPayment}</div>
-                    <div className="text-xs text-gray-400 mt-1">after sending</div>
-                  </div>
+                    // Additional metrics (selectable via dropdown)
+                    const additional = {
+                      avgInvoice: { label: 'Avg Invoice Value', value: loading ? '-' : `$${Number(avgInvoiceValue).toLocaleString()}`, sub: 'per invoice' },
+                      thisMonth: { label: 'This Month', value: loading ? '-' : `$${thisMonthRevenue.toLocaleString()}`, sub: 'revenue collected' },
+                      clientCount: { label: 'Client Count', value: loading ? '-' : uniqueClients.toString(), sub: 'unique clients' },
+                    }
+
+                    return (
+                      <>
+                        {/* Primary metrics grid */}
+                        <div className="grid grid-cols-3 gap-3">
+                          {primary.map(({ label, value, sub }) => (
+                            <div key={label} className="bg-gray-50 rounded-lg p-4">
+                              <div className="text-xs text-gray-500 mb-1">{label}</div>
+                              <div className="text-xl font-bold text-gray-900">{value}</div>
+                              <div className="text-xs text-gray-400 mt-1">{sub}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Additional metric with dropdown selector */}
+                        <div className="space-y-3">
+                          <label className="text-xs font-semibold text-gray-600 block">More metrics</label>
+                          <div>
+                            <select
+                              value={selectedMetric}
+                              onChange={(e) => setSelectedMetric(e.target.value as any)}
+                              className="text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black w-full mb-3"
+                            >
+                              <option value="thisMonth">This Month</option>
+                              <option value="avgInvoice">Avg Invoice Value</option>
+                              <option value="clientCount">Client Count</option>
+                            </select>
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <div className="text-xs text-gray-500 mb-1">{additional[selectedMetric].label}</div>
+                              <div className="text-2xl font-bold text-gray-900">{additional[selectedMetric].value}</div>
+                              <div className="text-xs text-gray-400 mt-1">{additional[selectedMetric].sub}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Secondary info card */}
+                        <div className="border-t border-gray-100 pt-6 space-y-4">
+                          <div>
+                            <div className="text-sm text-gray-500 mb-2">Pending Proposals</div>
+                            <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
+                            <div className="text-xs text-gray-400 mt-1">awaiting approval</div>
+                          </div>
+                          <div className="border-t border-gray-100 pt-4">
+                            <div className="text-sm text-gray-500 mb-2">Avg Days to Payment</div>
+                            <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.avgDaysToPayment}</div>
+                            <div className="text-xs text-gray-400 mt-1">after sending</div>
+                          </div>
+                        </div>
+                      </>
+                    )
+                  })()}
                 </div>
               </div>
 
@@ -423,41 +434,17 @@ export default function DashboardPage() {
                   return (
                     <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-96">
                       <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-4">
-                          <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
-                          <select
-                            value={timePeriod}
-                            onChange={(e) => setTimePeriod(e.target.value as any)}
-                            className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
-                          >
-                            <option value="thisMonth">This Month</option>
-                            <option value="ytd">YTD</option>
-                            <option value="30days">Last 30 Days</option>
-                            <option value="all">All Time</option>
-                          </select>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setChartView('week')}
-                            className={`text-xs px-3 py-1 rounded-lg transition ${
-                              chartView === 'week'
-                                ? 'bg-orange-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                          >
-                            Week
-                          </button>
-                          <button
-                            onClick={() => setChartView('month')}
-                            className={`text-xs px-3 py-1 rounded-lg transition ${
-                              chartView === 'month'
-                                ? 'bg-orange-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
-                          >
-                            Month
-                          </button>
-                        </div>
+                        <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
+                        <select
+                          value={timePeriod}
+                          onChange={(e) => setTimePeriod(e.target.value as any)}
+                          className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                        >
+                          <option value="thisMonth">This Month</option>
+                          <option value="ytd">YTD</option>
+                          <option value="30days">Last 30 Days</option>
+                          <option value="all">All Time</option>
+                        </select>
                       </div>
                       <div className="flex-1 flex items-end justify-between gap-3 min-h-56">
                         {chartData.slice(-6).map((data) => (

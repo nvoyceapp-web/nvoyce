@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 interface Proposal {
   id: string
@@ -153,6 +154,9 @@ export default function PublicProposalPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
+          <div className="mb-6">
+            <Logo size="medium" />
+          </div>
           <div className="text-6xl mb-4">❌</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Proposal Not Found</h1>
           <p className="text-gray-600">{error || 'This proposal link may have expired or be invalid.'}</p>
@@ -165,6 +169,9 @@ export default function PublicProposalPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center px-4">
         <div className="max-w-md text-center">
+          <div className="mb-6">
+            <Logo size="medium" />
+          </div>
           <div className="text-7xl mb-6">✓</div>
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Proposal Accepted!</h1>
           <p className="text-gray-600 mb-6">
@@ -187,6 +194,9 @@ export default function PublicProposalPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center px-4">
         <div className="max-w-md text-center">
+          <div className="mb-6">
+            <Logo size="medium" />
+          </div>
           <div className="text-7xl mb-6">✗</div>
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Proposal Declined</h1>
           <p className="text-gray-600 mb-6">
@@ -213,6 +223,9 @@ export default function PublicProposalPage() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
+          <div className="mb-6">
+            <Logo size="medium" />
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Business Proposal</h1>
           <p className="text-gray-600">From {proposal.business_name}</p>
         </div>

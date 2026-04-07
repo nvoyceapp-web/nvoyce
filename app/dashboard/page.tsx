@@ -1057,46 +1057,109 @@ export default function DashboardPage() {
                             <td className="px-6 py-4 text-gray-600 capitalize">{doc.doc_type}</td>
                             <td className="px-6 py-4 text-right text-gray-900 font-semibold">${doc.price.toLocaleString()}</td>
                             <td className="px-6 py-4">
-                              {doc.status === 'paid' ? (
-                                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
-                                  ✓ Paid
-                                </span>
+                              {doc.doc_type.toLowerCase() === 'proposal' ? (
+                                // Proposal status
+                                doc.status === 'agreed' ? (
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
+                                    ✓ Agreed
+                                  </span>
+                                ) : doc.status === 'rejected' ? (
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
+                                    ✗ Rejected
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      // Mark proposal as agreed (will implement with invoice generation)
+                                      console.log('Mark as agreed:', doc.id)
+                                    }}
+                                    className="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition"
+                                  >
+                                    Mark Agreed
+                                  </button>
+                                )
                               ) : (
-                                <button
-                                  onClick={() => {
-                                    // Mark as paid (will implement API call)
-                                    console.log('Mark as paid:', doc.id)
-                                  }}
-                                  className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition"
-                                >
-                                  Mark Paid
-                                </button>
+                                // Invoice status
+                                doc.status === 'paid' ? (
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
+                                    ✓ Paid
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      // Mark as paid (will implement API call)
+                                      console.log('Mark as paid:', doc.id)
+                                    }}
+                                    className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition"
+                                  >
+                                    Mark Paid
+                                  </button>
+                                )
                               )}
                             </td>
                             <td className="px-6 py-4 text-right text-gray-600">
-                              {doc.status === 'paid' ? '—' : (
-                                <span className={isOverdue ? 'text-red-600 font-semibold' : ''}>
-                                  {daysOld} days {isOverdue && '🚨'}
-                                </span>
+                              {doc.doc_type.toLowerCase() === 'proposal' ? (
+                                // Proposals: show days pending
+                                doc.status === 'agreed' || doc.status === 'rejected' ? (
+                                  '—'
+                                ) : (
+                                  <span className={daysOld > 14 ? 'text-orange-600 font-semibold' : ''}>
+                                    {daysOld} days pending {daysOld > 14 && '⚠'}
+                                  </span>
+                                )
+                              ) : (
+                                // Invoices: show days outstanding
+                                doc.status === 'paid' ? (
+                                  '—'
+                                ) : (
+                                  <span className={isOverdue ? 'text-red-600 font-semibold' : ''}>
+                                    {daysOld} days {isOverdue && '🚨'}
+                                  </span>
+                                )
                               )}
                             </td>
                             <td className="px-6 py-4 flex gap-2">
-                              {doc.status !== 'paid' && daysOld > 14 && (
-                                <button
-                                  onClick={() => {
-                                    // Send reminder (will implement email)
-                                    console.log('Send reminder to:', doc.client_name)
-                                    alert(`Reminder would be sent to ${doc.client_name}`)
-                                  }}
-                                  className="text-xs bg-orange-600 text-white px-2.5 py-1 rounded hover:bg-orange-700 transition"
-                                  title="Send payment reminder"
-                                >
-                                  📧 Remind
-                                </button>
+                              {doc.doc_type.toLowerCase() === 'proposal' ? (
+                                // Proposal actions
+                                <>
+                                  {doc.status !== 'agreed' && doc.status !== 'rejected' && daysOld > 7 && (
+                                    <button
+                                      onClick={() => {
+                                        // Send follow-up
+                                        console.log('Send follow-up to:', doc.client_name)
+                                        alert(`Follow-up would be sent to ${doc.client_name}`)
+                                      }}
+                                      className="text-xs bg-purple-600 text-white px-2.5 py-1 rounded hover:bg-purple-700 transition"
+                                      title="Send proposal follow-up"
+                                    >
+                                      📧 Follow-up
+                                    </button>
+                                  )}
+                                  <Link href={`/dashboard/documents/${doc.id}`} className="text-blue-600 hover:text-blue-700 text-xs font-semibold">
+                                    View
+                                  </Link>
+                                </>
+                              ) : (
+                                // Invoice actions
+                                <>
+                                  {doc.status !== 'paid' && daysOld > 14 && (
+                                    <button
+                                      onClick={() => {
+                                        // Send reminder
+                                        console.log('Send reminder to:', doc.client_name)
+                                        alert(`Reminder would be sent to ${doc.client_name}`)
+                                      }}
+                                      className="text-xs bg-orange-600 text-white px-2.5 py-1 rounded hover:bg-orange-700 transition"
+                                      title="Send payment reminder"
+                                    >
+                                      📧 Remind
+                                    </button>
+                                  )}
+                                  <Link href={`/dashboard/documents/${doc.id}`} className="text-blue-600 hover:text-blue-700 text-xs font-semibold">
+                                    View
+                                  </Link>
+                                </>
                               )}
-                              <Link href={`/dashboard/documents/${doc.id}`} className="text-blue-600 hover:text-blue-700 text-xs font-semibold">
-                                View
-                              </Link>
                             </td>
                           </tr>
                         )

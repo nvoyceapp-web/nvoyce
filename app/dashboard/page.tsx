@@ -511,15 +511,14 @@ export default function DashboardPage() {
                 >
                   💼 Proposal
                 </Link>
-                <Link
-                  href="/dashboard/faq"
-                  onClick={() => setShowCreateDropdown(false)}
-                  className="block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition border-t border-gray-100 mt-2 pt-2"
-                >
-                  ❓ Learn - FAQ
-                </Link>
               </div>
             )}
+            <Link href="/dashboard/faq" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+              ❓ FAQ
+            </Link>
+            <Link href="/dashboard/settings" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+              ⚙️ Settings
+            </Link>
           </nav>
 
           {/* About Tabs */}

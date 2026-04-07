@@ -1386,10 +1386,22 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {/* Status */}
-              <div className="pt-4 border-t border-gray-100">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Status</h3>
-                <div className="text-sm font-medium text-gray-700 capitalize">{viewingDocument.status}</div>
+              {/* Date Created & Status */}
+              <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Date Created</h3>
+                  <div className="text-sm font-medium text-gray-700">
+                    {new Date(viewingDocument.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Status</h3>
+                  <div className="text-sm font-medium text-gray-700 capitalize">{viewingDocument.status}</div>
+                </div>
               </div>
             </div>
 

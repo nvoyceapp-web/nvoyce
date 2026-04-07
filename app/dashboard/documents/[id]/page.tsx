@@ -11,6 +11,8 @@ export default function DocumentPage() {
   const [loading, setLoading] = useState(true)
   const [generatingLink, setGeneratingLink] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [amountPaid, setAmountPaid] = useState<number>(0)
+  const [paymentNotes, setPaymentNotes] = useState<string>('')
 
   useEffect(() => {
     async function fetchDoc() {
@@ -282,6 +284,86 @@ export default function DocumentPage() {
           <div className="border-t border-gray-100 pt-8 text-sm text-gray-600">
             <p className="leading-relaxed">{content.closingMessage}</p>
             <p className="mt-4 font-semibold text-gray-900">{content.from.name}</p>
+          </div>
+
+          {/* Payment Tracking (Phase 2) */}
+          <div className="border-t border-gray-100 mt-10 pt-8 print:hidden">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Payment Tracking</h3>
+
+            {/* Summary */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="text-xs text-blue-600 font-semibold uppercase">Total</div>
+                <div className="text-2xl font-bold text-blue-900">${content.total.toLocaleString()}</div>
+              </div>
+              <div className="bg-green-50 rounded-lg p-4">
+                <div className="text-xs text-green-600 font-semibold uppercase">Paid</div>
+                <div className="text-2xl font-bold text-green-900">${amountPaid.toLocaleString()}</div>
+              </div>
+              <div className={`rounded-lg p-4 ${amountPaid >= content.total ? 'bg-green-50' : amountPaid > 0 ? 'bg-yellow-50' : 'bg-red-50'}`}>
+                <div className={`text-xs font-semibold uppercase ${amountPaid >= content.total ? 'text-green-600' : amountPaid > 0 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  Outstanding
+                </div>
+                <div className={`text-2xl font-bold ${amountPaid >= content.total ? 'text-green-900' : amountPaid > 0 ? 'text-yellow-900' : 'text-red-900'}`}>
+                  ${Math.max(0, content.total - amountPaid).toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            {/* Status badge */}
+            <div className="mb-6">
+              {amountPaid >= content.total && (
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">
+                  ✓ Fully Paid
+                </span>
+              )}
+              {amountPaid > 0 && amountPaid < content.total && (
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                  ⚠ Partially Paid (${amountPaid.toLocaleString()} of ${content.total.toLocaleString()})
+                </span>
+              )}
+              {amountPaid === 0 && (
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-700">
+                  ⧗ Pending
+                </span>
+              )}
+            </div>
+
+            {/* Record Payment Form */}
+            {amountPaid < content.total && (
+              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">Amount Paid</label>
+                  <input
+                    type="number"
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(Math.max(0, Number(e.target.value)))}
+                    placeholder="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Enter total amount received (including partial payments)</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">Payment Notes (optional)</label>
+                  <textarea
+                    value={paymentNotes}
+                    onChange={(e) => setPaymentNotes(e.target.value)}
+                    placeholder="e.g., Received partial payment, remaining due by..."
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    console.log('Record payment:', { amountPaid, paymentNotes })
+                    alert(`Payment of $${amountPaid} recorded${paymentNotes ? ' with note: ' + paymentNotes : ''}`)
+                  }}
+                  className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm"
+                >
+                  ✓ Save Payment
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

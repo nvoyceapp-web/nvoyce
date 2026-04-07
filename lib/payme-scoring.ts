@@ -11,6 +11,7 @@ export interface Document {
   status: string
   created_at: string
   days_outstanding?: number
+  form_data?: Record<string, unknown> | string
 }
 
 export interface PaymeAction {

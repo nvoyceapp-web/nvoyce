@@ -26,6 +26,7 @@ export default function PublicProposalPage() {
   const [accepting, setAccepting] = useState(false)
   const [accepted, setAccepted] = useState(false)
   const [action, setAction] = useState<'accepted' | 'declined' | null>(null)
+  const [lastAction, setLastAction] = useState<'accept' | 'decline' | null>(null)
 
   useEffect(() => {
     const fetchProposal = async () => {
@@ -60,6 +61,7 @@ export default function PublicProposalPage() {
     if (!proposal) return
 
     try {
+      setLastAction('accept')
       setAccepting(true)
 
       // Call the invoice generation API
@@ -102,6 +104,7 @@ export default function PublicProposalPage() {
     if (!proposal) return
 
     try {
+      setLastAction('decline')
       setAccepting(true)
 
       // Update proposal status to declined
@@ -282,23 +285,23 @@ export default function PublicProposalPage() {
               onClick={handleAccept}
               disabled={accepting}
               className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
-                accepting
+                accepting && lastAction === 'accept'
                   ? 'bg-green-400 cursor-not-allowed opacity-75'
                   : 'bg-green-600 hover:bg-green-700 cursor-pointer'
               }`}
             >
-              {accepting ? '⏳ Processing...' : '✓ Accept'}
+              {accepting && lastAction === 'accept' ? '⏳ Processing...' : '✓ Accept'}
             </button>
             <button
               onClick={handleDecline}
               disabled={accepting}
               className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
-                accepting
+                accepting && lastAction === 'decline'
                   ? 'bg-red-400 cursor-not-allowed opacity-75'
                   : 'bg-red-600 hover:bg-red-700 cursor-pointer'
               }`}
             >
-              {accepting ? '⏳ Processing...' : '✗ Decline'}
+              {accepting && lastAction === 'decline' ? '⏳ Processing...' : '✗ Decline'}
             </button>
           </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 type DocType = 'invoice' | 'proposal'
@@ -17,7 +17,7 @@ interface FormData {
   notes: string
 }
 
-export default function NewDocumentPage() {
+function NewDocumentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const typeParam = searchParams.get('type') as DocType | null
@@ -279,5 +279,17 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-gray-400 w-28 shrink-0">{label}</span>
       <span className="text-gray-900 font-medium">{value}</span>
     </div>
+  )
+}
+
+export default function NewDocumentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-400 text-sm">Loading...</div>
+      </div>
+    }>
+      <NewDocumentContent />
+    </Suspense>
   )
 }

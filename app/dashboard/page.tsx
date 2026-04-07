@@ -49,7 +49,6 @@ export default function DashboardPage() {
   const [selectedMetric, setSelectedMetric] = useState<'avgInvoice' | 'avgDaysToPayment' | 'clientCount'>('avgInvoice')
   const [showPendingProposals, setShowPendingProposals] = useState(false)
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
-  const [sidebarTab, setSidebarTab] = useState<'about-nvoyce' | 'about-payme'>('about-nvoyce')
   const [dismissedRecommendations, setDismissedRecommendations] = useState<Set<string>>(new Set())
   const [expandPayme, setExpandPayme] = useState(false)
   const [showCreateDropdown, setShowCreateDropdown] = useState(false)
@@ -521,70 +520,27 @@ export default function DashboardPage() {
             </Link>
           </nav>
 
-          {/* About Tabs */}
+          {/* About Section */}
           <div className="border-t border-gray-100 pt-4 flex-1 flex flex-col">
-            <div className="flex gap-1 mb-4">
-              <button
-                onClick={() => setSidebarTab('about-nvoyce')}
-                className={`flex-1 text-xs font-semibold py-2 px-2 rounded-lg transition ${
-                  sidebarTab === 'about-nvoyce'
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                About Nvoyce
-              </button>
-              <button
-                onClick={() => setSidebarTab('about-payme')}
-                className={`flex-1 text-xs font-semibold py-2 px-2 rounded-lg transition ${
-                  sidebarTab === 'about-payme'
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                About Payme
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="text-xs text-gray-600 space-y-3 overflow-y-auto">
-              {sidebarTab === 'about-nvoyce' ? (
-                <>
-                  <div>
-                    <p className="font-semibold text-gray-900 mb-1">Nvoyce</p>
-                    <p className="text-gray-600">
-                      Create and manage invoices and proposals in seconds. Built for gig workers and freelancers.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 mb-1">Features</p>
-                    <ul className="text-gray-600 space-y-1">
-                      <li>• Quick invoice generation</li>
-                      <li>• Payment tracking</li>
-                      <li>• Client management</li>
-                      <li>• Smart analytics</li>
-                    </ul>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <p className="font-semibold text-gray-900 mb-1">💰 Payme</p>
-                    <p className="text-gray-600">
-                      Your smart payment assistant. Get paid faster with intelligent reminders and insights.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 mb-1">What Payme Does</p>
-                    <ul className="text-gray-600 space-y-1">
-                      <li>• Flags overdue invoices</li>
-                      <li>• Tracks collection trends</li>
-                      <li>• Identifies at-risk clients</li>
-                      <li>• Suggests next actions</li>
-                    </ul>
-                  </div>
-                </>
-              )}
+            <div className="text-xs space-y-4 overflow-y-auto">
+              <div>
+                <p className="font-semibold text-gray-900 mb-1">Our Mission</p>
+                <p className="text-gray-600 leading-relaxed">
+                  We do the hard stuff. You get paid.
+                </p>
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 mb-1">What We Do</p>
+                <p className="text-gray-600 leading-relaxed">
+                  Nvoyce automates invoicing and payment tracking so freelancers and gig workers can focus on what they do best.
+                </p>
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 mb-1">Learn More</p>
+                <Link href="/dashboard/faq" className="text-purple-600 hover:text-purple-700 text-xs font-semibold">
+                  → Visit FAQ
+                </Link>
+              </div>
             </div>
           </div>
 

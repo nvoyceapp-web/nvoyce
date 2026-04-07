@@ -47,6 +47,7 @@ export default function DashboardPage() {
   const [selectedMetric, setSelectedMetric] = useState<'avgInvoice' | 'thisMonth' | 'clientCount'>('thisMonth')
   const [showPendingProposals, setShowPendingProposals] = useState(false)
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
+  const [sidebarTab, setSidebarTab] = useState<'about-nvoyce' | 'about-payme'>('about-nvoyce')
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -436,6 +437,74 @@ export default function DashboardPage() {
               + New Document
             </Link>
           </nav>
+
+          {/* About Tabs */}
+          <div className="border-t border-gray-100 pt-4 flex-1 flex flex-col">
+            <div className="flex gap-1 mb-4">
+              <button
+                onClick={() => setSidebarTab('about-nvoyce')}
+                className={`flex-1 text-xs font-semibold py-2 px-2 rounded-lg transition ${
+                  sidebarTab === 'about-nvoyce'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                About Nvoyce
+              </button>
+              <button
+                onClick={() => setSidebarTab('about-payme')}
+                className={`flex-1 text-xs font-semibold py-2 px-2 rounded-lg transition ${
+                  sidebarTab === 'about-payme'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                About Payme
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="text-xs text-gray-600 space-y-3 overflow-y-auto">
+              {sidebarTab === 'about-nvoyce' ? (
+                <>
+                  <div>
+                    <p className="font-semibold text-gray-900 mb-1">Nvoyce</p>
+                    <p className="text-gray-600">
+                      Create and manage invoices and proposals in seconds. Built for gig workers and freelancers.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 mb-1">Features</p>
+                    <ul className="text-gray-600 space-y-1">
+                      <li>• Quick invoice generation</li>
+                      <li>• Payment tracking</li>
+                      <li>• Client management</li>
+                      <li>• Smart analytics</li>
+                    </ul>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <p className="font-semibold text-gray-900 mb-1">💰 Payme</p>
+                    <p className="text-gray-600">
+                      Your smart payment assistant. Get paid faster with intelligent reminders and insights.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 mb-1">What Payme Does</p>
+                    <ul className="text-gray-600 space-y-1">
+                      <li>• Flags overdue invoices</li>
+                      <li>• Tracks collection trends</li>
+                      <li>• Identifies at-risk clients</li>
+                      <li>• Suggests next actions</li>
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
           <div className="border-t border-gray-100 pt-4">
             <div className="flex items-center gap-3 px-2">
               <span className="text-sm text-gray-600">My Account</span>
@@ -462,10 +531,10 @@ export default function DashboardPage() {
               return (
                 <div className="bg-gradient-to-r from-purple-900 to-purple-800 text-white rounded-xl p-6 mb-10 border border-purple-700">
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="text-2xl">🤖</div>
+                    <div className="text-2xl">💰</div>
                     <div className="flex-1">
-                      <h3 className="font-semibold mb-1">Smart Assistant</h3>
-                      <p className="text-sm text-purple-200">Here's what you should focus on today:</p>
+                      <h3 className="font-semibold mb-1">Payme</h3>
+                      <p className="text-sm text-purple-200">Your payment smart assistant — Payme suggests:</p>
                     </div>
                   </div>
 

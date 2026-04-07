@@ -25,6 +25,7 @@ export default function PublicProposalPage() {
   const [error, setError] = useState<string | null>(null)
   const [accepting, setAccepting] = useState(false)
   const [accepted, setAccepted] = useState(false)
+  const [action, setAction] = useState<'accepted' | 'declined' | null>(null)
 
   useEffect(() => {
     const fetchProposal = async () => {
@@ -74,9 +75,64 @@ export default function PublicProposalPage() {
       }
 
       const data = await response.json()
+
+      // Send notification to freelancer
+      await fetch('/api/proposals/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          proposalId: proposal.id,
+          action: 'accepted',
+          clientName: proposal.client_name,
+          clientEmail: proposal.client_email,
+          amount: proposal.price,
+        }),
+      }).catch(err => console.log('Notification send failed (non-blocking):', err))
+
+      setAction('accepted')
       setAccepted(true)
     } catch (err) {
       alert(`Error: ${err instanceof Error ? err.message : 'Failed to accept proposal'}`)
+    } finally {
+      setAccepting(false)
+    }
+  }
+
+  const handleDecline = async () => {
+    if (!proposal) return
+
+    try {
+      setAccepting(true)
+
+      // Update proposal status to declined
+      const response = await fetch('/api/proposals/decline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proposalId: proposal.id }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to decline proposal')
+      }
+
+      // Send notification to freelancer
+      await fetch('/api/proposals/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          proposalId: proposal.id,
+          action: 'declined',
+          clientName: proposal.client_name,
+          clientEmail: proposal.client_email,
+          amount: proposal.price,
+        }),
+      }).catch(err => console.log('Notification send failed (non-blocking):', err))
+
+      setAction('declined')
+      setAccepted(true)
+    } catch (err) {
+      alert(`Error: ${err instanceof Error ? err.message : 'Failed to decline proposal'}`)
     } finally {
       setAccepting(false)
     }
@@ -102,14 +158,14 @@ export default function PublicProposalPage() {
     )
   }
 
-  if (accepted) {
+  if (accepted && action === 'accepted') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center px-4">
         <div className="max-w-md text-center">
-          <div className="text-7xl mb-6">🎉</div>
+          <div className="text-7xl mb-6">✓</div>
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Proposal Accepted!</h1>
           <p className="text-gray-600 mb-6">
-            Thank you for accepting this proposal. An invoice has been automatically generated and the business owner will be notified.
+            Thank you for accepting this proposal. An invoice has been automatically generated and {proposal.business_name} will be notified.
           </p>
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
             <p className="text-sm text-green-900 font-medium">
@@ -118,6 +174,28 @@ export default function PublicProposalPage() {
           </div>
           <p className="text-sm text-gray-500">
             If you have any questions, please contact {proposal.business_name}.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (accepted && action === 'declined') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center px-4">
+        <div className="max-w-md text-center">
+          <div className="text-7xl mb-6">✗</div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">Proposal Declined</h1>
+          <p className="text-gray-600 mb-6">
+            Your response has been recorded and {proposal.business_name} has been notified of your decision.
+          </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p className="text-sm text-blue-900 font-medium">
+              💬 {proposal.business_name} may reach out to discuss further if needed.
+            </p>
+          </div>
+          <p className="text-sm text-gray-500">
+            If you'd like to reconsider, please contact {proposal.business_name}.
           </p>
         </div>
       </div>
@@ -199,17 +277,30 @@ export default function PublicProposalPage() {
 
         {/* Action Section */}
         <div className="text-center">
-          <button
-            onClick={handleAccept}
-            disabled={accepting}
-            className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition mb-4 ${
-              accepting
-                ? 'bg-purple-400 cursor-not-allowed opacity-75'
-                : 'bg-purple-600 hover:bg-purple-700 cursor-pointer'
-            }`}
-          >
-            {accepting ? '⏳ Processing...' : '✓ Accept This Proposal'}
-          </button>
+          <div className="flex gap-4 justify-center mb-6">
+            <button
+              onClick={handleAccept}
+              disabled={accepting}
+              className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
+                accepting
+                  ? 'bg-green-400 cursor-not-allowed opacity-75'
+                  : 'bg-green-600 hover:bg-green-700 cursor-pointer'
+              }`}
+            >
+              {accepting ? '⏳ Processing...' : '✓ Accept'}
+            </button>
+            <button
+              onClick={handleDecline}
+              disabled={accepting}
+              className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
+                accepting
+                  ? 'bg-red-400 cursor-not-allowed opacity-75'
+                  : 'bg-red-600 hover:bg-red-700 cursor-pointer'
+              }`}
+            >
+              {accepting ? '⏳ Processing...' : '✗ Decline'}
+            </button>
+          </div>
 
           <p className="text-sm text-gray-600">
             By accepting, you agree to the terms above. An invoice will be generated immediately.

@@ -85,6 +85,27 @@ function scoreStaleDraft(doc: Document): number {
 }
 
 /**
+ * Calculate Payme action score for expiring proposals
+ * Alerts user when proposals are expiring soon (2 days or less)
+ * Assumes expiration info is stored in form_data.expirationDays
+ */
+function scoreExpiringProposal(doc: Document): number {
+  // Get expiration days from form_data
+  const formData = typeof doc.form_data === 'string' ? JSON.parse(doc.form_data) : doc.form_data || {}
+  const expirationDays = parseInt(formData.expirationDays || '7', 10)
+
+  const daysSinceSent = (new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24)
+  const daysRemaining = expirationDays - daysSinceSent
+
+  // Flag if less than 2 days remaining
+  if (daysRemaining > 2) return 0
+
+  // Higher score if very close to expiration
+  const urgencyBoost = daysRemaining <= 1 ? 1.5 : 1
+  return doc.price * urgencyBoost
+}
+
+/**
  * Generate top recommendations for both invoices and proposals
  */
 export function generatePaymeActions(documents: Document[]): PaymeAction[] {
@@ -149,6 +170,28 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
           urgency: 'medium',
           icon: '🔵',
           days_since: daysSince
+        })
+      }
+    } else if (doc.doc_type === 'proposal' && (doc.status === 'sent' || doc.status === 'received')) {
+      // Expiring proposal - check if expiring soon
+      const expiringScore = scoreExpiringProposal(doc)
+
+      if (expiringScore > 0) {
+        const formData = typeof doc.form_data === 'string' ? JSON.parse(doc.form_data) : doc.form_data || {}
+        const expirationDays = parseInt(formData.expirationDays || '7', 10)
+        const daysSinceSent = Math.floor((new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24))
+        const daysRemaining = expirationDays - daysSinceSent
+
+        actions.push({
+          id: doc.id,
+          type: 'proposal',
+          priority: expiringScore,
+          client_name: doc.client_name,
+          amount: doc.price,
+          action_text: `⏰ Proposal for ${doc.client_name} ($${doc.price.toFixed(2)}) expires in ${Math.max(0, daysRemaining)} day(s)`,
+          urgency: daysRemaining <= 1 ? 'critical' : 'high',
+          icon: daysRemaining <= 1 ? '🔴' : '🟡',
+          days_since: daysRemaining
         })
       }
     }

@@ -40,8 +40,8 @@ function scoreOverdueInvoice(doc: Document): number {
 
   // Urgency boost based on severity
   let urgencyMultiplier = 1
-  if (daysOverdue > 60) urgencyMultiplier = 1.5 // Very overdue
-  if (daysOverdue > 90) urgencyMultiplier = 2.0 // Critical
+  if (daysOverdue > 45) urgencyMultiplier = 1.5 // Very overdue
+  if (daysOverdue > 60) urgencyMultiplier = 2.0 // Critical
 
   return baseScore * urgencyMultiplier
 }
@@ -80,8 +80,8 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
         const daysOverdue = Math.floor((new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24) - 30)
 
         let urgency: 'critical' | 'high' | 'medium' = 'medium'
-        if (daysOverdue > 90) urgency = 'critical'
-        else if (daysOverdue > 60) urgency = 'high'
+        if (daysOverdue > 60) urgency = 'critical'
+        else if (daysOverdue > 45) urgency = 'high'
 
         actions.push({
           id: doc.id,

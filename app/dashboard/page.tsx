@@ -1187,21 +1187,19 @@ export default function DashboardPage() {
                                   </span>
                                 )
                               ) : (
-                                // Invoice status
+                                // Invoice status - status display only
                                 doc.status === 'paid' ? (
                                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
                                     ✓ Paid
                                   </span>
+                                ) : doc.status === 'overdue' ? (
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
+                                    🚨 Overdue
+                                  </span>
                                 ) : (
-                                  <button
-                                    onClick={() => {
-                                      // Mark as paid (will implement API call)
-                                      console.log('Mark as paid:', doc.id)
-                                    }}
-                                    className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition"
-                                  >
-                                    Mark Paid
-                                  </button>
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-100 text-orange-700">
+                                    ⏳ Unpaid
+                                  </span>
                                 )
                               )}
                             </td>
@@ -1276,7 +1274,19 @@ export default function DashboardPage() {
                                 </>
                               ) : (
                                 // Invoice actions
-                                <>
+                                <div className="flex gap-2 flex-wrap">
+                                  {doc.status !== 'paid' && (
+                                    <button
+                                      onClick={() => {
+                                        // Mark as paid (will implement API call)
+                                        console.log('Mark as paid:', doc.id)
+                                      }}
+                                      className="text-xs bg-green-600 text-white px-2.5 py-1 rounded hover:bg-green-700 transition"
+                                      title="Mark invoice as paid"
+                                    >
+                                      ✓ Mark Paid
+                                    </button>
+                                  )}
                                   {doc.status !== 'paid' && daysOld > 14 && (
                                     <button
                                       onClick={() => {
@@ -1293,7 +1303,7 @@ export default function DashboardPage() {
                                   <Link href={`/dashboard/documents/${doc.id}`} className="text-blue-600 hover:text-blue-700 text-xs font-semibold">
                                     View
                                   </Link>
-                                </>
+                                </div>
                               )}
                             </td>
                           </tr>

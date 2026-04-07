@@ -1236,7 +1236,7 @@ export default function DashboardPage() {
                                       className="text-xs bg-gray-600 text-white px-2.5 py-1 rounded hover:bg-gray-700 transition"
                                       title="Actions menu"
                                     >
-                                      ⋯ Menu
+                                      ⋯ Select
                                     </button>
                                     {openDropdown === doc.id && (
                                       <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">

@@ -377,10 +377,9 @@ export default function DashboardPage() {
 
   // Get row urgency color
   const getRowColor = (doc: Document) => {
-    if (doc.status === 'paid') return 'bg-green-50'
+    if (doc.status === 'paid') return 'hover:bg-gray-50'
     const daysOld = Math.floor((new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24))
     if (daysOld > 30) return 'bg-red-50'
-    if (daysOld > 14) return 'bg-yellow-50'
     return 'hover:bg-gray-50'
   }
 
@@ -518,37 +517,10 @@ export default function DashboardPage() {
             <Link href="/dashboard/settings" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
               ⚙️ Settings
             </Link>
+            <Link href="/about" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+              ℹ️ About Nvoyce
+            </Link>
           </nav>
-
-          {/* About Section */}
-          <div className="border-t border-gray-100 pt-4 flex-1 flex flex-col">
-            <div className="text-xs space-y-4 overflow-y-auto">
-              <div>
-                <p className="font-semibold text-gray-900 mb-1">Our Mission</p>
-                <p className="text-gray-600 leading-relaxed">
-                  We do the hard stuff. You get paid.
-                </p>
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900 mb-1">What We Do</p>
-                <p className="text-gray-600 leading-relaxed">
-                  Nvoyce automates invoicing and payment tracking so freelancers and gig workers can focus on what they do best.
-                </p>
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900 mb-1">Learn More</p>
-                <Link href="/dashboard/faq" className="text-purple-600 hover:text-purple-700 text-xs font-semibold">
-                  → Visit FAQ
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-100 pt-4">
-            <div className="flex items-center gap-3 px-2">
-              <span className="text-sm text-gray-600">My Account</span>
-            </div>
-          </div>
         </aside>
 
         <main className="flex-1 overflow-auto w-full">

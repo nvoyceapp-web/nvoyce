@@ -361,9 +361,9 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-8 mb-10">
+            <div className="grid grid-cols-2 gap-8 mb-10 auto-rows-max">
               {/* Left: KPI Cards */}
-              <div className="col-span-1 space-y-4">
+              <div className="col-span-1 space-y-4 h-fit">
                 <div className="grid grid-cols-2 gap-4">
                   {(() => {
                     const now = new Date()

@@ -316,11 +316,29 @@ export default function DashboardPage() {
     }
   }
 
+  // Check payment status of selected documents
+  const getSelectedPaymentStatus = () => {
+    const selected = Array.from(selectedDocs)
+    const paidCount = selected.filter((id) => stats.documents.find((d) => d.id === id)?.status === 'paid').length
+    const unpaidCount = selected.length - paidCount
+    return { paidCount, unpaidCount, hasMixed: paidCount > 0 && unpaidCount > 0 }
+  }
+
   const markSelectedAsPaid = () => {
-    selectedDocs.forEach((docId) => {
+    const unpaidIds = Array.from(selectedDocs).filter((id) => stats.documents.find((d) => d.id === id)?.status !== 'paid')
+    unpaidIds.forEach((docId) => {
       console.log('Mark as paid:', docId)
     })
-    alert(`Marked ${selectedDocs.size} invoice(s) as paid`)
+    alert(`Marked ${unpaidIds.length} invoice(s) as paid`)
+    setSelectedDocs(new Set())
+  }
+
+  const unmarkSelectedAsPaid = () => {
+    const paidIds = Array.from(selectedDocs).filter((id) => stats.documents.find((d) => d.id === id)?.status === 'paid')
+    paidIds.forEach((docId) => {
+      console.log('Unmark as paid:', docId)
+    })
+    alert(`Unmarked ${paidIds.length} invoice(s) as paid`)
     setSelectedDocs(new Set())
   }
 
@@ -834,33 +852,49 @@ export default function DashboardPage() {
 
             {stats.documents.length > 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                {selectedDocs.size > 0 && (
-                  <div className="bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between">
-                    <div className="text-sm font-semibold text-blue-900">
-                      {selectedDocs.size} document{selectedDocs.size !== 1 ? 's' : ''} selected
+                {selectedDocs.size > 0 && (() => {
+                  const { paidCount, unpaidCount, hasMixed } = getSelectedPaymentStatus()
+                  return (
+                    <div className="bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between">
+                      <div className="text-sm font-semibold text-blue-900">
+                        {selectedDocs.size} document{selectedDocs.size !== 1 ? 's' : ''} selected
+                        {hasMixed && <span className="text-xs text-gray-600 ml-2">({unpaidCount} unpaid, {paidCount} paid)</span>}
+                      </div>
+                      <div className="flex gap-2">
+                        {(unpaidCount > 0 || !hasMixed) && unpaidCount >= 0 && (
+                          <button
+                            onClick={markSelectedAsPaid}
+                            className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold"
+                            title={hasMixed ? `Mark ${unpaidCount} unpaid invoice(s) as paid` : 'Mark as paid'}
+                          >
+                            ✓ Mark as Paid
+                          </button>
+                        )}
+                        {(paidCount > 0 || !hasMixed) && paidCount >= 0 && (
+                          <button
+                            onClick={unmarkSelectedAsPaid}
+                            className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition font-semibold"
+                            title={hasMixed ? `Unmark ${paidCount} paid invoice(s)` : 'Unmark as paid'}
+                          >
+                            ↩ Unmark as Paid
+                          </button>
+                        )}
+                        <button
+                          onClick={sendRemindersToSelected}
+                          className="text-sm bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition font-semibold"
+                        >
+                          📧 Send Reminders
+                        </button>
+                        <button
+                          onClick={() => setSelectedDocs(new Set())}
+                          className="text-sm bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-300 transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={markSelectedAsPaid}
-                        className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold"
-                      >
-                        ✓ Mark as Paid
-                      </button>
-                      <button
-                        onClick={sendRemindersToSelected}
-                        className="text-sm bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition font-semibold"
-                      >
-                        📧 Send Reminders
-                      </button>
-                      <button
-                        onClick={() => setSelectedDocs(new Set())}
-                        className="text-sm bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-300 transition"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  )
+                })()}
                 <div className="p-6 border-b border-gray-100 space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-gray-900">Invoices & Proposals</h2>

@@ -53,6 +53,8 @@ export default function DashboardPage() {
   const [expandPayme, setExpandPayme] = useState(false)
   const [showCreateDropdown, setShowCreateDropdown] = useState(false)
   const [documentTab, setDocumentTab] = useState<'invoices' | 'proposals'>('invoices')
+  const [generatingInvoices, setGeneratingInvoices] = useState<Set<string>>(new Set())
+  const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string } | null>(null)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -259,6 +261,56 @@ export default function DashboardPage() {
     const newDismissed = new Set(dismissedRecommendations)
     newDismissed.add(type)
     setDismissedRecommendations(newDismissed)
+  }
+
+  // Accept proposal and auto-generate invoice
+  const acceptProposalAndGenerateInvoice = async (proposalId: string) => {
+    try {
+      setGeneratingInvoices((prev) => new Set(prev).add(proposalId))
+
+      const response = await fetch('/api/proposals/generate-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proposalId }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to generate invoice')
+      }
+
+      const data = await response.json()
+
+      // Show success message
+      setSuccessMessage({
+        docId: proposalId,
+        invoiceId: data.invoiceId,
+        message: `✅ ${data.message}. Invoice created!`,
+      })
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(null), 5000)
+
+      // Refresh the stats to show updated proposal status and new invoice
+      const { data: updatedStats, error: statsError } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (!statsError && updatedStats) {
+        setStats((prev) => ({ ...prev, documents: updatedStats }))
+      }
+    } catch (error) {
+      console.error('Error generating invoice:', error)
+      alert(`Error: ${error instanceof Error ? error.message : 'Failed to generate invoice'}`)
+    } finally {
+      setGeneratingInvoices((prev) => {
+        const next = new Set(prev)
+        next.delete(proposalId)
+        return next
+      })
+    }
   }
 
   // Batch action handlers
@@ -566,6 +618,30 @@ export default function DashboardPage() {
             </div>
 
             {/* Smart Assistant Card */}
+            {/* Success notification for invoice generation */}
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-10">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">🎉</div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-green-900">{successMessage.message}</p>
+                    <Link
+                      href={`/dashboard/documents/${successMessage.invoiceId}`}
+                      className="text-sm text-green-600 hover:text-green-700 font-semibold mt-2 inline-block"
+                    >
+                      View new invoice →
+                    </Link>
+                  </div>
+                  <button
+                    onClick={() => setSuccessMessage(null)}
+                    className="text-green-600 hover:text-green-700 text-lg"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
             {(() => {
               const recs = getRecommendations()
               if (recs.length === 0) return null
@@ -1108,13 +1184,16 @@ export default function DashboardPage() {
                                   </span>
                                 ) : (
                                   <button
-                                    onClick={() => {
-                                      // Mark proposal as agreed (will implement with invoice generation)
-                                      console.log('Mark as agreed:', doc.id)
-                                    }}
-                                    className="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition"
+                                    onClick={() => acceptProposalAndGenerateInvoice(doc.id)}
+                                    disabled={generatingInvoices.has(doc.id)}
+                                    className={`text-xs font-semibold px-2.5 py-1 rounded-full transition ${
+                                      generatingInvoices.has(doc.id)
+                                        ? 'bg-purple-400 text-white cursor-not-allowed opacity-75'
+                                        : 'bg-purple-600 text-white hover:bg-purple-700'
+                                    }`}
+                                    title="Accept proposal and auto-generate invoice"
                                   >
-                                    Mark Agreed
+                                    {generatingInvoices.has(doc.id) ? '⏳ Generating...' : '✓ Accept'}
                                   </button>
                                 )
                               ) : (

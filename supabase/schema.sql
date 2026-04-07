@@ -14,7 +14,7 @@ CREATE TABLE documents (
   business_name TEXT NOT NULL,
   price DECIMAL(10,2) NOT NULL,
   status TEXT NOT NULL DEFAULT 'draft'
-    CHECK (status IN ('draft', 'sent', 'viewed', 'paid', 'overdue')),
+    CHECK (status IN ('draft', 'sent', 'received', 'paid', 'unpaid', 'overdue', 'accepted', 'declined')),
   generated_content JSONB NOT NULL,         -- Full AI-generated document
   form_data JSONB NOT NULL,                 -- Original form inputs
   stripe_payment_link TEXT,                 -- Stripe payment link URL

@@ -431,7 +431,7 @@ export default function DashboardPage() {
       try {
         const { data, error } = await supabase
           .from('documents')
-          .select('id, client_name, doc_type, price, status, created_at')
+          .select('id, client_name, client_email, business_name, doc_type, price, status, created_at, form_data, generated_content')
           .eq('user_id', 'test-user')
           .order('created_at', { ascending: false })
 

@@ -1047,7 +1047,6 @@ export default function DashboardPage() {
                         >
                           Date Sent{getSortIndicator('date')}
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600">Type</th>
                         <th
                           onClick={() => toggleSort('amount')}
                           className="px-6 py-3 text-right text-xs font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
@@ -1094,7 +1093,6 @@ export default function DashboardPage() {
                             </td>
                             <td className="px-6 py-4 text-gray-900 font-medium">{doc.client_name}</td>
                             <td className="px-6 py-4 text-gray-600 text-sm">{createdDate.toLocaleDateString()}</td>
-                            <td className="px-6 py-4 text-gray-600 capitalize">{doc.doc_type}</td>
                             <td className="px-6 py-4 text-right text-gray-900 font-semibold">${doc.price.toLocaleString()}</td>
                             <td className="px-6 py-4">
                               {doc.doc_type.toLowerCase() === 'proposal' ? (

@@ -324,10 +324,13 @@ export default function DashboardPage() {
                       })
                       const daysOld = Math.floor((new Date().getTime() - new Date(oldest.created_at).getTime()) / (1000 * 60 * 60 * 24))
                       return (
-                        <div>
-                          <div className="text-sm text-blue-200 mb-1">Oldest unpaid</div>
-                          <div className="text-2xl font-bold text-orange-400">{daysOld} days</div>
-                          <div className="text-xs text-blue-300 mt-1">{oldest.client_name}</div>
+                        <div className="bg-white/10 rounded-lg p-3 border border-orange-500/30">
+                          <div className="text-sm text-blue-200 mb-1 flex items-center gap-1">
+                            ⏰ Oldest unpaid
+                          </div>
+                          <div className="text-3xl font-bold text-orange-300">{daysOld} days</div>
+                          <div className="text-xs text-blue-200 mt-2 font-medium">{oldest.client_name}</div>
+                          <div className="text-xs text-blue-300 mt-1">${oldest.price.toLocaleString()} outstanding</div>
                         </div>
                       )
                     })()}
@@ -624,7 +627,7 @@ export default function DashboardPage() {
                                     // Mark as paid (will implement API call)
                                     console.log('Mark as paid:', doc.id)
                                   }}
-                                  className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 hover:bg-orange-200 transition"
+                                  className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-600 text-white hover:bg-orange-700 transition"
                                 >
                                   Mark Paid
                                 </button>

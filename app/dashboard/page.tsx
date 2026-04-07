@@ -1226,6 +1226,17 @@ export default function DashboardPage() {
                               {doc.doc_type.toLowerCase() === 'proposal' ? (
                                 // Proposal actions
                                 <>
+                                  <button
+                                    onClick={() => {
+                                      const proposalUrl = `${window.location.origin}/p/${doc.id}`
+                                      navigator.clipboard.writeText(proposalUrl)
+                                      alert('Proposal link copied to clipboard!')
+                                    }}
+                                    className="text-xs bg-blue-600 text-white px-2.5 py-1 rounded hover:bg-blue-700 transition"
+                                    title="Copy shareable proposal link"
+                                  >
+                                    🔗 Copy Link
+                                  </button>
                                   {doc.status !== 'accepted' && doc.status !== 'declined' && daysOld > 7 && (
                                     <button
                                       onClick={() => {

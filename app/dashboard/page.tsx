@@ -44,7 +44,7 @@ export default function DashboardPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [chartView, setChartView] = useState<'week' | 'month'>('week')
   const [timePeriod, setTimePeriod] = useState<'all' | 'ytd' | '30days' | 'thisMonth'>('thisMonth')
-  const [selectedMetric, setSelectedMetric] = useState<'avgInvoice' | 'avgDaysToPayment' | 'clientCount'>('avgDaysToPayment')
+  const [selectedMetric, setSelectedMetric] = useState<'avgInvoice' | 'avgDaysToPayment' | 'clientCount'>('avgInvoice')
   const [showPendingProposals, setShowPendingProposals] = useState(false)
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
   const [sidebarTab, setSidebarTab] = useState<'about-nvoyce' | 'about-payme'>('about-nvoyce')

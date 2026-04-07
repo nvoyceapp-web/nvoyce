@@ -15,6 +15,7 @@ interface FormData {
   timeline: string
   paymentTerms: string
   notes: string
+  expirationDays?: string
 }
 
 function NewDocumentContent() {
@@ -33,6 +34,7 @@ function NewDocumentContent() {
     timeline: '',
     paymentTerms: 'Due on receipt',
     notes: '',
+    expirationDays: '7',
   })
 
 
@@ -198,6 +200,26 @@ function NewDocumentContent() {
               </select>
             </div>
 
+            {form.docType === 'proposal' && (
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">
+                  Proposal expiration <span className="text-gray-400 font-normal">(business days)</span>
+                </label>
+                <select
+                  value={form.expirationDays || '7'}
+                  onChange={(e) => update('expirationDays', e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                >
+                  <option value="3">3 business days</option>
+                  <option value="5">5 business days</option>
+                  <option value="7">7 business days</option>
+                  <option value="14">14 business days</option>
+                  <option value="30">30 business days</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Client will see when this proposal expires</p>
+              </div>
+            )}
+
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1">
                 Any additional notes? <span className="text-gray-400 font-normal">(optional)</span>
@@ -224,6 +246,9 @@ function NewDocumentContent() {
               <Row label="Amount" value={`$${form.price}`} />
               <Row label="Timeline" value={form.timeline} />
               <Row label="Payment terms" value={form.paymentTerms} />
+              {form.docType === 'proposal' && form.expirationDays && (
+                <Row label="Expires in" value={`${form.expirationDays} business days`} />
+              )}
               {form.notes && <Row label="Notes" value={form.notes} />}
             </div>
             <p className="text-xs text-gray-400 text-center">

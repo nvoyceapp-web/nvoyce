@@ -3,11 +3,27 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
+const TIMEZONES = [
+  { value: 'EST', label: 'Eastern Time (ET)', offset: '-5' },
+  { value: 'CST', label: 'Central Time (CT)', offset: '-6' },
+  { value: 'MST', label: 'Mountain Time (MT)', offset: '-7' },
+  { value: 'PST', label: 'Pacific Time (PT)', offset: '-8' },
+  { value: 'AKST', label: 'Alaska Time (AKST)', offset: '-9' },
+  { value: 'HST', label: 'Hawaii Time (HST)', offset: '-10' },
+  { value: 'UTC', label: 'UTC / GMT', offset: '+0' },
+  { value: 'GMT', label: 'London (GMT)', offset: '+0' },
+  { value: 'CET', label: 'Central European Time (CET)', offset: '+1' },
+  { value: 'IST', label: 'India Standard Time (IST)', offset: '+5:30' },
+  { value: 'SGT', label: 'Singapore Time (SGT)', offset: '+8' },
+  { value: 'AEST', label: 'Australian Eastern Time (AEST)', offset: '+10' },
+]
+
 export default function SettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [paymeAlerts, setPaymeAlerts] = useState(true)
   const [overdueReminders, setOverdueReminders] = useState(true)
   const [autoInvoices, setAutoInvoices] = useState(true)
+  const [timezone, setTimezone] = useState('EST')
 
   const settings = [
     {
@@ -103,6 +119,30 @@ export default function SettingsPage() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Business Settings */}
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Business Settings</h2>
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium text-gray-900">Timezone</h3>
+                    <p className="text-sm text-gray-600 mt-1">All dates and times will be displayed in your selected timezone</p>
+                  </div>
+                  <select
+                    value={timezone}
+                    onChange={(e) => setTimezone(e.target.value)}
+                    className="ml-4 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                  >
+                    {TIMEZONES.map((tz) => (
+                      <option key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
 
             {/* Account Section */}

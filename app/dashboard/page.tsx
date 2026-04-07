@@ -171,6 +171,121 @@ export default function DashboardPage() {
     return sortOrder === 'asc' ? ' ↑' : ' ↓'
   }
 
+  // Calculate collection rate trend (this month vs last month)
+  const getCollectionTrend = () => {
+    const now = new Date()
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+
+    const thisMonthDocs = stats.documents.filter((d) => new Date(d.created_at) >= thisMonthStart)
+    const lastMonthDocs = stats.documents.filter(
+      (d) => new Date(d.created_at) >= lastMonthStart && new Date(d.created_at) <= lastMonthEnd
+    )
+
+    const thisMonthRate = thisMonthDocs.length > 0 ? (thisMonthDocs.filter((d) => d.status === 'paid').length / thisMonthDocs.length) * 100 : 0
+    const lastMonthRate = lastMonthDocs.length > 0 ? (lastMonthDocs.filter((d) => d.status === 'paid').length / lastMonthDocs.length) * 100 : 0
+
+    return {
+      current: Math.round(thisMonthRate),
+      previous: Math.round(lastMonthRate),
+      trend: Math.round(thisMonthRate - lastMonthRate),
+    }
+  }
+
+  // Get top clients by revenue and payment speed
+  const getTopClients = () => {
+    const clientStats: {
+      [key: string]: { revenue: number; paidCount: number; totalCount: number; avgDays: number }
+    } = {}
+
+    stats.documents.forEach((doc) => {
+      if (!clientStats[doc.client_name]) {
+        clientStats[doc.client_name] = { revenue: 0, paidCount: 0, totalCount: 0, avgDays: 0 }
+      }
+      clientStats[doc.client_name].revenue += doc.price
+      clientStats[doc.client_name].totalCount += 1
+      if (doc.status === 'paid') {
+        clientStats[doc.client_name].paidCount += 1
+        const days = Math.floor((new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24))
+        clientStats[doc.client_name].avgDays += days
+      }
+    })
+
+    return Object.entries(clientStats)
+      .map(([name, data]) => ({
+        name,
+        revenue: data.revenue,
+        paymentRate: (data.paidCount / data.totalCount) * 100,
+        avgDays: data.paidCount > 0 ? Math.round(data.avgDays / data.paidCount) : 0,
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 3)
+  }
+
+  // Generate smart recommendations
+  const getRecommendations = () => {
+    const recommendations: { type: string; text: string; action: string; count?: number; urgency: 'high' | 'medium' | 'low' }[] = []
+
+    // 1. Overdue invoices (primary)
+    const overdueCount = stats.overdue
+    if (overdueCount > 0) {
+      recommendations.push({
+        type: 'overdue',
+        text: `${overdueCount} invoice${overdueCount !== 1 ? 's' : ''} overdue 20+ days`,
+        action: 'send-reminders',
+        count: overdueCount,
+        urgency: 'high',
+      })
+    }
+
+    // 2. Collection rate trend
+    const trend = getCollectionTrend()
+    if (trend.trend > 0) {
+      recommendations.push({
+        type: 'trend-positive',
+        text: `Collection rate up ${trend.trend}% this month (${trend.current}%)`,
+        action: 'celebrate',
+        urgency: 'low',
+      })
+    } else if (trend.trend < 0 && trend.current < 50) {
+      recommendations.push({
+        type: 'trend-negative',
+        text: `Collection rate down ${Math.abs(trend.trend)}% — follow up on pending`,
+        action: 'none',
+        urgency: 'high',
+      })
+    }
+
+    // 3. Top client insight
+    const topClients = getTopClients()
+    if (topClients.length > 0) {
+      const fastestClient = topClients.reduce((a, b) => (a.avgDays < b.avgDays ? a : b))
+      const slowestUnpaid = stats.documents
+        .filter((d) => d.status !== 'paid')
+        .reduce((a, b) => {
+          const aDays = Math.floor((new Date().getTime() - new Date(a.created_at).getTime()) / (1000 * 60 * 60 * 24))
+          const bDays = Math.floor((new Date().getTime() - new Date(b.created_at).getTime()) / (1000 * 60 * 60 * 24))
+          return aDays > bDays ? a : b
+        }, stats.documents[0])
+
+      if (slowestUnpaid && slowestUnpaid.status !== 'paid') {
+        const slowDays = Math.floor((new Date().getTime() - new Date(slowestUnpaid.created_at).getTime()) / (1000 * 60 * 60 * 24))
+        recommendations.push({
+          type: 'at-risk',
+          text: `${slowestUnpaid.client_name} hasn't paid in ${slowDays} days (vs ${fastestClient.name} pays in ${fastestClient.avgDays})`,
+          action: 'follow-up',
+          urgency: slowDays > 30 ? 'high' : 'medium',
+        })
+      }
+    }
+
+    return recommendations.sort((a, b) => {
+      const urgencyOrder = { high: 0, medium: 1, low: 2 }
+      return urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
+    })
+  }
+
   // Batch action handlers
   const toggleDocSelection = (docId: string) => {
     const newSelected = new Set(selectedDocs)
@@ -339,6 +454,62 @@ export default function DashboardPage() {
                 + New Document
               </Link>
             </div>
+
+            {/* Smart Assistant Card */}
+            {(() => {
+              const recs = getRecommendations()
+              if (recs.length === 0) return null
+              return (
+                <div className="bg-gradient-to-r from-purple-900 to-purple-800 text-white rounded-xl p-6 mb-10 border border-purple-700">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="text-2xl">🤖</div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold mb-1">Smart Assistant</h3>
+                      <p className="text-sm text-purple-200">Here's what you should focus on today:</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {recs.slice(0, 3).map((rec, idx) => (
+                      <div key={idx} className="bg-white/10 rounded-lg p-3 border border-purple-600/40 flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-purple-100">{rec.text}</div>
+                          <div className={`text-xs mt-1 ${rec.urgency === 'high' ? 'text-orange-300' : rec.urgency === 'medium' ? 'text-yellow-300' : 'text-green-300'}`}>
+                            {rec.urgency === 'high' ? '🔴 Urgent' : rec.urgency === 'medium' ? '🟡 Important' : '🟢 Good progress'}
+                          </div>
+                        </div>
+                        {rec.action === 'send-reminders' && (
+                          <button
+                            onClick={() => {
+                              // Filter to overdue and trigger batch action
+                              const overdueIds = stats.documents
+                                .filter((d) => {
+                                  if (d.status === 'paid') return false
+                                  const daysOld = Math.floor((new Date().getTime() - new Date(d.created_at).getTime()) / (1000 * 60 * 60 * 24))
+                                  return daysOld > 30
+                                })
+                                .map((d) => d.id)
+                              setSelectedDocs(new Set(overdueIds))
+                            }}
+                            className="text-xs bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg transition font-semibold whitespace-nowrap"
+                          >
+                            Send Now
+                          </button>
+                        )}
+                        {rec.action === 'follow-up' && (
+                          <button
+                            onClick={() => alert('Open details for this client in the table below')}
+                            className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition font-semibold whitespace-nowrap"
+                          >
+                            Review
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Urgency Summary Card - Navy Blue with Orange Accents */}
             {stats.outstanding > 0 && (

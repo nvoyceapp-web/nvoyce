@@ -174,7 +174,9 @@ export default function PublicProposalPage() {
           <div className="mb-6">
             <Logo size="medium" />
           </div>
-          <div className="text-7xl mb-6 inline-block bg-green-100 text-green-600 rounded-full w-24 h-24 flex items-center justify-center">✓</div>
+          <div className="flex justify-center mb-6">
+            <div className="bg-green-100 text-green-600 rounded-full w-24 h-24 flex items-center justify-center text-7xl">✓</div>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Proposal Accepted!</h1>
           <p className="text-gray-600 mb-6">
             Thank you for accepting this proposal. An invoice has been automatically generated and {proposal.business_name} will be notified.
@@ -199,7 +201,9 @@ export default function PublicProposalPage() {
           <div className="mb-6">
             <Logo size="medium" />
           </div>
-          <div className="text-7xl mb-6 inline-block bg-red-100 text-red-600 rounded-full w-24 h-24 flex items-center justify-center">✗</div>
+          <div className="flex justify-center mb-6">
+            <div className="bg-red-100 text-red-600 rounded-full w-24 h-24 flex items-center justify-center text-7xl">✗</div>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Proposal Declined</h1>
           <p className="text-gray-600 mb-6">
             Your response has been recorded and {proposal.business_name} has been notified of your decision.

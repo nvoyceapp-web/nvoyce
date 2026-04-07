@@ -41,7 +41,12 @@ export async function sendInvoiceEmail({
       `,
     })
 
-    console.log('Invoice email sent successfully:', result.id)
+    if (result.error) {
+      console.error('Invoice email error:', result.error)
+      throw result.error
+    }
+
+    console.log('Invoice email sent successfully:', result.data?.id)
     return result
   } catch (error) {
     console.error('Email sending error:', error)
@@ -94,7 +99,12 @@ export async function sendWelcomeEmail({
       `,
     })
 
-    console.log('Welcome email sent successfully:', result.id)
+    if (result.error) {
+      console.error('Welcome email error:', result.error)
+      throw result.error
+    }
+
+    console.log('Welcome email sent successfully:', result.data?.id)
     return result
   } catch (error) {
     console.error('Welcome email sending error:', error)

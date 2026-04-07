@@ -1065,6 +1065,9 @@ export default function DashboardPage() {
                         >
                           Days Outstanding{getSortIndicator('days')}
                         </th>
+                        {documentTab === 'proposals' && (
+                          <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600">Expires In</th>
+                        )}
                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600">Action</th>
                       </tr>
                     </thead>
@@ -1157,6 +1160,24 @@ export default function DashboardPage() {
                                 )
                               )}
                             </td>
+                            {documentTab === 'proposals' && (
+                              <td className="px-6 py-4 text-right text-gray-600">
+                                {doc.status === 'draft' || doc.status === 'accepted' || doc.status === 'declined' ? (
+                                  '—'
+                                ) : (
+                                  (() => {
+                                    const formData = typeof doc.generated_content === 'string' ? JSON.parse(doc.generated_content) : {}
+                                    const expirationDays = formData.expirationDays ? parseInt(formData.expirationDays, 10) : 7
+                                    const daysRemaining = expirationDays - daysOld
+                                    return (
+                                      <span className={daysRemaining <= 2 ? 'text-red-600 font-semibold' : daysRemaining <= 5 ? 'text-orange-600' : ''}>
+                                        {Math.max(0, daysRemaining)} days {daysRemaining <= 2 && '🔴'}
+                                      </span>
+                                    )
+                                  })()
+                                )}
+                              </td>
+                            )}
                             <td className="px-6 py-4 flex gap-2 relative">
                               {doc.doc_type.toLowerCase() === 'proposal' ? (
                                 // Proposal actions - dropdown menu

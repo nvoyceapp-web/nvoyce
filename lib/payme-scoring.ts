@@ -174,7 +174,7 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
         })
       }
     } else if (doc.doc_type === 'proposal' && (doc.status === 'sent' || doc.status === 'received')) {
-      // Expiring proposal - check if expiring soon
+      // Expiring proposal - check if expiring soon (2 days or less)
       const expiringScore = scoreExpiringProposal(doc)
 
       if (expiringScore > 0) {
@@ -189,9 +189,9 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
           priority: expiringScore,
           client_name: doc.client_name,
           amount: doc.price,
-          action_text: `⏰ Proposal for ${doc.client_name} ($${doc.price.toFixed(2)}) expires in ${Math.max(0, daysRemaining)} day(s)`,
-          urgency: daysRemaining <= 1 ? 'critical' : 'high',
-          icon: daysRemaining <= 1 ? '🔴' : '🟡',
+          action_text: `🔴 Proposal for ${doc.client_name} ($${doc.price.toFixed(2)}) expires in ${Math.max(0, daysRemaining)} day(s) — take action!`,
+          urgency: 'critical',
+          icon: '🔴',
           days_since: daysRemaining
         })
       }

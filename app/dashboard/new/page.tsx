@@ -24,6 +24,7 @@ function NewDocumentContent() {
   const typeParam = searchParams.get('type') as DocType | null
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [form, setForm] = useState<FormData>({
     docType: (typeParam && ['invoice', 'proposal'].includes(typeParam) ? typeParam : 'invoice') as DocType,
     clientName: '',
@@ -37,11 +38,73 @@ function NewDocumentContent() {
     expirationDays: '7',
   })
 
+  const validateStep = (currentStep: number): boolean => {
+    const errors: string[] = []
 
-  const update = (field: keyof FormData, value: string) =>
+    if (currentStep === 1) {
+      if (!form.businessName.trim()) {
+        errors.push('Business name is required')
+      }
+      if (!form.clientName.trim()) {
+        errors.push('Client name is required')
+      }
+      if (!form.clientEmail.trim()) {
+        errors.push('Client email is required')
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.clientEmail)) {
+        errors.push('Please enter a valid email address')
+      }
+    }
+
+    if (currentStep === 2) {
+      if (!form.serviceDescription.trim()) {
+        errors.push('Service description is required')
+      }
+      if (!form.price.trim()) {
+        errors.push('Price is required')
+      } else if (isNaN(parseFloat(form.price.replace(/,/g, '')))) {
+        errors.push('Price must be a valid number')
+      }
+      if (!form.timeline.trim()) {
+        errors.push('Timeline is required')
+      }
+    }
+
+    setValidationErrors(errors)
+    return errors.length === 0
+  }
+
+  const update = (field: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
+    setValidationErrors([])
+  }
+
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setStep((s) => s + 1)
+    }
+  }
 
   const handleGenerate = async () => {
+    // Validate all fields before submission
+    const allErrors: string[] = []
+
+    // Step 1 validation
+    if (!form.businessName.trim()) allErrors.push('Business name is required')
+    if (!form.clientName.trim()) allErrors.push('Client name is required')
+    if (!form.clientEmail.trim()) allErrors.push('Client email is required')
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.clientEmail)) allErrors.push('Please enter a valid email address')
+
+    // Step 2 validation
+    if (!form.serviceDescription.trim()) allErrors.push('Service description is required')
+    if (!form.price.trim()) allErrors.push('Price is required')
+    else if (isNaN(parseFloat(form.price.replace(/,/g, '')))) allErrors.push('Price must be a valid number')
+    if (!form.timeline.trim()) allErrors.push('Timeline is required')
+
+    if (allErrors.length > 0) {
+      setValidationErrors(allErrors)
+      return
+    }
+
     setLoading(true)
     try {
       const res = await fetch('/api/generate', {
@@ -55,6 +118,7 @@ function NewDocumentContent() {
       }
     } catch (err) {
       console.error(err)
+      setValidationErrors(['Failed to generate document. Please try again.'])
     } finally {
       setLoading(false)
     }
@@ -257,6 +321,21 @@ function NewDocumentContent() {
           </div>
         )}
 
+        {/* Validation Errors */}
+        {validationErrors.length > 0 && (
+          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <h3 className="text-sm font-semibold text-red-800 mb-2">Please complete the following:</h3>
+            <ul className="space-y-1">
+              {validationErrors.map((error, idx) => (
+                <li key={idx} className="text-sm text-red-700 flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">•</span>
+                  <span>{error}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="flex items-center justify-between mt-8">
           {step > 1 ? (
@@ -272,7 +351,7 @@ function NewDocumentContent() {
 
           {step < 3 ? (
             <button
-              onClick={() => setStep((s) => s + 1)}
+              onClick={handleNext}
               className="bg-orange-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-orange-700 transition"
             >
               Continue →

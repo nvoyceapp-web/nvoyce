@@ -483,41 +483,41 @@ export default function DashboardPage() {
           <div className="mb-8">
             <Logo showTagline={true} size="small" />
           </div>
-          <nav className="flex flex-col gap-1 flex-1">
-            <Link href="/dashboard" className="px-3 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-900">
-              Dashboard
+          <nav className="flex flex-col gap-0 flex-1">
+            <Link href="/dashboard" className="px-3 py-1.5 rounded-lg bg-gray-100 text-sm font-medium text-gray-900">
+              Navigation
             </Link>
             <button
               onClick={() => setShowCreateDropdown(!showCreateDropdown)}
-              className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 text-left w-full transition"
+              className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 text-left w-full transition"
             >
               ✨ Create
             </button>
             {showCreateDropdown && (
-              <div className="ml-2 border-l-2 border-gray-200 space-y-1">
+              <div className="ml-2 border-l-2 border-gray-200 space-y-0">
                 <Link
                   href="/dashboard/new?type=invoice"
                   onClick={() => setShowCreateDropdown(false)}
-                  className="block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
+                  className="block px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
                 >
                   📄 Invoice
                 </Link>
                 <Link
                   href="/dashboard/new?type=proposal"
                   onClick={() => setShowCreateDropdown(false)}
-                  className="block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
+                  className="block px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
                 >
                   💼 Proposal
                 </Link>
               </div>
             )}
-            <Link href="/dashboard/faq" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+            <Link href="/dashboard/faq" className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
               ❓ FAQ
             </Link>
-            <Link href="/dashboard/settings" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+            <Link href="/dashboard/settings" className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
               ⚙️ Settings
             </Link>
-            <Link href="/about" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+            <Link href="/about" className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
               ℹ️ About Nvoyce
             </Link>
           </nav>

@@ -56,6 +56,7 @@ export default function DashboardPage() {
   const [generatingInvoices, setGeneratingInvoices] = useState<Set<string>>(new Set())
   const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string } | null>(null)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -1214,13 +1215,15 @@ export default function DashboardPage() {
                                             📧 Send Follow-up
                                           </button>
                                         )}
-                                        <Link
-                                          href={`/dashboard/documents/${doc.id}`}
-                                          onClick={() => setOpenDropdown(null)}
-                                          className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 last:rounded-b-lg"
+                                        <button
+                                          onClick={() => {
+                                            setViewingDocument(doc)
+                                            setOpenDropdown(null)
+                                          }}
+                                          className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 last:rounded-b-lg"
                                         >
                                           👁️ View Details
-                                        </Link>
+                                        </button>
                                       </div>
                                     )}
                                   </div>
@@ -1262,13 +1265,15 @@ export default function DashboardPage() {
                                           📧 Send Reminder
                                         </button>
                                       )}
-                                      <Link
-                                        href={`/dashboard/documents/${doc.id}`}
-                                        onClick={() => setOpenDropdown(null)}
-                                        className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 last:rounded-b-lg"
+                                      <button
+                                        onClick={() => {
+                                          setViewingDocument(doc)
+                                          setOpenDropdown(null)
+                                        }}
+                                        className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 last:rounded-b-lg"
                                       >
                                         👁️ View Details
-                                      </Link>
+                                      </button>
                                     </div>
                                   )}
                                 </div>
@@ -1306,6 +1311,96 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
+
+      {/* Document Details Modal */}
+      {viewingDocument && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">
+                {viewingDocument.doc_type.charAt(0).toUpperCase() + viewingDocument.doc_type.slice(1)} Details
+              </h2>
+              <button
+                onClick={() => setViewingDocument(null)}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-light"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* From/To Section */}
+              <div className="grid grid-cols-2 gap-6 pb-6 border-b border-gray-100">
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">From</h3>
+                  <div className="text-lg font-semibold text-gray-900">{viewingDocument.business_name}</div>
+                </div>
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">To</h3>
+                  <div className="text-lg font-semibold text-gray-900">{viewingDocument.client_name}</div>
+                  <div className="text-sm text-gray-600">{viewingDocument.client_email}</div>
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Amount</h3>
+                  <div className="text-2xl font-bold text-purple-600">${viewingDocument.price.toLocaleString()}</div>
+                </div>
+
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Description</h3>
+                  <div className="text-gray-700">{viewingDocument.form_data?.serviceDescription || 'No description provided'}</div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Timeline</h3>
+                    <div className="text-gray-700">{viewingDocument.form_data?.timeline || 'Not specified'}</div>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Payment Terms</h3>
+                    <div className="text-gray-700">{viewingDocument.form_data?.paymentTerms || 'Not specified'}</div>
+                  </div>
+                </div>
+
+                {viewingDocument.form_data?.notes && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Notes</h3>
+                    <div className="text-gray-700">{viewingDocument.form_data.notes}</div>
+                  </div>
+                )}
+
+                {viewingDocument.doc_type === 'proposal' && viewingDocument.form_data?.expirationDays && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Expires In</h3>
+                    <div className="text-gray-700">{viewingDocument.form_data.expirationDays} business days</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Status */}
+              <div className="pt-4 border-t border-gray-100">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Status</h3>
+                <div className="text-sm font-medium text-gray-700 capitalize">{viewingDocument.status}</div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-100 p-6 bg-gray-50 rounded-b-2xl flex justify-end">
+              <button
+                onClick={() => setViewingDocument(null)}
+                className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

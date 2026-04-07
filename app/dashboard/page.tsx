@@ -48,6 +48,7 @@ export default function DashboardPage() {
   const [showPendingProposals, setShowPendingProposals] = useState(false)
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
   const [sidebarTab, setSidebarTab] = useState<'about-nvoyce' | 'about-payme'>('about-nvoyce')
+  const [dismissedRecommendations, setDismissedRecommendations] = useState<Set<string>>(new Set())
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -281,10 +282,19 @@ export default function DashboardPage() {
       }
     }
 
-    return recommendations.sort((a, b) => {
-      const urgencyOrder = { high: 0, medium: 1, low: 2 }
-      return urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
-    })
+    return recommendations
+      .sort((a, b) => {
+        const urgencyOrder = { high: 0, medium: 1, low: 2 }
+        return urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
+      })
+      .filter((rec) => !dismissedRecommendations.has(rec.type))
+  }
+
+  // Dismiss recommendation for this session
+  const dismissRecommendation = (type: string) => {
+    const newDismissed = new Set(dismissedRecommendations)
+    newDismissed.add(type)
+    setDismissedRecommendations(newDismissed)
   }
 
   // Batch action handlers
@@ -540,39 +550,48 @@ export default function DashboardPage() {
 
                   <div className="space-y-2">
                     {recs.slice(0, 3).map((rec, idx) => (
-                      <div key={idx} className="bg-white/10 rounded-lg p-3 border border-purple-600/40 flex items-start justify-between gap-3">
+                      <div key={idx} className="bg-white/10 rounded-lg p-3 border border-purple-600/40 flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="text-sm font-medium text-purple-100">{rec.text}</div>
                           <div className={`text-xs mt-1 ${rec.urgency === 'high' ? 'text-orange-300' : rec.urgency === 'medium' ? 'text-yellow-300' : 'text-green-300'}`}>
                             {rec.urgency === 'high' ? '🔴 Urgent' : rec.urgency === 'medium' ? '🟡 Important' : '🟢 Good progress'}
                           </div>
                         </div>
-                        {rec.action === 'send-reminders' && (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {rec.action === 'send-reminders' && (
+                            <button
+                              onClick={() => {
+                                // Filter to overdue and trigger batch action
+                                const overdueIds = stats.documents
+                                  .filter((d) => {
+                                    if (d.status === 'paid') return false
+                                    const daysOld = Math.floor((new Date().getTime() - new Date(d.created_at).getTime()) / (1000 * 60 * 60 * 24))
+                                    return daysOld > 30
+                                  })
+                                  .map((d) => d.id)
+                                setSelectedDocs(new Set(overdueIds))
+                              }}
+                              className="text-xs bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
+                            >
+                              Send
+                            </button>
+                          )}
+                          {rec.action === 'follow-up' && (
+                            <button
+                              onClick={() => alert('Open details for this client in the table below')}
+                              className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
+                            >
+                              Review
+                            </button>
+                          )}
                           <button
-                            onClick={() => {
-                              // Filter to overdue and trigger batch action
-                              const overdueIds = stats.documents
-                                .filter((d) => {
-                                  if (d.status === 'paid') return false
-                                  const daysOld = Math.floor((new Date().getTime() - new Date(d.created_at).getTime()) / (1000 * 60 * 60 * 24))
-                                  return daysOld > 30
-                                })
-                                .map((d) => d.id)
-                              setSelectedDocs(new Set(overdueIds))
-                            }}
-                            className="text-xs bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg transition font-semibold whitespace-nowrap"
+                            onClick={() => dismissRecommendation(rec.type)}
+                            className="text-xs bg-purple-700/50 hover:bg-purple-700 text-white px-2 py-1 rounded transition whitespace-nowrap"
+                            title="Dismiss for this session"
                           >
-                            Send Now
+                            ✕
                           </button>
-                        )}
-                        {rec.action === 'follow-up' && (
-                          <button
-                            onClick={() => alert('Open details for this client in the table below')}
-                            className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition font-semibold whitespace-nowrap"
-                          >
-                            Review
-                          </button>
-                        )}
+                        </div>
                       </div>
                     ))}
                   </div>

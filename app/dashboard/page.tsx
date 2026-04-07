@@ -290,69 +290,75 @@ export default function DashboardPage() {
             )}
 
             <div className="grid grid-cols-3 gap-5 mb-10">
-                {(() => {
-                  const now = new Date()
-                  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-                  const thisMonthRevenue = stats.documents
-                    .filter((d) => d.status === 'paid' && new Date(d.created_at) >= thisMonthStart)
-                    .reduce((sum, d) => sum + (d.price || 0), 0)
+              {/* Left: KPI Cards */}
+              <div className="col-span-2 space-y-5">
+                <div className="grid grid-cols-3 gap-5">
+                  {(() => {
+                    const now = new Date()
+                    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+                    const thisMonthRevenue = stats.documents
+                      .filter((d) => d.status === 'paid' && new Date(d.created_at) >= thisMonthStart)
+                      .reduce((sum, d) => sum + (d.price || 0), 0)
 
-                  return [
-                    { label: 'This Month', value: loading ? '-' : `$${thisMonthRevenue.toLocaleString()}`, sub: 'revenue collected' },
-                    { label: 'Total Sent', value: loading ? '-' : stats.totalSent.toString(), sub: 'invoices & proposals' },
-                    { label: 'Outstanding', value: loading ? '-' : `$${stats.outstanding.toLocaleString()}`, sub: 'awaiting payment' },
-                  ]
-                })().map(({ label, value, sub }) => (
-                  <div key={label} className="bg-white rounded-xl border border-gray-100 p-6">
-                    <div className="text-sm text-gray-500 mb-1">{label}</div>
-                    <div className="text-3xl font-bold text-gray-900">{value}</div>
-                    <div className="text-xs text-gray-400 mt-1">{sub}</div>
+                    return [
+                      { label: 'This Month', value: loading ? '-' : `$${thisMonthRevenue.toLocaleString()}`, sub: 'revenue collected' },
+                      { label: 'Total Sent', value: loading ? '-' : stats.totalSent.toString(), sub: 'invoices & proposals' },
+                      { label: 'Outstanding', value: loading ? '-' : `$${stats.outstanding.toLocaleString()}`, sub: 'awaiting payment' },
+                    ]
+                  })().map(({ label, value, sub }) => (
+                    <div key={label} className="bg-white rounded-xl border border-gray-100 p-6">
+                      <div className="text-sm text-gray-500 mb-1">{label}</div>
+                      <div className="text-3xl font-bold text-gray-900">{value}</div>
+                      <div className="text-xs text-gray-400 mt-1">{sub}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+                  <div>
+                    <div className="text-sm text-gray-500 mb-1">Pending Proposals</div>
+                    <div className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
+                    <div className="text-xs text-gray-400 mt-1">awaiting approval</div>
                   </div>
-                ))}
+                  <div className="border-t border-gray-100 pt-4">
+                    <div className="text-sm text-gray-500 mb-1">Avg Days to Payment</div>
+                    <div className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.avgDaysToPayment}</div>
+                    <div className="text-xs text-gray-400 mt-1">after sending</div>
+                  </div>
+                  {stats.overdue > 0 && (
+                    <div className="border-t border-gray-100 pt-4">
+                      <div className="text-sm text-red-600 mb-1 font-semibold">⚠️ Overdue</div>
+                      <div className="text-3xl font-bold text-red-600">{stats.overdue}</div>
+                      <div className="text-xs text-red-500 mt-1">invoices 30+ days</div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-              {/* Revenue Trend Mini Chart */}
+              {/* Right: Revenue Trend Chart - Full Height */}
               {(() => {
                 const chartData = getMonthlyRevenue()
                 if (chartData.length === 0) return null
                 const maxRevenue = Math.max(...chartData.map((d) => d.revenue), 1)
                 return (
                   <div className="bg-white rounded-xl border border-gray-100 p-6">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-4">Revenue Trend</h3>
-                    <div className="flex items-end gap-1 h-24">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-6">Revenue Trend</h3>
+                    <div className="flex items-end justify-between gap-2 h-64">
                       {chartData.slice(-6).map((data) => (
-                        <div key={data.month} className="flex-1 flex flex-col items-center gap-1">
+                        <div key={data.month} className="flex-1 flex flex-col items-center gap-2">
                           <div
-                            className="w-full bg-gradient-to-t from-orange-600 to-orange-500 rounded-t-sm transition-all hover:from-orange-700 hover:to-orange-600"
-                            style={{ height: `${Math.max((data.revenue / maxRevenue) * 100, 5)}%` }}
+                            className="w-full bg-gradient-to-t from-orange-600 to-orange-500 rounded-t-lg transition-all hover:from-orange-700 hover:to-orange-600 cursor-pointer"
+                            style={{ height: `${Math.max((data.revenue / maxRevenue) * 100, 8)}%` }}
                             title={`${data.month}: $${(data.revenue / 1000).toFixed(1)}k`}
                           />
-                          <div className="text-xs text-gray-500">{data.month}</div>
+                          <div className="text-xs font-medium text-gray-600 text-center">{data.month}</div>
+                          <div className="text-xs text-gray-500">${(data.revenue / 1000).toFixed(1)}k</div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )
               })()}
-
-              <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">Pending Proposals</div>
-                  <div className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
-                  <div className="text-xs text-gray-400 mt-1">awaiting approval</div>
-                </div>
-                <div className="border-t border-gray-100 pt-4">
-                  <div className="text-sm text-gray-500 mb-1">Avg Days to Payment</div>
-                  <div className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.avgDaysToPayment}</div>
-                  <div className="text-xs text-gray-400 mt-1">after sending</div>
-                </div>
-                {stats.overdue > 0 && (
-                  <div className="border-t border-gray-100 pt-4">
-                    <div className="text-sm text-red-600 mb-1 font-semibold">⚠️ Overdue</div>
-                    <div className="text-3xl font-bold text-red-600">{stats.overdue}</div>
-                    <div className="text-xs text-red-500 mt-1">invoices 30+ days</div>
-                  </div>
-                )}
-              </div>
             </div>
 
             {stats.documents.length > 0 ? (
@@ -419,6 +425,12 @@ export default function DashboardPage() {
                         >
                           Client{getSortIndicator('client')}
                         </th>
+                        <th
+                          onClick={() => toggleSort('date')}
+                          className="px-6 py-3 text-left text-xs font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                        >
+                          Date Sent{getSortIndicator('date')}
+                        </th>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600">Type</th>
                         <th
                           onClick={() => toggleSort('amount')}
@@ -457,6 +469,7 @@ export default function DashboardPage() {
                         return (
                           <tr key={doc.id} className={`border-b border-gray-100 ${getRowColor(doc)} transition`}>
                             <td className="px-6 py-4 text-gray-900 font-medium">{doc.client_name}</td>
+                            <td className="px-6 py-4 text-gray-600 text-sm">{createdDate.toLocaleDateString()}</td>
                             <td className="px-6 py-4 text-gray-600 capitalize">{doc.doc_type}</td>
                             <td className="px-6 py-4 text-right text-gray-900 font-semibold">${doc.price.toLocaleString()}</td>
                             <td className="px-6 py-4">

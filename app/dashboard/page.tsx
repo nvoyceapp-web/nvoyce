@@ -289,8 +289,7 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-5 mb-10">
-              <div className="grid grid-cols-3 gap-5 col-span-2">
+            <div className="grid grid-cols-3 gap-5 mb-10">
                 {(() => {
                   const now = new Date()
                   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -310,7 +309,30 @@ export default function DashboardPage() {
                     <div className="text-xs text-gray-400 mt-1">{sub}</div>
                   </div>
                 ))}
-              </div>
+
+              {/* Revenue Trend Mini Chart */}
+              {(() => {
+                const chartData = getMonthlyRevenue()
+                if (chartData.length === 0) return null
+                const maxRevenue = Math.max(...chartData.map((d) => d.revenue), 1)
+                return (
+                  <div className="bg-white rounded-xl border border-gray-100 p-6">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4">Revenue Trend</h3>
+                    <div className="flex items-end gap-1 h-24">
+                      {chartData.slice(-6).map((data) => (
+                        <div key={data.month} className="flex-1 flex flex-col items-center gap-1">
+                          <div
+                            className="w-full bg-gradient-to-t from-orange-600 to-orange-500 rounded-t-sm transition-all hover:from-orange-700 hover:to-orange-600"
+                            style={{ height: `${Math.max((data.revenue / maxRevenue) * 100, 5)}%` }}
+                            title={`${data.month}: $${(data.revenue / 1000).toFixed(1)}k`}
+                          />
+                          <div className="text-xs text-gray-500">{data.month}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
 
               <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
                 <div>
@@ -332,32 +354,6 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-
-            {/* Simple Revenue Trend Chart */}
-            {(() => {
-              const chartData = getMonthlyRevenue()
-              if (chartData.length === 0) return null
-              const maxRevenue = Math.max(...chartData.map((d) => d.revenue))
-              return (
-                <div className="bg-white rounded-xl border border-gray-100 p-6 mb-10">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-6">Revenue Trend</h2>
-                  <div className="flex items-end gap-4 h-48">
-                    {chartData.map((data) => (
-                      <div key={data.month} className="flex-1 flex flex-col items-center gap-2">
-                        <div className="relative w-full h-32 bg-gray-50 rounded-t-lg overflow-hidden">
-                          <div
-                            className="absolute bottom-0 w-full bg-gradient-to-t from-orange-600 to-orange-500 transition-all"
-                            style={{ height: `${(data.revenue / maxRevenue) * 100}%` }}
-                          />
-                        </div>
-                        <div className="text-xs font-medium text-gray-600">{data.month}</div>
-                        <div className="text-xs text-gray-500">${(data.revenue / 1000).toFixed(1)}k</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })()}
 
             {stats.documents.length > 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">

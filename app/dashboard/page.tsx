@@ -10,10 +10,14 @@ import Logo from '@/components/Logo'
 interface Document {
   id: string
   client_name: string
+  client_email: string
+  business_name: string
   doc_type: string
   price: number
   status: string
   created_at: string
+  form_data?: Record<string, any>
+  generated_content?: Record<string, any>
 }
 
 interface Stats {

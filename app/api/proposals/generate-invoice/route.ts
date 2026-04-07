@@ -111,7 +111,16 @@ Generate ONLY valid JSON, no additional text.`
       if (content.type !== 'text') {
         throw new Error('Unexpected response type from Claude')
       }
-      invoiceData = JSON.parse(content.text)
+
+      // Strip markdown code blocks if Claude wrapped the JSON
+      let jsonText = content.text.trim()
+      if (jsonText.startsWith('```json')) {
+        jsonText = jsonText.replace(/^```json\n?/, '').replace(/\n?```$/, '')
+      } else if (jsonText.startsWith('```')) {
+        jsonText = jsonText.replace(/^```\n?/, '').replace(/\n?```$/, '')
+      }
+
+      invoiceData = JSON.parse(jsonText)
     } catch (parseError) {
       console.error('Failed to parse Claude response:', parseError)
       return NextResponse.json(

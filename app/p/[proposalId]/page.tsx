@@ -74,7 +74,8 @@ export default function PublicProposalPage() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Failed to accept proposal')
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : (data.error || 'Failed to accept proposal')
+        throw new Error(errorMsg)
       }
 
       const data = await response.json()
@@ -117,7 +118,8 @@ export default function PublicProposalPage() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Failed to decline proposal')
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : (data.error || 'Failed to decline proposal')
+        throw new Error(errorMsg)
       }
 
       // Send notification to freelancer
@@ -172,7 +174,7 @@ export default function PublicProposalPage() {
           <div className="mb-6">
             <Logo size="medium" />
           </div>
-          <div className="text-7xl mb-6">✓</div>
+          <div className="text-7xl mb-6 inline-block bg-green-100 text-green-600 rounded-full w-24 h-24 flex items-center justify-center">✓</div>
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Proposal Accepted!</h1>
           <p className="text-gray-600 mb-6">
             Thank you for accepting this proposal. An invoice has been automatically generated and {proposal.business_name} will be notified.
@@ -197,7 +199,7 @@ export default function PublicProposalPage() {
           <div className="mb-6">
             <Logo size="medium" />
           </div>
-          <div className="text-7xl mb-6">✗</div>
+          <div className="text-7xl mb-6 inline-block bg-red-100 text-red-600 rounded-full w-24 h-24 flex items-center justify-center">✗</div>
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Proposal Declined</h1>
           <p className="text-gray-600 mb-6">
             Your response has been recorded and {proposal.business_name} has been notified of your decision.

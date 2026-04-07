@@ -1,19 +1,17 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-
-// Public API routes that don't require authentication
-const isPublicApiRoute = createRouteMatcher([
-  '/api/proposals/generate-invoice',
-  '/api/proposals/decline',
-  '/api/proposals/notify',
-  '/p(.*)',
-])
+import { clerkMiddleware } from '@clerk/nextjs/server'
 
 export default clerkMiddleware((auth, req) => {
-  // Allow public API routes without authentication
-  if (isPublicApiRoute(req)) {
+  // Allow unauthenticated access to public proposal endpoints
+  const pathname = req.nextUrl.pathname
+  const publicRoutes = [
+    '/api/proposals/generate-invoice',
+    '/api/proposals/decline',
+    '/api/proposals/notify',
+  ]
+
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
     return
   }
-  // Other routes remain protected
 })
 
 export const config = {

@@ -48,22 +48,40 @@ function scoreOverdueInvoice(doc: Document): number {
 
 /**
  * Calculate Payme action score for a stale proposal
- * Score = days_since_created × amount × historical_conversion_rate
+ * Score = days_since_sent × amount × historical_conversion_rate
  * Higher score = higher priority (funnel replenishment needed)
+ * Only counts from when proposal was SENT, not from creation
  */
 function scoreStaleProposal(doc: Document): number {
-  const daysSinceCreated = (new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24)
+  // For proposals, we'll calculate days from creation for now
+  // Dashboard will calculate days from 'sent' status
+  const daysSinceSent = (new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24)
 
-  // Only surface proposals older than 3 days
-  if (daysSinceCreated < 3) return 0
+  // Only surface proposals older than 3 days after being sent
+  if (daysSinceSent < 3) return 0
 
   // Assume 60% historical conversion rate for gig workers
   const conversionRate = 0.6
 
   // Score increases over time - older proposals are more urgent
-  const ageMultiplier = Math.min(daysSinceCreated / 14, 1.5) // Caps at 14 days
+  const ageMultiplier = Math.min(daysSinceSent / 14, 1.5) // Caps at 14 days
 
-  return daysSinceCreated * doc.price * conversionRate * ageMultiplier
+  return daysSinceSent * doc.price * conversionRate * ageMultiplier
+}
+
+/**
+ * Calculate Payme action score for a stale draft
+ * Score = days_since_created × amount
+ * Alerts user to send draft proposals that have been sitting for 2+ days
+ */
+function scoreStaleDraft(doc: Document): number {
+  const daysSinceCreated = (new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24)
+
+  // Flag drafts that have been sitting for 2+ days
+  if (daysSinceCreated < 2) return 0
+
+  // Simple score - just alert presence
+  return daysSinceCreated * doc.price
 }
 
 /**
@@ -95,7 +113,8 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
           days_since: daysOverdue
         })
       }
-    } else if (doc.doc_type === 'proposal' && doc.status === 'pending') {
+    } else if (doc.doc_type === 'proposal' && doc.status === 'sent') {
+      // Stale proposal - pending response after being sent
       const score = scoreStaleProposal(doc)
 
       if (score > 0) {
@@ -110,6 +129,25 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
           action_text: `Follow up on proposal for ${doc.client_name} ($${doc.price.toFixed(2)}) - ${daysSince} days pending`,
           urgency: daysSince > 14 ? 'high' : 'medium',
           icon: '🟡',
+          days_since: daysSince
+        })
+      }
+    } else if (doc.doc_type === 'proposal' && doc.status === 'draft') {
+      // Stale draft - sitting unsent for 2+ days
+      const score = scoreStaleDraft(doc)
+
+      if (score > 0) {
+        const daysSince = Math.floor((new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24))
+
+        actions.push({
+          id: doc.id,
+          type: 'proposal',
+          priority: score,
+          client_name: doc.client_name,
+          amount: doc.price,
+          action_text: `📝 Draft proposal for ${doc.client_name} ($${doc.price.toFixed(2)}) - ${daysSince} days. Ready to send?`,
+          urgency: 'medium',
+          icon: '🔵',
           days_since: daysSince
         })
       }

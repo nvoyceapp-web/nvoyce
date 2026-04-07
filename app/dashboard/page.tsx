@@ -1137,10 +1137,11 @@ export default function DashboardPage() {
                             </td>
                             <td className="px-6 py-4 text-right text-gray-600">
                               {doc.doc_type.toLowerCase() === 'proposal' ? (
-                                // Proposals: show days pending
-                                doc.status === 'accepted' || doc.status === 'declined' ? (
+                                // Proposals: show days pending only after sent, not for drafts
+                                doc.status === 'draft' || doc.status === 'accepted' || doc.status === 'declined' ? (
                                   '—'
                                 ) : (
+                                  // Sent, Received: show days pending since sent
                                   <span className={daysOld > 14 ? 'text-orange-600 font-semibold' : ''}>
                                     {daysOld} days pending {daysOld > 14 && '⚠'}
                                   </span>

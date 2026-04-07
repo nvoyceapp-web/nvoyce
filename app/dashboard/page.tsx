@@ -43,6 +43,24 @@ export default function DashboardPage() {
   const [sortBy, setSortBy] = useState<'client' | 'amount' | 'date' | 'status' | 'days'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [chartView, setChartView] = useState<'week' | 'month'>('week')
+  const [timePeriod, setTimePeriod] = useState<'all' | 'ytd' | '30days' | 'thisMonth'>('thisMonth')
+
+  // Get date range for selected time period
+  const getDateRange = () => {
+    const now = new Date()
+    let dateFrom: Date | null = null
+
+    if (timePeriod === 'thisMonth') {
+      dateFrom = new Date(now.getFullYear(), now.getMonth(), 1)
+    } else if (timePeriod === '30days') {
+      dateFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    } else if (timePeriod === 'ytd') {
+      dateFrom = new Date(now.getFullYear(), 0, 1)
+    }
+    // 'all' has no dateFrom
+
+    return dateFrom
+  }
 
   // Filter and sort documents
   const filteredDocuments = stats.documents
@@ -101,11 +119,13 @@ export default function DashboardPage() {
 
   // Calculate revenue for chart (weekly or monthly)
   const getChartData = () => {
+    const dateFrom = getDateRange()
     if (chartView === 'week') {
       const weeklyData: { [key: string]: number } = {}
       stats.documents.forEach((doc) => {
         if (doc.status === 'paid') {
           const date = new Date(doc.created_at)
+          if (dateFrom && date < dateFrom) return
           const weekStart = new Date(date)
           weekStart.setDate(date.getDate() - date.getDay())
           const weekKey = weekStart.toISOString().split('T')[0]
@@ -125,9 +145,11 @@ export default function DashboardPage() {
         })
     } else {
       const monthlyData: { [key: string]: number } = {}
+      const dateFrom = getDateRange()
       stats.documents.forEach((doc) => {
         if (doc.status === 'paid') {
           const date = new Date(doc.created_at)
+          if (dateFrom && date < dateFrom) return
           const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
           monthlyData[monthKey] = (monthlyData[monthKey] || 0) + doc.price
         }
@@ -143,8 +165,14 @@ export default function DashboardPage() {
 
   // Get invoice status breakdown
   const getStatusBreakdown = () => {
-    const paid = stats.documents.filter((d) => d.status === 'paid').length
-    const unpaid = stats.documents.filter((d) => d.status !== 'paid')
+    const dateFrom = getDateRange()
+    const filteredDocs = stats.documents.filter((d) => {
+      if (!dateFrom) return true
+      return new Date(d.created_at) >= dateFrom
+    })
+
+    const paid = filteredDocs.filter((d) => d.status === 'paid').length
+    const unpaid = filteredDocs.filter((d) => d.status !== 'paid')
 
     // Split unpaid into pending and overdue based on days old
     const now = new Date()
@@ -389,7 +417,19 @@ export default function DashboardPage() {
                   return (
                     <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-96">
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
+                        <div className="flex items-center gap-4">
+                          <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
+                          <select
+                            value={timePeriod}
+                            onChange={(e) => setTimePeriod(e.target.value as any)}
+                            className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                          >
+                            <option value="thisMonth">This Month</option>
+                            <option value="ytd">YTD</option>
+                            <option value="30days">Last 30 Days</option>
+                            <option value="all">All Time</option>
+                          </select>
+                        </div>
                         <div className="flex gap-2">
                           <button
                             onClick={() => setChartView('week')}

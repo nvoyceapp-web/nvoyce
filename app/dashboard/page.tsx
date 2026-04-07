@@ -367,15 +367,28 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 gap-4">
                   {(() => {
                     const now = new Date()
+                    const dateFrom = getDateRange()
+                    const periodDocs = stats.documents.filter((d) => !dateFrom || new Date(d.created_at) >= dateFrom)
+
                     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
                     const thisMonthRevenue = stats.documents
                       .filter((d) => d.status === 'paid' && new Date(d.created_at) >= thisMonthStart)
                       .reduce((sum, d) => sum + (d.price || 0), 0)
 
+                    const paidDocs = periodDocs.filter((d) => d.status === 'paid').length
+                    const totalInvoicesInPeriod = periodDocs.length
+                    const totalRevenueInPeriod = periodDocs.filter((d) => d.status === 'paid').reduce((sum, d) => sum + (d.price || 0), 0)
+                    const uniqueClients = new Set(stats.documents.map((d) => d.client_name)).size
+                    const collectionRate = totalInvoicesInPeriod > 0 ? ((paidDocs / totalInvoicesInPeriod) * 100).toFixed(0) : 0
+                    const avgInvoiceValue = totalInvoicesInPeriod > 0 ? (totalRevenueInPeriod / totalInvoicesInPeriod).toFixed(0) : 0
+
                     return [
                       { label: 'This Month', value: loading ? '-' : `$${thisMonthRevenue.toLocaleString()}`, sub: 'revenue collected' },
                       { label: 'Total Sent', value: loading ? '-' : stats.totalSent.toString(), sub: 'invoices & proposals' },
-                      { label: 'Outstanding', value: loading ? '-' : `$${stats.outstanding.toLocaleString()}`, sub: 'awaiting payment' },
+                      { label: 'Collection Rate', value: loading ? '-' : `${collectionRate}%`, sub: 'of invoices paid' },
+                      { label: 'Avg Invoice Value', value: loading ? '-' : `$${Number(avgInvoiceValue).toLocaleString()}`, sub: 'per invoice' },
+                      { label: 'Client Count', value: loading ? '-' : uniqueClients.toString(), sub: 'unique clients' },
+                      { label: 'Period Revenue', value: loading ? '-' : `$${totalRevenueInPeriod.toLocaleString()}`, sub: 'for selected period' },
                     ]
                   })().map(({ label, value, sub }) => (
                     <div key={label} className="bg-white rounded-xl border border-gray-100 p-4">
@@ -389,21 +402,14 @@ export default function DashboardPage() {
                 <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
                   <div>
                     <div className="text-sm text-gray-500 mb-1">Pending Proposals</div>
-                    <div className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
+                    <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
                     <div className="text-xs text-gray-400 mt-1">awaiting approval</div>
                   </div>
-                  <div className="border-t border-gray-100 pt-4">
+                  <div className="border-t border-gray-100 pt-3">
                     <div className="text-sm text-gray-500 mb-1">Avg Days to Payment</div>
-                    <div className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.avgDaysToPayment}</div>
+                    <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.avgDaysToPayment}</div>
                     <div className="text-xs text-gray-400 mt-1">after sending</div>
                   </div>
-                  {stats.overdue > 0 && (
-                    <div className="border-t border-gray-100 pt-4">
-                      <div className="text-sm text-red-600 mb-1 font-semibold">⚠️ Overdue</div>
-                      <div className="text-3xl font-bold text-red-600">{stats.overdue}</div>
-                      <div className="text-xs text-red-500 mt-1">invoices 30+ days</div>
-                    </div>
-                  )}
                 </div>
               </div>
 

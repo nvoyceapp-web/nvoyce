@@ -45,6 +45,8 @@ export default function DashboardPage() {
   const [chartView, setChartView] = useState<'week' | 'month'>('week')
   const [timePeriod, setTimePeriod] = useState<'all' | 'ytd' | '30days' | 'thisMonth'>('thisMonth')
   const [selectedMetric, setSelectedMetric] = useState<'avgInvoice' | 'thisMonth' | 'clientCount'>('thisMonth')
+  const [showPendingProposals, setShowPendingProposals] = useState(false)
+  const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -169,6 +171,41 @@ export default function DashboardPage() {
     return sortOrder === 'asc' ? ' ↑' : ' ↓'
   }
 
+  // Batch action handlers
+  const toggleDocSelection = (docId: string) => {
+    const newSelected = new Set(selectedDocs)
+    if (newSelected.has(docId)) {
+      newSelected.delete(docId)
+    } else {
+      newSelected.add(docId)
+    }
+    setSelectedDocs(newSelected)
+  }
+
+  const selectAllFiltered = () => {
+    if (selectedDocs.size === filteredDocuments.length) {
+      setSelectedDocs(new Set())
+    } else {
+      setSelectedDocs(new Set(filteredDocuments.map((d) => d.id)))
+    }
+  }
+
+  const markSelectedAsPaid = () => {
+    selectedDocs.forEach((docId) => {
+      console.log('Mark as paid:', docId)
+    })
+    alert(`Marked ${selectedDocs.size} invoice(s) as paid`)
+    setSelectedDocs(new Set())
+  }
+
+  const sendRemindersToSelected = () => {
+    selectedDocs.forEach((docId) => {
+      console.log('Send reminder:', docId)
+    })
+    alert(`Reminders sent to ${selectedDocs.size} client(s)`)
+    setSelectedDocs(new Set())
+  }
+
   // Get row urgency color
   const getRowColor = (doc: Document) => {
     if (doc.status === 'paid') return 'bg-green-50'
@@ -273,8 +310,8 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex h-screen">
-        <aside className="w-60 bg-white border-r border-gray-100 flex flex-col px-4 py-6">
+      <div className="flex h-screen flex-col lg:flex-row">
+        <aside className="hidden lg:flex w-full lg:w-60 bg-white border-r border-gray-100 border-b lg:border-b-0 flex flex-col px-4 py-6">
           <span className="text-lg font-bold text-gray-900 mb-8 px-2">Nvoyce</span>
           <nav className="flex flex-col gap-1 flex-1">
             <Link href="/dashboard" className="px-3 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-900">
@@ -291,8 +328,8 @@ export default function DashboardPage() {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-auto">
-          <div className="px-10 py-8">
+        <main className="flex-1 overflow-auto w-full">
+          <div className="px-4 lg:px-10 py-8">
             <div className="flex items-center justify-between mb-8">
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
               <Link
@@ -339,7 +376,7 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-8 mb-10 auto-rows-max">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10 auto-rows-max">
               {/* Left: Metrics Block with Dropdown */}
               <div className="col-span-1 space-y-4 h-fit">
                 <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
@@ -410,11 +447,42 @@ export default function DashboardPage() {
 
                         {/* Secondary info card */}
                         <div className="border-t border-gray-100 pt-6 space-y-4">
-                          <div>
-                            <div className="text-sm text-gray-500 mb-2">Pending Proposals</div>
-                            <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
-                            <div className="text-xs text-gray-400 mt-1">awaiting approval</div>
-                          </div>
+                          <button
+                            onClick={() => setShowPendingProposals(!showPendingProposals)}
+                            className="w-full text-left hover:bg-gray-50 rounded-lg p-2 -m-2 transition"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="text-sm text-gray-500 mb-2">Pending Proposals</div>
+                                <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
+                                <div className="text-xs text-gray-400 mt-1">awaiting approval</div>
+                              </div>
+                              <div className="text-xl text-gray-400">{showPendingProposals ? '▼' : '▶'}</div>
+                            </div>
+                          </button>
+
+                          {showPendingProposals && stats.pendingProposals > 0 && (
+                            <div className="bg-gray-50 rounded-lg p-3 space-y-2 border border-gray-200">
+                              {stats.documents
+                                .filter((d) => d.doc_type === 'proposal' && d.status !== 'paid')
+                                .slice(0, 5)
+                                .map((proposal) => (
+                                  <div key={proposal.id} className="flex items-center justify-between text-xs p-2 bg-white rounded border border-gray-100">
+                                    <div>
+                                      <div className="font-medium text-gray-900">{proposal.client_name}</div>
+                                      <div className="text-gray-500">${proposal.price.toLocaleString()}</div>
+                                    </div>
+                                    <Link href={`/dashboard/documents/${proposal.id}`} className="text-blue-600 hover:text-blue-700 font-semibold">
+                                      View
+                                    </Link>
+                                  </div>
+                                ))}
+                              {stats.documents.filter((d) => d.doc_type === 'proposal' && d.status !== 'paid').length === 0 && (
+                                <div className="text-xs text-gray-500 p-2">No pending proposals</div>
+                              )}
+                            </div>
+                          )}
+
                           <div className="border-t border-gray-100 pt-4">
                             <div className="text-sm text-gray-500 mb-2">Avg Days to Payment</div>
                             <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.avgDaysToPayment}</div>
@@ -507,6 +575,33 @@ export default function DashboardPage() {
 
             {stats.documents.length > 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                {selectedDocs.size > 0 && (
+                  <div className="bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between">
+                    <div className="text-sm font-semibold text-blue-900">
+                      {selectedDocs.size} document{selectedDocs.size !== 1 ? 's' : ''} selected
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={markSelectedAsPaid}
+                        className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold"
+                      >
+                        ✓ Mark as Paid
+                      </button>
+                      <button
+                        onClick={sendRemindersToSelected}
+                        className="text-sm bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition font-semibold"
+                      >
+                        📧 Send Reminders
+                      </button>
+                      <button
+                        onClick={() => setSelectedDocs(new Set())}
+                        className="text-sm bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-300 transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="p-6 border-b border-gray-100 space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-gray-900">Invoices & Proposals</h2>
@@ -563,6 +658,14 @@ export default function DashboardPage() {
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 border-b border-gray-100">
                       <tr>
+                        <th className="px-3 py-3 text-left">
+                          <input
+                            type="checkbox"
+                            checked={selectedDocs.size === filteredDocuments.length && filteredDocuments.length > 0}
+                            onChange={selectAllFiltered}
+                            className="rounded border-gray-300 cursor-pointer"
+                          />
+                        </th>
                         <th
                           onClick={() => toggleSort('client')}
                           className="px-6 py-3 text-left text-xs font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
@@ -612,6 +715,14 @@ export default function DashboardPage() {
 
                         return (
                           <tr key={doc.id} className={`border-b border-gray-100 ${getRowColor(doc)} transition`}>
+                            <td className="px-3 py-4">
+                              <input
+                                type="checkbox"
+                                checked={selectedDocs.has(doc.id)}
+                                onChange={() => toggleDocSelection(doc.id)}
+                                className="rounded border-gray-300 cursor-pointer"
+                              />
+                            </td>
                             <td className="px-6 py-4 text-gray-900 font-medium">{doc.client_name}</td>
                             <td className="px-6 py-4 text-gray-600 text-sm">{createdDate.toLocaleDateString()}</td>
                             <td className="px-6 py-4 text-gray-600 capitalize">{doc.doc_type}</td>
@@ -663,7 +774,7 @@ export default function DashboardPage() {
                       })
                       ) : (
                         <tr>
-                          <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                          <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                             No documents found. Try adjusting your filters.
                           </td>
                         </tr>

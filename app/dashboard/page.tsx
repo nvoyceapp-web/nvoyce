@@ -361,10 +361,10 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-5 mb-10">
+            <div className="grid grid-cols-2 gap-8 mb-10">
               {/* Left: KPI Cards */}
-              <div className="col-span-2 space-y-5">
-                <div className="grid grid-cols-3 gap-5">
+              <div className="col-span-1 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   {(() => {
                     const now = new Date()
                     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -378,15 +378,15 @@ export default function DashboardPage() {
                       { label: 'Outstanding', value: loading ? '-' : `$${stats.outstanding.toLocaleString()}`, sub: 'awaiting payment' },
                     ]
                   })().map(({ label, value, sub }) => (
-                    <div key={label} className="bg-white rounded-xl border border-gray-100 p-6">
-                      <div className="text-sm text-gray-500 mb-1">{label}</div>
-                      <div className="text-3xl font-bold text-gray-900">{value}</div>
+                    <div key={label} className="bg-white rounded-xl border border-gray-100 p-4">
+                      <div className="text-xs text-gray-500 mb-1">{label}</div>
+                      <div className="text-2xl font-bold text-gray-900">{value}</div>
                       <div className="text-xs text-gray-400 mt-1">{sub}</div>
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+                <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
                   <div>
                     <div className="text-sm text-gray-500 mb-1">Pending Proposals</div>
                     <div className="text-3xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
@@ -408,7 +408,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Right: Charts - Stacked Vertically */}
-              <div className="col-span-1 space-y-5 flex flex-col">
+              <div className="col-span-1 space-y-4 flex flex-col">
                 {/* Revenue Trend Chart */}
                 {(() => {
                   const chartData = getChartData()

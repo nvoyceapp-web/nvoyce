@@ -427,7 +427,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen flex-col lg:flex-row">
-        <aside className="hidden lg:flex w-full lg:w-60 bg-white border-r border-gray-100 border-b lg:border-b-0 flex flex-col px-4 py-6">
+        <aside className="hidden lg:flex w-full lg:w-60 bg-purple-50 border-r border-purple-200 border-b lg:border-b-0 flex flex-col px-4 py-6">
           <span className="text-lg font-bold text-gray-900 mb-8 px-2">Nvoyce</span>
           <nav className="flex flex-col gap-1 flex-1">
             <Link href="/dashboard" className="px-3 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-900">

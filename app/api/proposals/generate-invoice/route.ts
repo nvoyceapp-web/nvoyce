@@ -84,16 +84,26 @@ Generate a professional invoice in JSON format with this structure:
 
 Generate ONLY valid JSON, no additional text.`
 
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: invoiceGenerationPrompt,
-        },
-      ],
-    })
+    let message
+    try {
+      message = await client.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1024,
+        messages: [
+          {
+            role: 'user',
+            content: invoiceGenerationPrompt,
+          },
+        ],
+      })
+    } catch (claudeError) {
+      console.error('Claude API error:', claudeError)
+      const errorMsg = claudeError instanceof Error ? claudeError.message : String(claudeError)
+      return NextResponse.json({
+        error: 'Failed to call Claude API',
+        details: errorMsg
+      }, { status: 500 })
+    }
 
     let invoiceData
     try {
@@ -154,6 +164,10 @@ Generate ONLY valid JSON, no additional text.`
     })
   } catch (error) {
     console.error('Error generating invoice from proposal:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({
+      error: 'Internal server error',
+      details: errorMessage
+    }, { status: 500 })
   }
 }

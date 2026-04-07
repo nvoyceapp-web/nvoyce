@@ -1182,28 +1182,27 @@ export default function DashboardPage() {
                             <td className="px-6 py-4 text-right text-gray-900 font-semibold">${doc.price.toLocaleString()}</td>
                             <td className="px-6 py-4">
                               {doc.doc_type.toLowerCase() === 'proposal' ? (
-                                // Proposal status
-                                doc.status === 'agreed' ? (
+                                // Proposal status (clients accept via public link, not here)
+                                doc.status === 'accepted' ? (
                                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
-                                    ✓ Agreed
+                                    ✓ Accepted
                                   </span>
-                                ) : doc.status === 'rejected' ? (
+                                ) : doc.status === 'declined' ? (
                                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
-                                    ✗ Rejected
+                                    ✗ Declined
+                                  </span>
+                                ) : doc.status === 'sent' ? (
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
+                                    📤 Sent
+                                  </span>
+                                ) : doc.status === 'received' ? (
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                                    👁️ Received
                                   </span>
                                 ) : (
-                                  <button
-                                    onClick={() => acceptProposalAndGenerateInvoice(doc.id)}
-                                    disabled={generatingInvoices.has(doc.id)}
-                                    className={`text-xs font-semibold px-2.5 py-1 rounded-full transition ${
-                                      generatingInvoices.has(doc.id)
-                                        ? 'bg-purple-400 text-white cursor-not-allowed opacity-75'
-                                        : 'bg-purple-600 text-white hover:bg-purple-700'
-                                    }`}
-                                    title="Accept proposal and auto-generate invoice"
-                                  >
-                                    {generatingInvoices.has(doc.id) ? '⏳ Generating...' : '✓ Accept'}
-                                  </button>
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700">
+                                    {doc.status === 'draft' ? '📝 Draft' : doc.status}
+                                  </span>
                                 )
                               ) : (
                                 // Invoice status
@@ -1227,7 +1226,7 @@ export default function DashboardPage() {
                             <td className="px-6 py-4 text-right text-gray-600">
                               {doc.doc_type.toLowerCase() === 'proposal' ? (
                                 // Proposals: show days pending
-                                doc.status === 'agreed' || doc.status === 'rejected' ? (
+                                doc.status === 'accepted' || doc.status === 'declined' ? (
                                   '—'
                                 ) : (
                                   <span className={daysOld > 14 ? 'text-orange-600 font-semibold' : ''}>
@@ -1249,7 +1248,7 @@ export default function DashboardPage() {
                               {doc.doc_type.toLowerCase() === 'proposal' ? (
                                 // Proposal actions
                                 <>
-                                  {doc.status !== 'agreed' && doc.status !== 'rejected' && daysOld > 7 && (
+                                  {doc.status !== 'accepted' && doc.status !== 'declined' && daysOld > 7 && (
                                     <button
                                       onClick={() => {
                                         // Send follow-up

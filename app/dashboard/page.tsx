@@ -144,8 +144,18 @@ export default function DashboardPage() {
   // Get invoice status breakdown
   const getStatusBreakdown = () => {
     const paid = stats.documents.filter((d) => d.status === 'paid').length
-    const pending = stats.documents.filter((d) => d.status === 'pending').length
-    const overdue = stats.documents.filter((d) => d.status === 'overdue').length
+    const unpaid = stats.documents.filter((d) => d.status !== 'paid')
+
+    // Split unpaid into pending and overdue based on days old
+    const now = new Date()
+    let pending = 0
+    let overdue = 0
+    unpaid.forEach((d) => {
+      const daysOld = Math.floor((now.getTime() - new Date(d.created_at).getTime()) / (1000 * 60 * 60 * 24))
+      if (daysOld >= 30) overdue++
+      else pending++
+    })
+
     const total = paid + pending + overdue
     return { paid, pending, overdue, total }
   }
@@ -377,7 +387,7 @@ export default function DashboardPage() {
                   if (chartData.length === 0) return null
                   const maxRevenue = Math.max(...chartData.map((d) => d.revenue), 1)
                   return (
-                    <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-80">
+                    <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-96">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
                         <div className="flex gap-2">
@@ -403,15 +413,15 @@ export default function DashboardPage() {
                           </button>
                         </div>
                       </div>
-                      <div className="flex-1 flex items-end justify-between gap-2">
+                      <div className="flex-1 flex items-end justify-between gap-3 min-h-56">
                         {chartData.slice(-6).map((data) => (
-                          <div key={data.label} className="flex-1 flex flex-col items-center gap-2">
+                          <div key={data.label} className="flex-1 flex flex-col items-center justify-end gap-2 h-full">
                             <div
-                              className="w-full bg-gradient-to-t from-orange-600 to-orange-500 rounded-t-lg transition-all hover:from-orange-700 hover:to-orange-600 cursor-pointer"
-                              style={{ height: `${Math.max((data.revenue / maxRevenue) * 100, 8)}%` }}
+                              className="w-8 bg-gradient-to-t from-orange-600 to-orange-500 rounded-t-lg transition-all hover:from-orange-700 hover:to-orange-600 cursor-pointer"
+                              style={{ height: `${Math.max((data.revenue / maxRevenue) * 100, 15)}%` }}
                               title={`$${(data.revenue / 1000).toFixed(1)}k`}
                             />
-                            <div className="text-xs font-medium text-gray-600 text-center">{data.label}</div>
+                            <div className="text-xs font-medium text-gray-600 text-center whitespace-nowrap">{data.label}</div>
                             <div className="text-xs text-gray-500">${(data.revenue / 1000).toFixed(1)}k</div>
                           </div>
                         ))}
@@ -428,7 +438,7 @@ export default function DashboardPage() {
                   const pendingPercent = (pending / total) * 100
                   const overduePercent = (overdue / total) * 100
                   return (
-                    <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-80">
+                    <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-96">
                       <h3 className="text-sm font-semibold text-gray-900 mb-6">Invoice Status</h3>
                       <div className="flex-1 flex items-center justify-between gap-8">
                         <svg className="w-24 h-24" viewBox="0 0 120 120">

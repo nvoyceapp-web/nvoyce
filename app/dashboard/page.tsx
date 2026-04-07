@@ -98,6 +98,24 @@ export default function DashboardPage() {
     }
   }
 
+  // Calculate monthly revenue for chart
+  const getMonthlyRevenue = () => {
+    const monthlyData: { [key: string]: number } = {}
+    stats.documents.forEach((doc) => {
+      if (doc.status === 'paid') {
+        const date = new Date(doc.created_at)
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        monthlyData[monthKey] = (monthlyData[monthKey] || 0) + doc.price
+      }
+    })
+    return Object.entries(monthlyData)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, revenue]) => ({
+        month: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+        revenue
+      }))
+  }
+
   // Get sort indicator
   const getSortIndicator = (field: string) => {
     if (sortBy !== field) return ' ⇅'
@@ -314,6 +332,32 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
+
+            {/* Simple Revenue Trend Chart */}
+            {(() => {
+              const chartData = getMonthlyRevenue()
+              if (chartData.length === 0) return null
+              const maxRevenue = Math.max(...chartData.map((d) => d.revenue))
+              return (
+                <div className="bg-white rounded-xl border border-gray-100 p-6 mb-10">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-6">Revenue Trend</h2>
+                  <div className="flex items-end gap-4 h-48">
+                    {chartData.map((data) => (
+                      <div key={data.month} className="flex-1 flex flex-col items-center gap-2">
+                        <div className="relative w-full h-32 bg-gray-50 rounded-t-lg overflow-hidden">
+                          <div
+                            className="absolute bottom-0 w-full bg-gradient-to-t from-orange-600 to-orange-500 transition-all"
+                            style={{ height: `${(data.revenue / maxRevenue) * 100}%` }}
+                          />
+                        </div>
+                        <div className="text-xs font-medium text-gray-600">{data.month}</div>
+                        <div className="text-xs text-gray-500">${(data.revenue / 1000).toFixed(1)}k</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
 
             {stats.documents.length > 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">

@@ -965,32 +965,10 @@ export default function DashboardPage() {
                         {hasProposals && !hasMixed && allProposalsAccepted && <span className="text-xs text-green-600 ml-2">(all accepted)</span>}
                       </div>
                       <div className="flex gap-2">
-                        {hasProposals && !hasMixed && anyProposalPending && (
-                          <>
-                            <button
-                              onClick={() => {
-                                console.log('Mark proposals as agreed:', Array.from(selectedDocs))
-                                alert('Mark as agreed: coming soon!')
-                              }}
-                              className="text-sm bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition font-semibold"
-                              title="Mark selected proposals as agreed"
-                            >
-                              ✓ Mark as Agreed
-                            </button>
-                            <button
-                              onClick={() => {
-                                console.log('Generate invoices from proposals:', Array.from(selectedDocs))
-                                alert('Generate invoices: coming soon!')
-                              }}
-                              className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold"
-                              title="Auto-generate invoices from selected proposals"
-                            >
-                              🚀 Generate Invoices
-                            </button>
-                          </>
-                        )}
-                        {hasProposals && !hasMixed && allProposalsAccepted && (
-                          <span className="text-xs text-green-600 font-semibold">✓ Invoices generated</span>
+                        {hasProposals && !hasMixed && (
+                          <span className="text-xs text-gray-600 font-semibold">
+                            {allProposalsAccepted ? '✓ All accepted' : 'Waiting for client response via shareable link'}
+                          </span>
                         )}
                         {hasInvoices && !hasMixed && (
                           <>

@@ -1166,9 +1166,8 @@ export default function DashboardPage() {
                                   '—'
                                 ) : (
                                   (() => {
-                                    const formData = typeof doc.generated_content === 'string' ? JSON.parse(doc.generated_content) : {}
-                                    const expirationDays = formData.expirationDays ? parseInt(formData.expirationDays, 10) : 7
-                                    const daysRemaining = expirationDays - daysOld
+                                    // Default to 7 days if expiration not specified
+                                    const daysRemaining = 7 - daysOld
                                     return (
                                       <span className={daysRemaining <= 2 ? 'text-red-600 font-semibold' : daysRemaining <= 5 ? 'text-orange-600' : ''}>
                                         {Math.max(0, daysRemaining)} days {daysRemaining <= 2 && '🔴'}

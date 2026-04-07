@@ -480,8 +480,8 @@ export default function DashboardPage() {
                   return (
                     <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-96">
                       <h3 className="text-sm font-semibold text-gray-900 mb-6">Invoice Status</h3>
-                      <div className="flex-1 flex items-center justify-between gap-8">
-                        <svg className="w-24 h-24" viewBox="0 0 120 120">
+                      <div className="flex-1 flex items-center justify-center gap-12">
+                        <svg className="w-40 h-40 flex-shrink-0" viewBox="0 0 120 120">
                           <circle cx="60" cy="60" r="45" fill="none" stroke="#10b981" strokeWidth="30" strokeDasharray={`${(paidPercent / 100) * 282.7} 282.7`} transform="rotate(-90 60 60)" />
                           <circle cx="60" cy="60" r="45" fill="none" stroke="#f59e0b" strokeWidth="30" strokeDasharray={`${(pendingPercent / 100) * 282.7} 282.7`} strokeDashoffset={`${-((paidPercent / 100) * 282.7)}`} transform="rotate(-90 60 60)" />
                           <circle cx="60" cy="60" r="45" fill="none" stroke="#ef4444" strokeWidth="30" strokeDasharray={`${(overduePercent / 100) * 282.7} 282.7`} strokeDashoffset={`${-(((paidPercent + pendingPercent) / 100) * 282.7)}`} transform="rotate(-90 60 60)" />

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type DocType = 'invoice' | 'proposal'
 
@@ -19,10 +19,12 @@ interface FormData {
 
 export default function NewDocumentPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const typeParam = searchParams.get('type') as DocType | null
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState<FormData>({
-    docType: 'invoice',
+    docType: (typeParam && ['invoice', 'proposal'].includes(typeParam) ? typeParam : 'invoice') as DocType,
     clientName: '',
     clientEmail: '',
     businessName: '',
@@ -32,6 +34,13 @@ export default function NewDocumentPage() {
     paymentTerms: 'Due on receipt',
     notes: '',
   })
+
+  // Auto-advance to step 2 if type is pre-selected from URL
+  useEffect(() => {
+    if (typeParam && ['invoice', 'proposal'].includes(typeParam)) {
+      setStep(2)
+    }
+  }, [typeParam])
 
   const update = (field: keyof FormData, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }))

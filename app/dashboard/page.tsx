@@ -1273,36 +1273,51 @@ export default function DashboardPage() {
                                   </div>
                                 </>
                               ) : (
-                                // Invoice actions
-                                <div className="flex gap-2 flex-wrap">
-                                  {doc.status !== 'paid' && (
-                                    <button
-                                      onClick={() => {
-                                        // Mark as paid (will implement API call)
-                                        console.log('Mark as paid:', doc.id)
-                                      }}
-                                      className="text-xs bg-green-600 text-white px-2.5 py-1 rounded hover:bg-green-700 transition"
-                                      title="Mark invoice as paid"
-                                    >
-                                      ✓ Mark Paid
-                                    </button>
+                                // Invoice actions - dropdown menu
+                                <div className="relative">
+                                  <button
+                                    onClick={() => setOpenDropdown(openDropdown === doc.id ? null : doc.id)}
+                                    className="text-xs bg-gray-600 text-white px-2.5 py-1 rounded hover:bg-gray-700 transition"
+                                    title="Actions menu"
+                                  >
+                                    ⋯ Select
+                                  </button>
+                                  {openDropdown === doc.id && (
+                                    <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">
+                                      {doc.status !== 'paid' && (
+                                        <button
+                                          onClick={() => {
+                                            // Mark as paid (will implement API call)
+                                            console.log('Mark as paid:', doc.id)
+                                            setOpenDropdown(null)
+                                          }}
+                                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
+                                        >
+                                          ✓ Mark Paid
+                                        </button>
+                                      )}
+                                      {doc.status !== 'paid' && daysOld > 14 && (
+                                        <button
+                                          onClick={() => {
+                                            // Send reminder
+                                            console.log('Send reminder to:', doc.client_name)
+                                            alert(`Reminder would be sent to ${doc.client_name}`)
+                                            setOpenDropdown(null)
+                                          }}
+                                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                        >
+                                          📧 Send Reminder
+                                        </button>
+                                      )}
+                                      <Link
+                                        href={`/dashboard/documents/${doc.id}`}
+                                        onClick={() => setOpenDropdown(null)}
+                                        className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 last:rounded-b-lg"
+                                      >
+                                        👁️ View Details
+                                      </Link>
+                                    </div>
                                   )}
-                                  {doc.status !== 'paid' && daysOld > 14 && (
-                                    <button
-                                      onClick={() => {
-                                        // Send reminder
-                                        console.log('Send reminder to:', doc.client_name)
-                                        alert(`Reminder would be sent to ${doc.client_name}`)
-                                      }}
-                                      className="text-xs bg-orange-600 text-white px-2.5 py-1 rounded hover:bg-orange-700 transition"
-                                      title="Send payment reminder"
-                                    >
-                                      📧 Remind
-                                    </button>
-                                  )}
-                                  <Link href={`/dashboard/documents/${doc.id}`} className="text-blue-600 hover:text-blue-700 text-xs font-semibold">
-                                    View
-                                  </Link>
                                 </div>
                               )}
                             </td>

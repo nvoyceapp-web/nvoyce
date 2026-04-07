@@ -44,7 +44,7 @@ export default function DashboardPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [chartView, setChartView] = useState<'week' | 'month'>('week')
   const [timePeriod, setTimePeriod] = useState<'all' | 'ytd' | '30days' | 'thisMonth'>('thisMonth')
-  const [selectedMetric, setSelectedMetric] = useState<'avgInvoice' | 'thisMonth' | 'clientCount'>('thisMonth')
+  const [selectedMetric, setSelectedMetric] = useState<'avgInvoice' | 'avgDaysToPayment' | 'clientCount'>('avgDaysToPayment')
   const [showPendingProposals, setShowPendingProposals] = useState(false)
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
   const [sidebarTab, setSidebarTab] = useState<'about-nvoyce' | 'about-payme'>('about-nvoyce')
@@ -666,7 +666,7 @@ export default function DashboardPage() {
                     // Additional metrics (selectable via dropdown)
                     const additional = {
                       avgInvoice: { label: 'Avg Invoice Value', value: loading ? '-' : `$${Number(avgInvoiceValue).toLocaleString()}`, sub: 'per invoice' },
-                      thisMonth: { label: 'This Month', value: loading ? '-' : `$${thisMonthRevenue.toLocaleString()}`, sub: 'revenue collected' },
+                      avgDaysToPayment: { label: 'Avg Days to Payment', value: loading ? '-' : stats.avgDaysToPayment.toString(), sub: 'after sending' },
                       clientCount: { label: 'Client Count', value: loading ? '-' : uniqueClients.toString(), sub: 'unique clients' },
                     }
 
@@ -692,8 +692,8 @@ export default function DashboardPage() {
                               onChange={(e) => setSelectedMetric(e.target.value as any)}
                               className="text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black w-full mb-3"
                             >
-                              <option value="thisMonth">This Month</option>
                               <option value="avgInvoice">Avg Invoice Value</option>
+                              <option value="avgDaysToPayment">Avg Days to Payment</option>
                               <option value="clientCount">Client Count</option>
                             </select>
                             <div className="bg-gray-50 rounded-lg p-4">

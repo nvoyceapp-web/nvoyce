@@ -65,8 +65,8 @@ function NewDocumentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 w-full max-w-xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-purple-100 w-full max-w-xl p-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -74,7 +74,7 @@ function NewDocumentContent() {
               <div
                 key={s}
                 className={`h-1.5 flex-1 rounded-full transition-all ${
-                  s <= step ? 'bg-black' : 'bg-gray-200'
+                  s <= step ? 'bg-orange-600' : 'bg-gray-200'
                 }`}
               />
             ))}
@@ -99,7 +99,7 @@ function NewDocumentContent() {
                     onClick={() => update('docType', type)}
                     className={`p-4 rounded-xl border-2 text-left transition ${
                       form.docType === type
-                        ? 'border-black bg-black text-white'
+                        ? 'border-orange-600 bg-orange-600 text-white'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -120,7 +120,7 @@ function NewDocumentContent() {
                 value={form.businessName}
                 onChange={(e) => update('businessName', e.target.value)}
                 placeholder="e.g. Jane Smith Photography"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -131,7 +131,7 @@ function NewDocumentContent() {
                 value={form.clientName}
                 onChange={(e) => update('clientName', e.target.value)}
                 placeholder="e.g. Acme Corp"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -142,7 +142,7 @@ function NewDocumentContent() {
                 value={form.clientEmail}
                 onChange={(e) => update('clientEmail', e.target.value)}
                 placeholder="client@company.com"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
@@ -160,7 +160,7 @@ function NewDocumentContent() {
                 onChange={(e) => update('serviceDescription', e.target.value)}
                 placeholder="e.g. Brand photography session — 2 hours, 50 edited photos, delivered via Google Drive"
                 rows={4}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
               />
             </div>
 
@@ -173,7 +173,7 @@ function NewDocumentContent() {
                   value={form.price}
                   onChange={(e) => update('price', e.target.value)}
                   placeholder="1,500"
-                  className="w-full border border-gray-200 rounded-lg pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full border border-gray-200 rounded-lg pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
             </div>
@@ -185,7 +185,7 @@ function NewDocumentContent() {
                 value={form.timeline}
                 onChange={(e) => update('timeline', e.target.value)}
                 placeholder="e.g. Delivered within 7 business days"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -194,7 +194,7 @@ function NewDocumentContent() {
               <select
                 value={form.paymentTerms}
                 onChange={(e) => update('paymentTerms', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
               >
                 <option>Due on receipt</option>
                 <option>Net 7</option>
@@ -213,7 +213,7 @@ function NewDocumentContent() {
                 onChange={(e) => update('notes', e.target.value)}
                 placeholder="Anything else to include..."
                 rows={2}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
               />
             </div>
           </div>
@@ -222,7 +222,7 @@ function NewDocumentContent() {
         {/* Step 3 */}
         {step === 3 && (
           <div className="space-y-4">
-            <div className="bg-gray-50 rounded-xl p-5 space-y-3 text-sm">
+            <div className="bg-gradient-to-br from-purple-50 via-white to-purple-50 rounded-xl p-5 space-y-3 text-sm">
               <Row label="Type" value={form.docType} />
               <Row label="From" value={form.businessName} />
               <Row label="To" value={`${form.clientName} (${form.clientEmail})`} />
@@ -254,7 +254,7 @@ function NewDocumentContent() {
           {step < 3 ? (
             <button
               onClick={() => setStep((s) => s + 1)}
-              className="bg-black text-white text-sm px-6 py-2.5 rounded-lg hover:bg-gray-800 transition"
+              className="bg-orange-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-orange-700 transition"
             >
               Continue →
             </button>
@@ -262,7 +262,7 @@ function NewDocumentContent() {
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="bg-black text-white text-sm px-6 py-2.5 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+              className="bg-orange-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-orange-700 transition disabled:opacity-50"
             >
               {loading ? 'Generating...' : '✨ Generate with AI'}
             </button>
@@ -285,7 +285,7 @@ function Row({ label, value }: { label: string; value: string }) {
 export default function NewDocumentPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-gray-400 text-sm">Loading...</div>
       </div>
     }>

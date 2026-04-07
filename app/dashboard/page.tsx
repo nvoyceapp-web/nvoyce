@@ -952,14 +952,20 @@ export default function DashboardPage() {
                   const invoiceCount = selectedDocuments.filter((d) => d.doc_type.toLowerCase() !== 'proposal').length
                   const proposalCount = selectedDocuments.filter((d) => d.doc_type.toLowerCase() === 'proposal').length
 
+                  // Check if selected proposals are already accepted
+                  const selectedProposals = selectedDocuments.filter((d) => d.doc_type.toLowerCase() === 'proposal')
+                  const allProposalsAccepted = selectedProposals.length > 0 && selectedProposals.every((p) => p.status === 'accepted')
+                  const anyProposalPending = selectedProposals.some((p) => p.status !== 'accepted' && p.status !== 'declined')
+
                   return (
                     <div className="bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between">
                       <div className="text-sm font-semibold text-blue-900">
                         {selectedDocs.size} document{selectedDocs.size !== 1 ? 's' : ''} selected
                         {hasMixed && <span className="text-xs text-gray-600 ml-2">({invoiceCount} invoices, {proposalCount} proposals)</span>}
+                        {hasProposals && !hasMixed && allProposalsAccepted && <span className="text-xs text-green-600 ml-2">(all accepted)</span>}
                       </div>
                       <div className="flex gap-2">
-                        {hasProposals && !hasMixed && (
+                        {hasProposals && !hasMixed && anyProposalPending && (
                           <>
                             <button
                               onClick={() => {
@@ -982,6 +988,9 @@ export default function DashboardPage() {
                               🚀 Generate Invoices
                             </button>
                           </>
+                        )}
+                        {hasProposals && !hasMixed && allProposalsAccepted && (
+                          <span className="text-xs text-green-600 font-semibold">✓ Invoices generated</span>
                         )}
                         {hasInvoices && !hasMixed && (
                           <>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseServerServer } from '@/lib/supabaseServer-server'
 import Anthropic from '@anthropic-ai/sdk'
 
 const client = new Anthropic()
@@ -25,7 +24,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch the proposal (no auth required - public proposal acceptance)
-    const { data: proposal, error: fetchError } = await supabase
+    const { data: proposal, error: fetchError } = await supabaseServer
       .from('documents')
       .select('*')
       .eq('id', proposalId)
@@ -112,7 +111,7 @@ Generate ONLY valid JSON, no additional text.`
     }
 
     // Create the invoice document (with same user_id as the proposal)
-    const { data: invoice, error: insertError } = await supabase
+    const { data: invoice, error: insertError } = await supabaseServer
       .from('documents')
       .insert({
         user_id: proposal.user_id,
@@ -138,7 +137,7 @@ Generate ONLY valid JSON, no additional text.`
     }
 
     // Update proposal status to "accepted"
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseServer
       .from('documents')
       .update({ status: 'accepted' })
       .eq('id', proposalId)

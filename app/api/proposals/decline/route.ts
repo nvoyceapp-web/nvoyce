@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseServerServer } from '@/lib/supabaseServer-server'
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Update proposal status to "declined"
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseServer
       .from('documents')
       .update({ status: 'declined' })
       .eq('id', proposalId)

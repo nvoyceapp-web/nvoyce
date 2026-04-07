@@ -85,7 +85,7 @@ Generate a professional invoice in JSON format with this structure:
 Generate ONLY valid JSON, no additional text.`
 
     const message = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       messages: [
         {

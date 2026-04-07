@@ -18,23 +18,17 @@ interface Document {
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const { proposalId } = await req.json()
 
     if (!proposalId) {
       return NextResponse.json({ error: 'proposalId is required' }, { status: 400 })
     }
 
-    // Fetch the proposal
+    // Fetch the proposal (no auth required - public proposal acceptance)
     const { data: proposal, error: fetchError } = await supabase
       .from('documents')
       .select('*')
       .eq('id', proposalId)
-      .eq('user_id', userId)
       .single()
 
     if (fetchError || !proposal) {
@@ -117,11 +111,11 @@ Generate ONLY valid JSON, no additional text.`
       )
     }
 
-    // Create the invoice document
+    // Create the invoice document (with same user_id as the proposal)
     const { data: invoice, error: insertError } = await supabase
       .from('documents')
       .insert({
-        user_id: userId,
+        user_id: proposal.user_id,
         doc_type: 'invoice',
         client_name: proposal.client_name,
         client_email: proposal.client_email,
@@ -148,7 +142,6 @@ Generate ONLY valid JSON, no additional text.`
       .from('documents')
       .update({ status: 'accepted' })
       .eq('id', proposalId)
-      .eq('user_id', userId)
 
     if (updateError) {
       console.error('Failed to update proposal status:', updateError)

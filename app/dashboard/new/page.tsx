@@ -64,8 +64,9 @@ function NewDocumentContent() {
       } else if (isNaN(parseFloat(form.price.replace(/,/g, '')))) {
         errors.push('Price must be a valid number')
       }
-      if (!form.timeline.trim()) {
-        errors.push('Timeline is required')
+      // Timeline is only required for proposals
+      if (form.docType === 'proposal' && !form.timeline.trim()) {
+        errors.push('Timeline/deadline is required for proposals')
       }
     }
 
@@ -98,7 +99,7 @@ function NewDocumentContent() {
     if (!form.serviceDescription.trim()) allErrors.push('Service description is required')
     if (!form.price.trim()) allErrors.push('Price is required')
     else if (isNaN(parseFloat(form.price.replace(/,/g, '')))) allErrors.push('Price must be a valid number')
-    if (!form.timeline.trim()) allErrors.push('Timeline is required')
+    if (form.docType === 'proposal' && !form.timeline.trim()) allErrors.push('Timeline/deadline is required for proposals')
 
     if (allErrors.length > 0) {
       setValidationErrors(allErrors)
@@ -239,14 +240,32 @@ function NewDocumentContent() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Timeline / deadline</label>
-              <input
-                type="text"
+              <label className="text-sm font-medium text-gray-700 block mb-2">
+                Timeline / deadline {form.docType === 'proposal' && <span className="text-red-500">*</span>}
+                <span className="text-gray-400 font-normal text-xs ml-1">{form.docType === 'invoice' ? '(optional)' : '(required for proposals)'}</span>
+              </label>
+              <textarea
                 value={form.timeline}
                 onChange={(e) => update('timeline', e.target.value)}
-                placeholder="e.g. Delivered within 7 business days"
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder={form.docType === 'proposal' ? 'e.g. Delivered within 7 business days' : 'e.g. Delivered on March 15, 2026'}
+                rows={2}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none mb-2"
               />
+              <div className="grid grid-cols-3 gap-2">
+                {['Within 3 days', 'Within 1 week', 'Within 2 weeks', 'Within 1 month', 'Custom date', 'Ongoing'].map((preset) => (
+                  <button
+                    key={preset}
+                    onClick={() => update('timeline', preset)}
+                    className={`px-3 py-1.5 text-xs rounded border transition ${
+                      form.timeline === preset
+                        ? 'bg-orange-100 border-orange-400 text-orange-700'
+                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>

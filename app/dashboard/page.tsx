@@ -50,6 +50,7 @@ export default function DashboardPage() {
   const [sidebarTab, setSidebarTab] = useState<'about-nvoyce' | 'about-payme'>('about-nvoyce')
   const [dismissedRecommendations, setDismissedRecommendations] = useState<Set<string>>(new Set())
   const [expandPayme, setExpandPayme] = useState(false)
+  const [showCreateDropdown, setShowCreateDropdown] = useState(false)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -462,9 +463,30 @@ export default function DashboardPage() {
             <Link href="/dashboard" className="px-3 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-900">
               Dashboard
             </Link>
-            <Link href="/dashboard/new" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-              + New Document
-            </Link>
+            <button
+              onClick={() => setShowCreateDropdown(!showCreateDropdown)}
+              className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 text-left w-full transition"
+            >
+              ✨ Create
+            </button>
+            {showCreateDropdown && (
+              <div className="ml-2 border-l-2 border-gray-200 space-y-1">
+                <Link
+                  href="/dashboard/new?type=invoice"
+                  onClick={() => setShowCreateDropdown(false)}
+                  className="block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
+                >
+                  📄 Invoice
+                </Link>
+                <Link
+                  href="/dashboard/new?type=proposal"
+                  onClick={() => setShowCreateDropdown(false)}
+                  className="block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
+                >
+                  💼 Proposal
+                </Link>
+              </div>
+            )}
           </nav>
 
           {/* About Tabs */}
@@ -545,12 +567,32 @@ export default function DashboardPage() {
           <div className="px-4 lg:px-10 py-8">
             <div className="flex items-center justify-between mb-8">
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-              <Link
-                href="/dashboard/new"
-                className="bg-black text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-              >
-                + New Document
-              </Link>
+              <div className="relative">
+                <button
+                  onClick={() => setShowCreateDropdown(!showCreateDropdown)}
+                  className="bg-black text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-800 transition font-semibold"
+                >
+                  ✨ Create
+                </button>
+                {showCreateDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    <Link
+                      href="/dashboard/new?type=invoice"
+                      onClick={() => setShowCreateDropdown(false)}
+                      className="block px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 first:rounded-t-lg border-b border-gray-100"
+                    >
+                      📄 New Invoice
+                    </Link>
+                    <Link
+                      href="/dashboard/new?type=proposal"
+                      onClick={() => setShowCreateDropdown(false)}
+                      className="block px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 last:rounded-b-lg"
+                    >
+                      💼 New Proposal
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Smart Assistant Card */}

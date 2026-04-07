@@ -55,6 +55,7 @@ export default function DashboardPage() {
   const [documentTab, setDocumentTab] = useState<'invoices' | 'proposals'>('invoices')
   const [generatingInvoices, setGeneratingInvoices] = useState<Set<string>>(new Set())
   const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string } | null>(null)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -1222,37 +1223,53 @@ export default function DashboardPage() {
                                 )
                               )}
                             </td>
-                            <td className="px-6 py-4 flex gap-2">
+                            <td className="px-6 py-4 flex gap-2 relative">
                               {doc.doc_type.toLowerCase() === 'proposal' ? (
-                                // Proposal actions
+                                // Proposal actions - dropdown menu
                                 <>
-                                  <button
-                                    onClick={() => {
-                                      const proposalUrl = `${window.location.origin}/p/${doc.id}`
-                                      navigator.clipboard.writeText(proposalUrl)
-                                      alert('Proposal link copied to clipboard!')
-                                    }}
-                                    className="text-xs bg-blue-600 text-white px-2.5 py-1 rounded hover:bg-blue-700 transition"
-                                    title="Copy shareable proposal link"
-                                  >
-                                    🔗 Copy Link
-                                  </button>
-                                  {doc.status !== 'accepted' && doc.status !== 'declined' && daysOld > 7 && (
+                                  <div className="relative">
                                     <button
-                                      onClick={() => {
-                                        // Send follow-up
-                                        console.log('Send follow-up to:', doc.client_name)
-                                        alert(`Follow-up would be sent to ${doc.client_name}`)
-                                      }}
-                                      className="text-xs bg-purple-600 text-white px-2.5 py-1 rounded hover:bg-purple-700 transition"
-                                      title="Send proposal follow-up"
+                                      onClick={() => setOpenDropdown(openDropdown === doc.id ? null : doc.id)}
+                                      className="text-xs bg-gray-600 text-white px-2.5 py-1 rounded hover:bg-gray-700 transition"
+                                      title="Actions menu"
                                     >
-                                      📧 Follow-up
+                                      ⋯ Menu
                                     </button>
-                                  )}
-                                  <Link href={`/dashboard/documents/${doc.id}`} className="text-blue-600 hover:text-blue-700 text-xs font-semibold">
-                                    View
-                                  </Link>
+                                    {openDropdown === doc.id && (
+                                      <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">
+                                        <button
+                                          onClick={() => {
+                                            const proposalUrl = `${window.location.origin}/p/${doc.id}`
+                                            navigator.clipboard.writeText(proposalUrl)
+                                            alert('Proposal link copied!')
+                                            setOpenDropdown(null)
+                                          }}
+                                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
+                                        >
+                                          🔗 Copy Link
+                                        </button>
+                                        {doc.status !== 'accepted' && doc.status !== 'declined' && daysOld > 7 && (
+                                          <button
+                                            onClick={() => {
+                                              console.log('Send follow-up to:', doc.client_name)
+                                              alert(`Follow-up would be sent to ${doc.client_name}`)
+                                              setOpenDropdown(null)
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                          >
+                                            📧 Send Follow-up
+                                          </button>
+                                        )}
+                                        <Link
+                                          href={`/dashboard/documents/${doc.id}`}
+                                          onClick={() => setOpenDropdown(null)}
+                                          className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 last:rounded-b-lg"
+                                        >
+                                          👁️ View Details
+                                        </Link>
+                                      </div>
+                                    )}
+                                  </div>
                                 </>
                               ) : (
                                 // Invoice actions

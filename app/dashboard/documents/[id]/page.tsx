@@ -108,4 +108,185 @@ export default function DocumentPage() {
             ← Dashboard
           </Link>
           <span className="text-gray-200">|</span>
-          <span className="text-sm
+          <span className="text-sm font-medium text-gray-900">{content.documentNumber}</span>
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${statusColors[doc.status]}`}>
+            {doc.status}
+          </span>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-3">
+          {/* Payment link only for invoices */}
+          {doc.doc_type === 'invoice' && (
+            <>
+              {doc.status === 'paid' ? (
+                <span className="text-sm text-green-600 font-semibold">✓ Paid</span>
+              ) : doc.stripe_payment_link ? (
+                <>
+                  <span className="text-xs text-gray-400 max-w-xs truncate hidden md:block">
+                    {doc.stripe_payment_link}
+                  </span>
+                  <button
+                    onClick={copyLink}
+                    className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+                  >
+                    {copied ? '✓ Copied!' : 'Copy payment link'}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={generatePaymentLink}
+                  disabled={generatingLink}
+                  className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+                >
+                  {generatingLink ? 'Creating link...' : '⚡ Generate payment link'}
+                </button>
+              )}
+            </>
+          )}
+
+          <button
+            onClick={() => window.print()}
+            className="text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
+          >
+            Print / Save PDF
+          </button>
+        </div>
+      </div>
+
+      {/* Success banner for proposals */}
+      {doc.doc_type === 'proposal' && doc.status === 'draft' && (
+        <div className="bg-blue-50 border-b border-blue-100">
+          <div className="max-w-3xl mx-auto px-4 py-4">
+            <div className="flex items-start gap-3">
+              <div className="text-blue-600 font-semibold text-lg">✓</div>
+              <div>
+                <h3 className="text-sm font-semibold text-blue-900">Proposal sent!</h3>
+                <p className="text-sm text-blue-700 mt-1">
+                  Your proposal has been sent to <strong>{doc.client_email}</strong>.
+                  They can view it and respond with approval or decline.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document */}
+      <div className="max-w-3xl mx-auto px-4 py-12 print:py-0 print:px-0">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 print:shadow-none print:border-none print:rounded-none">
+
+          {/* Header */}
+          <div className="flex items-start justify-between mb-10">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">{content.from.name}</h1>
+              <p className="text-gray-400 text-sm mt-1">{content.from.tagline}</p>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-gray-900 capitalize">{doc.doc_type}</div>
+              <div className="text-sm text-gray-400 mt-1">{content.documentNumber}</div>
+            </div>
+          </div>
+
+          {/* Date row */}
+          <div className="flex gap-12 mb-10 text-sm">
+            <div>
+              <div className="text-gray-400 mb-0.5">Date</div>
+              <div className="font-medium text-gray-900">{content.date}</div>
+            </div>
+            <div>
+              <div className="text-gray-400 mb-0.5">Due date</div>
+              <div className="font-medium text-gray-900">{content.dueDate}</div>
+            </div>
+            <div>
+              <div className="text-gray-400 mb-0.5">Payment terms</div>
+              <div className="font-medium text-gray-900">{content.paymentTerms}</div>
+            </div>
+          </div>
+
+          {/* Bill to */}
+          <div className="flex gap-16 mb-10">
+            <div className="text-sm">
+              <div className="text-gray-400 mb-1 uppercase text-xs font-semibold tracking-wide">From</div>
+              <div className="font-semibold text-gray-900">{content.from.name}</div>
+            </div>
+            <div className="text-sm">
+              <div className="text-gray-400 mb-1 uppercase text-xs font-semibold tracking-wide">Bill to</div>
+              <div className="font-semibold text-gray-900">{content.to.name}</div>
+              <div className="text-gray-500">{content.to.email}</div>
+            </div>
+          </div>
+
+          {/* Subject + intro */}
+          <div className="border-t border-gray-100 pt-8 mb-8">
+            <h2 className="font-semibold text-gray-900 mb-3">{content.subject}</h2>
+            <p className="text-gray-600 text-sm leading-relaxed">{content.introduction}</p>
+          </div>
+
+          {/* Line items */}
+          <div className="mb-10">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left py-3 text-gray-400 font-medium">Description</th>
+                  <th className="text-right py-3 text-gray-400 font-medium">Qty</th>
+                  <th className="text-right py-3 text-gray-400 font-medium">Unit Price</th>
+                  <th className="text-right py-3 text-gray-400 font-medium">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {content.lineItems.map((item: any, idx: number) => (
+                  <tr key={idx} className="border-b border-gray-50">
+                    <td className="py-4 text-gray-900">{item.description}</td>
+                    <td className="text-right py-4 text-gray-600">{item.quantity}</td>
+                    <td className="text-right py-4 text-gray-600">${item.unitPrice.toFixed(2)}</td>
+                    <td className="text-right py-4 font-medium text-gray-900">${item.total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Totals */}
+          <div className="flex justify-end mb-10">
+            <div className="w-64">
+              <div className="flex justify-between py-2 border-b border-gray-100 text-sm">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="text-gray-900 font-medium">${content.subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-gray-100 text-sm">
+                <span className="text-gray-600">Tax</span>
+                <span className="text-gray-900 font-medium">${content.tax.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between py-3 text-sm">
+                <span className="font-semibold text-gray-900">Total</span>
+                <span className="font-bold text-lg text-gray-900">${content.total.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Timeline & Notes */}
+          <div className="grid grid-cols-2 gap-8 mb-10 border-t border-gray-100 pt-8">
+            {content.timeline && (
+              <div className="text-sm">
+                <div className="text-gray-400 mb-1 font-semibold">Timeline</div>
+                <div className="text-gray-900">{content.timeline}</div>
+              </div>
+            )}
+            {content.notes && (
+              <div className="text-sm">
+                <div className="text-gray-400 mb-1 font-semibold">Notes</div>
+                <div className="text-gray-900">{content.notes}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Closing message */}
+          <div className="border-t border-gray-100 pt-8">
+            <p className="text-gray-600 text-sm leading-relaxed">{content.closingMessage}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

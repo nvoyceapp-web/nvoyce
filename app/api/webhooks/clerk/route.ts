@@ -52,10 +52,6 @@ export async function POST(req: Request) {
       console.error('❌ Welcome email failed:', error)
       // Don't fail the webhook response; log and continue
     }
-    } catch (error) {
-      console.error('❌ Welcome email failed:', error)
-      // Don't fail the webhook response; log and continue
-    }
   }
 
   return new Response('OK', { status: 200 })

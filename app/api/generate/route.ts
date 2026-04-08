@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { createPaymentLink } from '@/lib/stripe'
-import { sendInvoiceEmail } from '@/lib/email'
+import { sendInvoiceEmail, sendProposalSentEmail } from '@/lib/email'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -140,18 +140,33 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
       // Don't fail the whole request if payment link fails
     }
 
-    // 7. Send email to client
+    // 7. Send email to client (type-specific)
     try {
       const documentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${data.id}`
-      await sendInvoiceEmail({
-        clientEmail: clientEmail,
-        clientName: clientName,
-        invoiceLink: documentUrl,
-        paymentLink: paymentLink,
-        businessName: businessName,
-        amount: parseFloat(price.replace(',', '')),
-      })
-      console.log('Invoice email sent to:', clientEmail)
+
+      if (docType === 'proposal') {
+        // Send proposal email for proposals
+        await sendProposalSentEmail({
+          clientEmail: clientEmail,
+          clientName: clientName,
+          businessName: businessName,
+          proposalLink: documentUrl,
+          serviceDescription: serviceDescription,
+          amount: parseFloat(price.replace(',', '')),
+        })
+        console.log('Proposal email sent to:', clientEmail)
+      } else {
+        // Send invoice email for invoices
+        await sendInvoiceEmail({
+          clientEmail: clientEmail,
+          clientName: clientName,
+          invoiceLink: documentUrl,
+          paymentLink: paymentLink,
+          businessName: businessName,
+          amount: parseFloat(price.replace(',', '')),
+        })
+        console.log('Invoice email sent to:', clientEmail)
+      }
     } catch (emailError) {
       console.error('Email sending error:', emailError)
       // Don't fail the whole request if email fails

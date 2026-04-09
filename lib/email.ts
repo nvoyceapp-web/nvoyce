@@ -385,4 +385,5 @@ export async function sendProposalDeclinedEmail({
   } catch (error) {
     console.error('Proposal declined email error:', error)
     throw error
-  }}
+  }
+}

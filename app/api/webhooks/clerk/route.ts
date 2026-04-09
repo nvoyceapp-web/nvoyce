@@ -45,7 +45,6 @@ export async function POST(req: Request) {
       await sendWelcomeEmail({
         userEmail: primaryEmail.email_address,
         userName: first_name || 'there',
-        dashboardLink: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
       })
       console.log(`✅ Welcome email sent to ${primaryEmail.email_address}`)
     } catch (error) {

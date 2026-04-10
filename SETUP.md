@@ -16,7 +16,7 @@ Install these before starting:
 ## Step 1 — Install dependencies
 
 ```bash
-cd invoiceai
+cd nvoyce
 npm install
 ```
 
@@ -51,7 +51,7 @@ npm install
    ```
    Copy the webhook secret it gives you.
 
-### Resend (Email — Phase 2)
+### Resend (Email — ✅ Live)
 1. Go to https://resend.com and create an account
 2. Create an API key
 

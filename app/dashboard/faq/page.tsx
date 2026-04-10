@@ -23,13 +23,13 @@ export default function FAQPage() {
       id: 'invoice-statuses',
       question: 'What are the different invoice statuses?',
       answer:
-        '📝 Draft: Invoice created but not sent. ⏳ Unpaid: Sent but payment not received yet. 🚨 Overdue: Invoice is 30+ days old and unpaid. ✓ Paid: Payment received. Use the Status column to see where each invoice stands.',
+        '📝 Draft: Invoice created but not yet sent to client. 📤 Sent: Invoice emailed to client, awaiting payment. 🚨 Overdue: Invoice is 30+ days old and unpaid — follow up immediately. ✓ Paid: Payment received and recorded. Use the Status column to track where each invoice stands.',
     },
     {
       id: 'proposal-statuses',
       question: 'What are the different proposal statuses?',
       answer:
-        '📝 Draft: Proposal created but not shared. 📤 Sent: Proposal shared with client. 👁️ Received: Client has viewed the proposal. ✓ Accepted: Client accepted the proposal (invoice auto-generates). ✗ Declined: Client declined the proposal.',
+        '📝 Draft: Proposal generated and saved — review it before sending. 📤 Sent: You clicked 'Send to Client' and the proposal was emailed. 👁️ Viewed: Client has opened the proposal link. ✓ Accepted: Client accepted — an invoice is automatically generated. ✗ Declined: Client declined the proposal.',
     },
     {
       id: 'avg-days-payment',
@@ -47,13 +47,13 @@ export default function FAQPage() {
       id: 'proposal-acceptance',
       question: 'How do clients accept proposals?',
       answer:
-        'When you create a proposal, you get a shareable link. Copy the link from the "⋯ Select" menu and send it to your client. They can click the link and accept (or decline) the proposal without needing to sign up for Nvoyce. Once accepted, an invoice is automatically generated.',
+        'After generating a proposal, you'll land on a review page with an amber banner. Review the proposal, then click ✉ Send to Client — this emails the proposal directly to your client. They can click the link in the email to accept or decline without needing to sign up for Nvoyce. Once accepted, an invoice is automatically generated.',
     },
     {
       id: 'select-dropdown',
       question: 'What is the "⋯ Select" dropdown for?',
       answer:
-        'The "⋯ Select" dropdown contains all actions you can take on an invoice or proposal. For invoices: Mark Paid, Send Reminder, View Details. For proposals: Copy Link, Send Follow-up, View Details. Keep your dashboard organized by using these action menus.',
+        'The "⋯ Select" dropdown contains all actions you can take on a document. For invoices: Mark Paid, Send Reminder, View Details. For proposals: View Details, where you can Send to Client, Save as Draft, or Edit Inputs. Keep your dashboard organized by using these action menus.',
     },
     {
       id: 'negative-days',

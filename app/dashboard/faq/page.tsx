@@ -29,7 +29,7 @@ export default function FAQPage() {
       id: 'proposal-statuses',
       question: 'What are the different proposal statuses?',
       answer:
-        '📝 Draft: Proposal generated and saved — review it before sending. 📤 Sent: You clicked 'Send to Client' and the proposal was emailed. 👁️ Viewed: Client has opened the proposal link. ✓ Accepted: Client accepted — an invoice is automatically generated. ✗ Declined: Client declined the proposal.',
+        '📝 Draft: Proposal generated and saved — review it before sending. 📤 Sent: You clicked \'Send to Client\' and the proposal was emailed. 👁️ Viewed: Client has opened the proposal link. ✓ Accepted: Client accepted — an invoice is automatically generated. ✗ Declined: Client declined the proposal.',
     },
     {
       id: 'avg-days-payment',

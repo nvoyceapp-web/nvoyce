@@ -1,18 +1,21 @@
 'use client'
-
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase, type Document } from '@/lib/supabase'
 
 export default function DocumentPage() {
   const { id } = useParams()
+  const router = useRouter()
   const [doc, setDoc] = useState<Document | null>(null)
   const [loading, setLoading] = useState(true)
   const [generatingLink, setGeneratingLink] = useState(false)
   const [copied, setCopied] = useState(false)
   const [amountPaid, setAmountPaid] = useState<number>(0)
   const [paymentNotes, setPaymentNotes] = useState<string>('')
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
 
   useEffect(() => {
     async function fetchDoc() {
@@ -21,7 +24,6 @@ export default function DocumentPage() {
         .select('*')
         .eq('id', id)
         .single()
-
       if (!error && data) {
         console.log('Loaded document:', data)
         setDoc(data as Document)
@@ -43,18 +45,14 @@ export default function DocumentPage() {
         description: `${doc.doc_type} from ${doc.business_name}`,
         clientEmail: doc.client_email,
       }
-      console.log('Sending payment link request:', payload)
       const res = await fetch('/api/payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
       const data = await res.json()
-      console.log('Payment link response:', data)
       if (data.paymentLink) {
         setDoc((prev) => prev ? { ...prev, stripe_payment_link: data.paymentLink } : prev)
-      } else {
-        console.error('No payment link in response:', data)
       }
     } catch (error) {
       console.error('Payment link error:', error)
@@ -68,6 +66,28 @@ export default function DocumentPage() {
     await navigator.clipboard.writeText(doc.stripe_payment_link)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const sendToClient = async () => {
+    if (!doc) return
+    setSending(true)
+    try {
+      const res = await fetch('/api/proposals/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proposalId: id }),
+      })
+      if (res.ok) {
+        setSent(true)
+        setDoc((prev) => prev ? { ...prev, status: 'sent' } : prev)
+      } else {
+        console.error('Failed to send proposal')
+      }
+    } catch (error) {
+      console.error('Send error:', error)
+    } finally {
+      setSending(false)
+    }
   }
 
   const statusColors: Record<string, string> = {
@@ -113,10 +133,7 @@ export default function DocumentPage() {
             {doc.status}
           </span>
         </div>
-
-        {/* Actions */}
         <div className="flex items-center gap-3">
-          {/* Payment link only for invoices */}
           {doc.doc_type === 'invoice' && (
             <>
               {doc.status === 'paid' ? (
@@ -144,7 +161,6 @@ export default function DocumentPage() {
               )}
             </>
           )}
-
           <button
             onClick={() => window.print()}
             className="text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
@@ -154,17 +170,54 @@ export default function DocumentPage() {
         </div>
       </div>
 
-      {/* Success banner for proposals */}
+      {/* Draft proposal action bar */}
       {doc.doc_type === 'proposal' && doc.status === 'draft' && (
-        <div className="bg-blue-50 border-b border-blue-100">
-          <div className="max-w-3xl mx-auto px-4 py-4">
-            <div className="flex items-start gap-3">
-              <div className="text-blue-600 font-semibold text-lg">✓</div>
+        <div className="bg-amber-50 border-b border-amber-100">
+          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="text-amber-500 font-semibold text-lg">✎</div>
               <div>
-                <h3 className="text-sm font-semibold text-blue-900">Proposal sent!</h3>
-                <p className="text-sm text-blue-700 mt-1">
-                  Your proposal has been sent to <strong>{doc.client_email}</strong>.
-                  They can view it and respond with approval or decline.
+                <h3 className="text-sm font-semibold text-amber-900">Review your proposal before sending</h3>
+                <p className="text-sm text-amber-700 mt-0.5">
+                  This proposal is saved as a draft. Send it to <strong>{doc.client_email}</strong> when ready.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => router.push(`/dashboard/new?edit=${id}&step=1`)}
+                className="text-sm border border-amber-300 text-amber-800 px-4 py-2 rounded-lg hover:bg-amber-100 transition"
+              >
+                ← Edit Inputs
+              </button>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="text-sm border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
+              >
+                Save as Draft
+              </button>
+              <button
+                onClick={sendToClient}
+                disabled={sending}
+                className="text-sm bg-violet-600 text-white px-5 py-2 rounded-lg hover:bg-violet-700 transition font-semibold disabled:opacity-50"
+              >
+                {sending ? 'Sending...' : '✉ Send to Client'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sent confirmation banner */}
+      {doc.doc_type === 'proposal' && (doc.status === 'sent' || sent) && (
+        <div className="bg-green-50 border-b border-green-100">
+          <div className="max-w-3xl mx-auto px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div className="text-green-600 font-semibold text-lg">✓</div>
+              <div>
+                <h3 className="text-sm font-semibold text-green-900">Proposal sent!</h3>
+                <p className="text-sm text-green-700 mt-0.5">
+                  Your proposal has been sent to <strong>{doc.client_email}</strong>. They can review and respond.
                 </p>
               </div>
             </div>
@@ -175,6 +228,18 @@ export default function DocumentPage() {
       {/* Document */}
       <div className="max-w-3xl mx-auto px-4 py-12 print:py-0 print:px-0">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 print:shadow-none print:border-none print:rounded-none">
+
+          {/* Logo */}
+          <div className="flex justify-start mb-8">
+            <Image
+              src="/logo.png"
+              alt="Nvoyce"
+              width={280}
+              height={90}
+              style={{ objectFit: 'contain' }}
+              priority
+            />
+          </div>
 
           {/* Header */}
           <div className="flex items-start justify-between mb-10">
@@ -285,6 +350,7 @@ export default function DocumentPage() {
           <div className="border-t border-gray-100 pt-8">
             <p className="text-gray-600 text-sm leading-relaxed">{content.closingMessage}</p>
           </div>
+
         </div>
       </div>
     </div>

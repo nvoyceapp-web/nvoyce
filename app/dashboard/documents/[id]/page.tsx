@@ -120,9 +120,21 @@ export default function DocumentPage() {
   const content = doc.generated_content
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 print:bg-white">
+      <style>{`
+        @media print {
+          @page {
+            margin: 0.5in;
+            size: letter;
+          }
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+        }
+      `}</style>
       {/* Top bar */}
-      <div className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between">
+      <div className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between print:hidden">
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="text-sm text-gray-400 hover:text-gray-700">
             ← Dashboard
@@ -172,7 +184,7 @@ export default function DocumentPage() {
 
       {/* Draft proposal action bar */}
       {doc.doc_type === 'proposal' && doc.status === 'draft' && (
-        <div className="bg-amber-50 border-b border-amber-100">
+        <div className="bg-amber-50 border-b border-amber-100 print:hidden">
           <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="text-amber-500 font-semibold text-lg">✎</div>
@@ -210,7 +222,7 @@ export default function DocumentPage() {
 
       {/* Sent confirmation banner */}
       {doc.doc_type === 'proposal' && (doc.status === 'sent' || sent) && (
-        <div className="bg-green-50 border-b border-green-100">
+        <div className="bg-green-50 border-b border-green-100 print:hidden">
           <div className="max-w-3xl mx-auto px-4 py-4">
             <div className="flex items-center gap-3">
               <div className="text-green-600 font-semibold text-lg">✓</div>

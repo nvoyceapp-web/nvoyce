@@ -19,6 +19,8 @@ const TIMEZONES = [
 ]
 
 export default function SettingsPage() {
+  const { user } = useUser()
+  const [businessName, setBusinessName] = useState('Loading...')
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [paymeAlerts, setPaymeAlerts] = useState(true)
   const [overdueReminders, setOverdueReminders] = useState(true)
@@ -152,7 +154,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium text-gray-900">Business Name</h3>
-                    <p className="text-sm text-gray-600 mt-1">Wanderlust Trips</p>
+                    <p className="text-sm text-gray-600 mt-1">{businessName}</p>
                   </div>
                   <button className="text-purple-600 hover:text-purple-700 text-sm font-semibold">Edit</button>
                 </div>

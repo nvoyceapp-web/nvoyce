@@ -47,7 +47,7 @@ export default function FAQPage() {
       id: 'proposal-acceptance',
       question: 'How do clients accept proposals?',
       answer:
-        'After generating a proposal, you'll land on a review page with an amber banner. Review the proposal, then click ✉ Send to Client — this emails the proposal directly to your client. They can click the link in the email to accept or decline without needing to sign up for Nvoyce. Once accepted, an invoice is automatically generated.',
+        'After generating a proposal, you\'ll land on a review page with an amber banner. Review the proposal, then click ✉ Send to Client — this emails the proposal directly to your client. They can click the link in the email to accept or decline without needing to sign up for Nvoyce. Once accepted, an invoice is automatically generated.',
     },
     {
       id: 'select-dropdown',

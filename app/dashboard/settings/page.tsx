@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
-import { supabase } from '@/lib/supabase'
 
 const TIMEZONES = [
   { value: 'EST', label: 'Eastern Time (ET)', offset: '-5' },
@@ -22,7 +21,24 @@ const TIMEZONES = [
 
 export default function SettingsPage() {
   const { user } = useUser()
-  const [businessName, setBusinessName] = useState('Loading...')
+  const [businessName, setBusinessName] = useState('')
+  const [editingName, setEditingName] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+
+  useEffect(() => {
+    if (user) {
+      const saved = (user.unsafeMetadata?.businessName as string) || ''
+      setBusinessName(saved)
+      setNameInput(saved)
+    }
+  }, [user])
+
+  async function saveBusinessName() {
+    if (!user) return
+    await user.update({ unsafeMetadata: { ...user.unsafeMetadata, businessName: nameInput } })
+    setBusinessName(nameInput)
+    setEditingName(false)
+  }
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [paymeAlerts, setPaymeAlerts] = useState(true)
   const [overdueReminders, setOverdueReminders] = useState(true)
@@ -154,11 +170,28 @@ export default function SettingsPage() {
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Account</h2>
               <div className="bg-white rounded-lg border border-gray-200 p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-medium text-gray-900">Business Name</h3>
-                    <p className="text-sm text-gray-600 mt-1">{businessName}</p>
+                    {editingName ? (
+                      <div className="flex items-center gap-2 mt-2">
+                        <input
+                          type="text"
+                          value={nameInput}
+                          onChange={(e) => setNameInput(e.target.value)}
+                          className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-purple-500"
+                          placeholder="Enter your business name"
+                          autoFocus
+                        />
+                        <button onClick={saveBusinessName} className="text-sm bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700">Save</button>
+                        <button onClick={() => setEditingName(false)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600 mt-1">{businessName || 'Not set — click Edit to add'}</p>
+                    )}
                   </div>
-                  <button className="text-purple-600 hover:text-purple-700 text-sm font-semibold">Edit</button>
+                  {!editingName && (
+                    <button onClick={() => setEditingName(true)} className="text-purple-600 hover:text-purple-700 text-sm font-semibold ml-4">Edit</button>
+                  )}
                 </div>
               </div>
             </div>

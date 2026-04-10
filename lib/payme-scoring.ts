@@ -129,7 +129,7 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
           priority: score,
           client_name: doc.client_name,
           amount: doc.price,
-          action_text: `Send payment reminder to ${doc.client_name} for $${doc.price.toFixed(2)} (${daysOverdue} days overdue)`,
+          action_text: `Send payment reminder to ${doc.client_name} for $${doc.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${daysOverdue} days overdue)`,
           urgency,
           icon: '🔴',
           days_since: daysOverdue
@@ -148,7 +148,7 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
           priority: score,
           client_name: doc.client_name,
           amount: doc.price,
-          action_text: `Follow up on proposal for ${doc.client_name} ($${doc.price.toFixed(2)}) - ${daysSince} days pending`,
+          action_text: `Follow up on proposal for ${doc.client_name} ($${doc.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}) - ${daysSince} days pending`,
           urgency: daysSince > 14 ? 'high' : 'medium',
           icon: '🟡',
           days_since: daysSince
@@ -167,7 +167,7 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
           priority: score,
           client_name: doc.client_name,
           amount: doc.price,
-          action_text: `📝 Draft proposal for ${doc.client_name} ($${doc.price.toFixed(2)}) - ${daysSince} days. Ready to send?`,
+          action_text: `📝 Draft proposal for ${doc.client_name} ($${doc.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}) - ${daysSince} days. Ready to send?`,
           urgency: 'medium',
           icon: '🔵',
           days_since: daysSince
@@ -189,7 +189,7 @@ export function generatePaymeActions(documents: Document[]): PaymeAction[] {
           priority: expiringScore,
           client_name: doc.client_name,
           amount: doc.price,
-          action_text: `🔴 Proposal for ${doc.client_name} ($${doc.price.toFixed(2)}) expires in ${Math.max(0, daysRemaining)} day(s) — take action!`,
+          action_text: `🔴 Proposal for ${doc.client_name} ($${doc.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}) expires in ${Math.max(0, daysRemaining)} day(s) — take action!`,
           urgency: 'critical',
           icon: '🔴',
           days_since: daysRemaining

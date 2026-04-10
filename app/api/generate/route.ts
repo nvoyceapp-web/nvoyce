@@ -140,23 +140,10 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
       // Don't fail the whole request if payment link fails
     }
 
-    // 7. Send email to client (type-specific)
-    try {
-      const documentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${data.id}`
-
-      if (docType === 'proposal') {
-        // Send proposal email for proposals
-        await sendProposalSentEmail({
-          clientEmail: clientEmail,
-          clientName: clientName,
-          businessName: businessName,
-          proposalLink: documentUrl,
-          serviceDescription: serviceDescription,
-          amount: parseFloat(price.replace(',', '')),
-        })
-        console.log('Proposal email sent to:', clientEmail)
-      } else {
-        // Send invoice email for invoices
+    // 7. Send email to client (invoices only — proposals require user review before sending)
+    if (docType === 'invoice') {
+      try {
+        const documentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${data.id}`
         await sendInvoiceEmail({
           clientEmail: clientEmail,
           clientName: clientName,
@@ -166,12 +153,11 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
           amount: parseFloat(price.replace(',', '')),
         })
         console.log('Invoice email sent to:', clientEmail)
+      } catch (emailError) {
+        console.error('Email sending error:', emailError)
       }
-    } catch (emailError) {
-      console.error('Email sending error:', emailError)
-      // Don't fail the whole request if email fails
     }
-
+    // Proposals are saved as draft — user must click "Send to Client"
     return NextResponse.json({ id: data.id, document: generatedDoc, paymentLink })
   } catch (err: any) {
     console.error('Generation error full:', JSON.stringify(err?.error || err, null, 2))

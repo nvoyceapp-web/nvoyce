@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useUser } from '@clerk/nextjs'
+import { supabase } from '@/lib/supabase'
 
 const TIMEZONES = [
   { value: 'EST', label: 'Eastern Time (ET)', offset: '-5' },

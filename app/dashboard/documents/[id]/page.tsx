@@ -316,8 +316,8 @@ export default function DocumentPage() {
                   <tr key={idx} className="border-b border-gray-50">
                     <td className="py-4 text-gray-900">{item.description}</td>
                     <td className="text-right py-4 text-gray-600">{item.quantity}</td>
-                    <td className="text-right py-4 text-gray-600">${item.unitPrice.toFixed(2)}</td>
-                    <td className="text-right py-4 font-medium text-gray-900">${item.total.toFixed(2)}</td>
+                    <td className="text-right py-4 text-gray-600">${item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td className="text-right py-4 font-medium text-gray-900">${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   </tr>
                 ))}
               </tbody>
@@ -329,15 +329,15 @@ export default function DocumentPage() {
             <div className="w-64">
               <div className="flex justify-between py-2 border-b border-gray-100 text-sm">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="text-gray-900 font-medium">${content.subtotal.toFixed(2)}</span>
+                <span className="text-gray-900 font-medium">${content.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100 text-sm">
                 <span className="text-gray-600">Tax</span>
-                <span className="text-gray-900 font-medium">${content.tax.toFixed(2)}</span>
+                <span className="text-gray-900 font-medium">${content.tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between py-3 text-sm">
                 <span className="font-semibold text-gray-900">Total</span>
-                <span className="font-bold text-lg text-gray-900">${content.total.toFixed(2)}</span>
+                <span className="font-bold text-lg text-gray-900">${content.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>

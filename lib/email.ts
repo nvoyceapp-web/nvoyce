@@ -58,7 +58,7 @@ export async function sendInvoiceEmail({
               </div>
               <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #d1fae5;">
                 <p style="margin: 0 0 6px 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Total Amount</p>
-                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #f97316;">$${amount.toFixed(2)}</p>
+                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #f97316;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
             </div>
             <div style="background-color: #f9fafb; padding: 20px; border-radius: 4px; margin: 0 0 30px 0;">
@@ -210,7 +210,7 @@ export async function sendProposalSentEmail({
               </div>
               <div style="margin: 0 0 12px 0;">
                 <p style="margin: 0 0 8px 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Proposed Amount</p>
-                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #f97316;">$${amount.toFixed(2)}</p>
+                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #f97316;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div style="margin: 0 0 12px 0;">
                 <p style="margin: 0 0 8px 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Timeline</p>
@@ -289,7 +289,7 @@ export async function sendProposalAcceptedEmail({
           <div style="padding: 30px 20px; text-align: center;">
             <p style="margin: 0 0 10px 0; font-size: 28px;">🎉</p>
             <h1 style="margin: 0 0 20px 0; font-size: 20px; font-weight: bold; color: #1f2937;">Great news, ${freelancerName}!</h1>
-            <p style="margin: 0 0 30px 0; font-size: 16px; color: #374151; line-height: 1.6;"><strong>${clientName}</strong> accepted your proposal for <strong style="color: #f97316;">$${amount.toFixed(2)}</strong></p>
+            <p style="margin: 0 0 30px 0; font-size: 16px; color: #374151; line-height: 1.6;"><strong>${clientName}</strong> accepted your proposal for <strong style="color: #f97316;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>
             <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 0 0 30px 0; border-left: 4px solid #10b981;">
               <p style="margin: 0 0 10px 0; font-size: 14px; color: #065f46; font-weight: bold;">✓ Invoice Auto-Generated</p>
               <p style="margin: 0; font-size: 13px; color: #047857; line-height: 1.6;">An invoice has been automatically created and sent to your client. Payment will be due on the agreed date.</p>

@@ -185,7 +185,7 @@ export default function DocumentPage() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
-                onClick={() => router.push(`/dashboard/new?type=proposal`)}
+                onClick={() => router.push(`/dashboard/new?type=proposal&prefill=${id}`)}
                 className="text-sm border border-amber-300 text-amber-800 px-4 py-2 rounded-lg hover:bg-amber-100 transition"
               >
                 ← Edit Inputs

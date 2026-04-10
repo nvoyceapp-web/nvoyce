@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 
 type DocType = 'invoice' | 'proposal'
 
@@ -22,6 +23,7 @@ function NewDocumentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const typeParam = searchParams.get('type') as DocType | null
+  const prefillId = searchParams.get('prefill')
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
@@ -37,6 +39,34 @@ function NewDocumentContent() {
     notes: '',
     expirationDays: '7',
   })
+
+
+  useEffect(() => {
+    if (!prefillId) return
+    async function prefillForm() {
+      const { data } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('id', prefillId)
+        .single()
+      if (data?.form_data) {
+        setForm({
+          docType: 'proposal',
+          clientName: data.form_data.clientName || data.client_name || '',
+          clientEmail: data.form_data.clientEmail || data.client_email || '',
+          businessName: data.form_data.businessName || data.business_name || '',
+          serviceDescription: data.form_data.serviceDescription || '',
+          price: data.form_data.price || String(data.price) || '',
+          timeline: data.form_data.timeline || '',
+          paymentTerms: data.form_data.paymentTerms || 'Due on receipt',
+          notes: data.form_data.notes || '',
+          expirationDays: data.form_data.expirationDays || '7',
+        })
+        setStep(3)
+      }
+    }
+    prefillForm()
+  }, [prefillId])
 
   const validateStep = (currentStep: number): boolean => {
     const errors: string[] = []

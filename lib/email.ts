@@ -33,7 +33,7 @@ export async function sendInvoiceEmail({
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <div style="text-align: center; padding: 30px 20px; border-bottom: 1px solid #e5e7eb;">
-            <img src="${logoUrl}" alt="Nvoyce" style="max-width: 120px; height: auto;" />
+            <img src="${logoUrl}" alt="Nvoyce" style="max-width: 320px; height: auto;" />
             <div style="margin-top: 15px; display: inline-block; background-color: #f0fdf4; padding: 8px 16px; border-radius: 4px; border: 1px solid #d1fae5;">
               <p style="margin: 0; font-size: 13px; font-weight: bold; color: #047857;">✓ Invoice Ready for Payment</p>
             </div>
@@ -197,8 +197,8 @@ export async function sendProposalSentEmail({
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <div style="text-align: center; padding: 30px 20px 20px; border-bottom: 1px solid #e5e7eb;">
-            <img src="${logoUrl}" alt="Nvoyce" style="max-width: 120px; height: auto;" />
-            <p style="margin: 15px 0 0 0; color: #374151; font-size: 14px;">Professional Proposals from ${businessName}</p>
+            <img src="${logoUrl}" alt="Nvoyce" style="max-width: 320px; height: auto;" />
+            <p style="margin: 15px 0 0 0; color: #374151; font-size: 14px;">Professional Proposals from <strong>${businessName}</strong></p>
           </div>
           <div style="padding: 30px 20px;">
             <p style="margin: 0 0 20px 0; font-size: 16px; color: #1f2937;">Hi ${clientName},</p>

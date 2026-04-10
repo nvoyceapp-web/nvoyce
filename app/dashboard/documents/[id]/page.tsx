@@ -185,7 +185,7 @@ export default function DocumentPage() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
-                onClick={() => router.push(`/dashboard/new?edit=${id}&step=1`)}
+                onClick={() => router.push(`/dashboard/new?type=proposal`)}
                 className="text-sm border border-amber-300 text-amber-800 px-4 py-2 rounded-lg hover:bg-amber-100 transition"
               >
                 ← Edit Inputs
@@ -230,7 +230,7 @@ export default function DocumentPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 print:shadow-none print:border-none print:rounded-none">
 
           {/* Logo */}
-          <div className="flex justify-start mb-8">
+          <div className="flex justify-center mb-8">
             <Image
               src="/logo.png"
               alt="Nvoyce"

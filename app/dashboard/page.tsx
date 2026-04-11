@@ -1347,11 +1347,11 @@ function DashboardContent() {
                     onClick={() => setShowArchived(!showArchived)}
                     className={`text-xs px-3 py-1.5 rounded-lg border transition mb-1 ${
                       showArchived
-                        ? 'bg-gray-700 text-white border-gray-700'
-                        : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                        ? 'bg-gray-100 text-gray-900 border-gray-400 font-semibold'
+                        : 'text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700'
                     }`}
                   >
-                    🗂 {showArchived ? 'Archived' : 'View Archived'}
+                    🗂 {showArchived ? '← Back to Active' : 'View Archived'}
                   </button>
                 </div>
 
@@ -1533,7 +1533,7 @@ function DashboardContent() {
                                   <div className="relative">
                                     <button
                                       onClick={() => setOpenDropdown(openDropdown === doc.id ? null : doc.id)}
-                                      className="text-xs bg-gray-600 text-white px-2.5 py-1 rounded hover:bg-gray-700 transition"
+                                      className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition"
                                       title="Actions menu"
                                     >
                                       ⋯ Actions
@@ -1607,10 +1607,10 @@ function DashboardContent() {
                                 <div className="relative">
                                   <button
                                     onClick={() => setOpenDropdown(openDropdown === doc.id ? null : doc.id)}
-                                    className="text-xs bg-gray-600 text-white px-2.5 py-1 rounded hover:bg-gray-700 transition"
+                                    className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition"
                                     title="Actions menu"
                                   >
-                                    ⋯ Select
+                                    ⋯ Actions
                                   </button>
                                   {openDropdown === doc.id && (
                                     <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">

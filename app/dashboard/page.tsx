@@ -1137,11 +1137,9 @@ function DashboardContent() {
                               />
                             </td>
                             <td className="px-6 py-4">
-                              {doc.document_number ? (
-                                <span className="text-xs font-mono font-semibold text-gray-500">{doc.document_number}</span>
-                              ) : (
-                                <span className="text-xs text-gray-300 italic">Draft</span>
-                              )}
+                              <span className="text-xs font-mono font-semibold text-gray-500">
+                                {doc.document_number || '—'}
+                              </span>
                             </td>
                             <td className="px-6 py-4 text-gray-900 font-medium">{doc.client_name}</td>
                             <td className="px-6 py-4 text-gray-600 text-sm">{createdDate.toLocaleDateString()}</td>

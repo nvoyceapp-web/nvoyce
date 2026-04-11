@@ -129,6 +129,10 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
 
     console.log('Document saved successfully:', data.id)
 
+    // 5b. Assign document number immediately (drafts included)
+    // INV-YYYY-NNN for invoices, PRO-YYYY-NNN for proposals
+    const assignedNumber = await assignDocumentNumber(userId, docType as 'invoice' | 'proposal', data.id)
+
     // 6. Create payment link (invoices only)
     let paymentLink = ''
     if (docType === 'invoice') try {
@@ -145,14 +149,9 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
       console.error('Payment link creation error:', paymentError)
     }
 
-    // 7. Send email + assign document number at send time (invoices only)
-    // Proposals are saved as draft — number assigned when user sends to client
-    let assignedNumber = ''
+    // 7. Send invoice email
     if (docType === 'invoice') {
       try {
-        // Assign INV-YYYY-NNN number now (at send time, not draft creation)
-        assignedNumber = await assignDocumentNumber(userId, 'invoice', data.id)
-
         const documentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${data.id}`
         await sendInvoiceEmail({
           clientEmail: clientEmail,

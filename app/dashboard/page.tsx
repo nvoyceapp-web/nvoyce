@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getTopPaymeActions, PaymeAction } from '@/lib/payme-scoring'
 import Logo from '@/components/Logo'
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface Document {
   id: string
@@ -888,79 +889,9 @@ function DashboardContent() {
               </div>
             )}
 
-            {(() => {
-              const recs = getRecommendations()
-              if (recs.length === 0) return null
-              return (
-                <div className="bg-gradient-to-r from-purple-900 to-purple-800 text-white rounded-xl p-6 mb-10 border border-purple-700">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="text-2xl">💰</div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold mb-1">Payme</h3>
-                      <p className="text-sm text-purple-200">Your payment smart assistant</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    {recs.slice(0, expandPayme ? 3 : 1).map((rec, idx) => (
-                      <div key={idx} className="bg-white/10 rounded-lg p-3 border border-purple-600/40 flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <div className="text-sm font-medium text-purple-100">{rec.text}</div>
-                          <div className={`text-xs mt-1 ${rec.paymeAction?.type === 'invoice' ? 'text-red-300' : 'text-yellow-300'}`}>
-                            {rec.paymeAction?.icon} {rec.paymeAction?.type === 'invoice' ? 'Invoice - ' : 'Proposal - '}
-                            {rec.urgency === 'high' ? 'Urgent' : 'Important'}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          {rec.action === 'send-reminders' && (
-                            <button
-                              onClick={() => {
-                                // Select this specific overdue invoice
-                                setSelectedDocs(new Set([rec.paymeAction?.id]))
-                              }}
-                              className="text-xs bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
-                            >
-                              Send Reminder
-                            </button>
-                          )}
-                          {rec.action === 'follow-up' && (
-                            <button
-                              onClick={() => {
-                                // Filter table to show this proposal
-                                setFilterClient(rec.paymeAction?.client_name || '')
-                              }}
-                              className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
-                            >
-                              Review
-                            </button>
-                          )}
-                          <button
-                            onClick={() => dismissRecommendation(rec.type)}
-                            className="text-xs bg-purple-700/50 hover:bg-purple-700 text-white px-2 py-1 rounded transition whitespace-nowrap"
-                            title="Dismiss for this session"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {recs.length > 1 && (
-                    <button
-                      onClick={() => setExpandPayme(!expandPayme)}
-                      className="text-sm text-purple-200 hover:text-white mt-3 transition"
-                    >
-                      {expandPayme ? '▲ Show less' : `▼ Show ${recs.length - 1} more action${recs.length - 1 !== 1 ? 's' : ''}`}
-                    </button>
-                  )}
-                </div>
-              )
-            })()}
-
-            {/* Urgency Summary Card - Navy Blue with Orange Accents */}
+            {/* Urgency Summary Card - Navy Blue with Orange Accents — always first */}
             {stats.outstanding > 0 && (
-              <div className="bg-gradient-to-r from-blue-950 to-blue-900 text-white rounded-xl p-6 mb-10 border border-blue-800">
+              <div className="bg-gradient-to-r from-blue-950 to-blue-900 text-white rounded-xl p-6 mb-6 border border-blue-800">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="text-sm text-blue-200 mb-1">You're owed</div>
@@ -993,6 +924,71 @@ function DashboardContent() {
                 </div>
               </div>
             )}
+
+            {/* Payme — collapsed strip, expands on click */}
+            {(() => {
+              const recs = getRecommendations()
+              if (recs.length === 0) return null
+              return (
+                <div className="rounded-xl border border-purple-200 mb-6 overflow-hidden">
+                  {/* Always-visible header strip */}
+                  <button
+                    onClick={() => setExpandPayme(!expandPayme)}
+                    className="w-full flex items-center justify-between px-5 py-3 bg-gradient-to-r from-purple-900 to-purple-800 text-white hover:from-purple-800 hover:to-purple-700 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg">💰</span>
+                      <span className="font-semibold text-sm">Payme</span>
+                      <span className="text-xs text-purple-300 bg-purple-700/50 px-2 py-0.5 rounded-full">
+                        {recs.length} action{recs.length !== 1 ? 's' : ''} waiting
+                      </span>
+                    </div>
+                    <span className="text-purple-300 text-xs">{expandPayme ? '▲ Collapse' : '▼ Expand'}</span>
+                  </button>
+
+                  {/* Expandable body */}
+                  {expandPayme && (
+                    <div className="bg-gradient-to-r from-purple-900 to-purple-800 px-5 pb-5 space-y-2 border-t border-purple-700/50">
+                      {recs.map((rec, idx) => (
+                        <div key={idx} className="bg-white/10 rounded-lg p-3 border border-purple-600/40 flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-purple-100">{rec.text}</div>
+                            <div className={`text-xs mt-1 ${rec.paymeAction?.type === 'invoice' ? 'text-red-300' : 'text-yellow-300'}`}>
+                              {rec.paymeAction?.icon} {rec.paymeAction?.type === 'invoice' ? 'Invoice' : 'Proposal'} — {rec.urgency === 'high' ? 'Urgent' : 'Important'}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {rec.action === 'send-reminders' && (
+                              <button
+                                onClick={() => setSelectedDocs(new Set([rec.paymeAction?.id]))}
+                                className="text-xs bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
+                              >
+                                Send Reminder
+                              </button>
+                            )}
+                            {rec.action === 'follow-up' && (
+                              <button
+                                onClick={() => setFilterClient(rec.paymeAction?.client_name || '')}
+                                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
+                              >
+                                Review
+                              </button>
+                            )}
+                            <button
+                              onClick={() => dismissRecommendation(rec.type)}
+                              className="text-xs bg-purple-700/50 hover:bg-purple-700 text-white px-2 py-1 rounded transition whitespace-nowrap"
+                              title="Dismiss"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10 auto-rows-max">
               {/* Left: Metrics Block with Dropdown */}
@@ -1105,15 +1101,29 @@ function DashboardContent() {
 
               {/* Right: Charts - Stacked Vertically */}
               <div className="col-span-1 space-y-4 flex flex-col">
-                {/* Revenue Trend Chart */}
+                {/* Revenue Trend Chart — Recharts ComposedChart */}
                 {(() => {
                   const chartData = getChartData()
                   if (chartData.length === 0) return null
-                  const maxRevenue = Math.max(...chartData.map((d) => d.revenue), 1)
+
+                  // Scale Y-axis: start slightly below min so variance is visible
+                  const revenues = chartData.map((d) => d.revenue)
+                  const minRev = Math.min(...revenues)
+                  const maxRev = Math.max(...revenues)
+                  const padding = (maxRev - minRev) * 0.2 || maxRev * 0.1
+                  const yMin = Math.max(0, Math.floor((minRev - padding) / 100) * 100)
+                  const yMax = Math.ceil((maxRev + padding) / 100) * 100
+
+                  const formatY = (val: number) =>
+                    val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`
+
                   return (
                     <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-96">
-                      <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
+                          <p className="text-xs text-gray-400 mt-0.5">Collected revenue by month</p>
+                        </div>
                         <select
                           value={timePeriod}
                           onChange={(e) => setTimePeriod(e.target.value as any)}
@@ -1125,18 +1135,39 @@ function DashboardContent() {
                           <option value="all">All Time</option>
                         </select>
                       </div>
-                      <div className="flex-1 flex items-end justify-between gap-3 min-h-56">
-                        {chartData.slice(-6).map((data) => (
-                          <div key={data.label} className="flex-1 flex flex-col items-center justify-end gap-2 h-full">
-                            <div
-                              className="w-8 bg-gradient-to-t from-orange-600 to-orange-500 rounded-t-lg transition-all hover:from-orange-700 hover:to-orange-600 cursor-pointer"
-                              style={{ height: `${Math.max((data.revenue / maxRevenue) * 100, 15)}%` }}
-                              title={`$${(data.revenue / 1000).toFixed(1)}k`}
+                      <div className="flex-1">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <ComposedChart data={chartData.slice(-8)} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                            <XAxis
+                              dataKey="label"
+                              tick={{ fontSize: 11, fill: '#9ca3af' }}
+                              axisLine={false}
+                              tickLine={false}
                             />
-                            <div className="text-xs font-medium text-gray-600 text-center whitespace-nowrap">{data.label}</div>
-                            <div className="text-xs text-gray-500">${(data.revenue / 1000).toFixed(1)}k</div>
-                          </div>
-                        ))}
+                            <YAxis
+                              domain={[yMin, yMax]}
+                              tickFormatter={formatY}
+                              tick={{ fontSize: 11, fill: '#9ca3af' }}
+                              axisLine={false}
+                              tickLine={false}
+                              width={52}
+                            />
+                            <Tooltip
+                              formatter={(val: number) => [`$${val.toLocaleString()}`, 'Revenue']}
+                              contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
+                            />
+                            <Bar dataKey="revenue" fill="#ea580c" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                            <Line
+                              type="monotone"
+                              dataKey="revenue"
+                              stroke="#f97316"
+                              strokeWidth={2}
+                              dot={{ fill: '#f97316', r: 3 }}
+                              strokeDasharray="4 2"
+                            />
+                          </ComposedChart>
+                        </ResponsiveContainer>
                       </div>
                     </div>
                   )

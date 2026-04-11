@@ -205,144 +205,142 @@ export default function SettingsPage() {
               <p className="text-lg text-gray-600">Customize your Nvoyce experience and manage notifications.</p>
             </div>
 
-            {/* Settings Sections */}
-            <div className="space-y-8">
-              {settings.map((settingGroup) => (
-                <div key={settingGroup.section}>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">{settingGroup.section}</h2>
-                  <div className="space-y-4">
-                    {settingGroup.items.map((item) => (
-                      <div key={item.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-medium text-gray-900">{item.label}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-                        </div>
-                        <button
-                          onClick={() => item.onChange(!item.enabled)}
-                          className={`ml-4 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-                            item.enabled ? 'bg-purple-600' : 'bg-gray-300'
-                          }`}
-                        >
-                          <span
-                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                              item.enabled ? 'translate-x-5' : 'translate-x-0'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
             {/* Business Settings */}
-            <div className="mt-12 pt-8 border-t border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Business Settings</h2>
-              <div className="space-y-4">
-                <div className="bg-white rounded-lg border border-gray-200 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-gray-900">Timezone</h3>
-                      <p className="text-sm text-gray-600 mt-1">All dates and times will be displayed in your selected timezone</p>
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Business Settings</h2>
+                <div className="space-y-4">
+                  <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">Business Name</h3>
+                        {editingName ? (
+                          <div className="flex items-center gap-2 mt-2">
+                            <input
+                              type="text"
+                              value={nameInput}
+                              onChange={(e) => setNameInput(e.target.value)}
+                              className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-purple-500"
+                              placeholder="Enter your business name"
+                              autoFocus
+                            />
+                            <button onClick={saveBusinessName} className="text-sm bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700">Save</button>
+                            <button onClick={() => setEditingName(false)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-600 mt-1">{businessName || 'Not set — click Edit to add'}</p>
+                        )}
+                      </div>
+                      {!editingName && (
+                        <button onClick={() => setEditingName(true)} className="text-purple-600 hover:text-purple-700 text-sm font-semibold ml-4">Edit</button>
+                      )}
                     </div>
-                    <select
-                      value={timezone}
-                      onChange={(e) => setTimezone(e.target.value)}
-                      className="ml-4 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
-                    >
-                      {TIMEZONES.map((tz) => (
-                        <option key={tz.value} value={tz.value}>
-                          {tz.label}
-                        </option>
-                      ))}
-                    </select>
                   </div>
-                </div>
 
-                <div className="bg-white rounded-lg border border-gray-200 p-4">
-                  <div className="mb-4">
-                    <h3 className="font-medium text-gray-900">Business Logo</h3>
-                    <p className="text-sm text-gray-600 mt-1">Upload your logo to display on invoices and proposals</p>
-                  </div>
-
-                  {uploadMessage && (
-                    <div className={`mb-4 p-3 rounded text-sm ${uploadMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-                      {uploadMessage.text}
+                  <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <div className="mb-4">
+                      <h3 className="font-medium text-gray-900">Business Logo</h3>
+                      <p className="text-sm text-gray-600 mt-1">Upload your logo to display on invoices and proposals</p>
                     </div>
-                  )}
 
-                  {logoUrl ? (
-                    <div className="space-y-4">
-                      <div className="flex justify-center">
-                        <img src={logoUrl} alt="Your logo" className="max-h-32 max-w-xs" />
+                    {uploadMessage && (
+                      <div className={`mb-4 p-3 rounded text-sm ${uploadMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                        {uploadMessage.text}
                       </div>
-                      <div className="flex gap-2">
-                        <label className="flex-1 px-4 py-2 border-2 border-purple-200 rounded-lg text-center cursor-pointer hover:bg-purple-50 transition">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleLogoUpload}
-                            disabled={uploading}
-                            className="hidden"
-                          />
-                          <span className="text-sm font-medium text-purple-600">{uploading ? 'Uploading...' : 'Change Logo'}</span>
-                        </label>
-                        <button
-                          onClick={handleRemoveLogo}
-                          className="px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition text-sm font-medium"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <label className="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-purple-300 transition">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoUpload}
-                        disabled={uploading}
-                        className="hidden"
-                      />
-                      <div className="text-sm">
-                        <p className="font-medium text-gray-900">{uploading ? 'Uploading...' : 'Click to upload logo'}</p>
-                        <p className="text-gray-600 mt-1">PNG, JPG up to 5MB</p>
-                      </div>
-                    </label>
-                  )}
-                </div>
-              </div>
-            </div>
+                    )}
 
-            {/* Account Section */}
-            <div className="mt-12 pt-8 border-t border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Account</h2>
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">Business Name</h3>
-                    {editingName ? (
-                      <div className="flex items-center gap-2 mt-2">
-                        <input
-                          type="text"
-                          value={nameInput}
-                          onChange={(e) => setNameInput(e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-purple-500"
-                          placeholder="Enter your business name"
-                          autoFocus
-                        />
-                        <button onClick={saveBusinessName} className="text-sm bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700">Save</button>
-                        <button onClick={() => setEditingName(false)} className="text-sm text-gray-500 hover:text-gray-700">Cancel</button>
+                    {logoUrl ? (
+                      <div className="space-y-4">
+                        <div className="flex justify-center">
+                          <img src={logoUrl} alt="Your logo" className="max-h-32 max-w-xs" />
+                        </div>
+                        <div className="flex gap-2">
+                          <label className="flex-1 px-4 py-2 border-2 border-purple-200 rounded-lg text-center cursor-pointer hover:bg-purple-50 transition">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                              disabled={uploading}
+                              className="hidden"
+                            />
+                            <span className="text-sm font-medium text-purple-600">{uploading ? 'Uploading...' : 'Change Logo'}</span>
+                          </label>
+                          <button
+                            onClick={handleRemoveLogo}
+                            className="px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition text-sm font-medium"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-600 mt-1">{businessName || 'Not set — click Edit to add'}</p>
+                      <label className="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-purple-300 transition">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                        <div className="text-sm">
+                          <p className="font-medium text-gray-900">{uploading ? 'Uploading...' : 'Click to upload logo'}</p>
+                          <p className="text-gray-600 mt-1">PNG, JPG up to 5MB</p>
+                        </div>
+                      </label>
                     )}
                   </div>
-                  {!editingName && (
-                    <button onClick={() => setEditingName(true)} className="text-purple-600 hover:text-purple-700 text-sm font-semibold ml-4">Edit</button>
-                  )}
+
+                  <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-gray-900">Timezone</h3>
+                        <p className="text-sm text-gray-600 mt-1">All dates and times will be displayed in your selected timezone</p>
+                      </div>
+                      <select
+                        value={timezone}
+                        onChange={(e) => setTimezone(e.target.value)}
+                        className="ml-4 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                      >
+                        {TIMEZONES.map((tz) => (
+                          <option key={tz.value} value={tz.value}>
+                            {tz.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              {/* Settings Sections - Notifications & Automation */}
+              <div className="pt-8 border-t border-gray-200">
+                {settings.map((settingGroup) => (
+                  <div key={settingGroup.section} className="mb-8">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">{settingGroup.section}</h2>
+                    <div className="space-y-4">
+                      {settingGroup.items.map((item) => (
+                        <div key={item.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-medium text-gray-900">{item.label}</h3>
+                            <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                          </div>
+                          <button
+                            onClick={() => item.onChange(!item.enabled)}
+                            className={`ml-4 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+                              item.enabled ? 'bg-purple-600' : 'bg-gray-300'
+                            }`}
+                          >
+                            <span
+                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                item.enabled ? 'translate-x-5' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 

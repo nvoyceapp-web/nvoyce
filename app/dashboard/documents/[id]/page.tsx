@@ -58,23 +58,38 @@ export default function DocumentPage() {
   const [paymentNotes, setPaymentNotes] = useState<string>('')
   const [editingContent, setEditingContent] = useState<Record<string, any> | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [userLogo, setUserLogo] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchDoc() {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('id', id)
-        .single()
+      try {
+        const { data, error } = await supabase
+          .from('documents')
+          .select('*')
+          .eq('id', id)
+          .single()
 
-      if (!error && data) {
-        setDoc(data as Document)
-        setEditingContent(data.generated_content)
-        if (data.amount_paid) setAmountPaid(data.amount_paid)
-      } else {
-        console.error('Error loading document:', error)
+        if (!error && data) {
+          setDoc(data as Document)
+          setEditingContent(data.generated_content)
+          if (data.amount_paid) setAmountPaid(data.amount_paid)
+
+          // Fetch user settings to get logo
+          const { data: settings } = await supabase
+            .from('user_settings')
+            .select('logo_url')
+            .eq('user_id', data.user_id)
+            .single()
+
+          if (settings?.logo_url) {
+            setUserLogo(settings.logo_url)
+          }
+        } else {
+          console.error('Error loading document:', error)
+        }
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     fetchDoc()
   }, [id])
@@ -402,10 +417,16 @@ export default function DocumentPage() {
       <div className="max-w-3xl mx-auto px-4 py-12 print:py-0 print:px-0">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 print:shadow-none print:border-none print:rounded-none">
 
-          {/* Nvoyce Logo */}
+          {/* Logo Section */}
           <div className="text-center mb-12 pb-8 border-b border-gray-100">
-            <div className="text-4xl font-bold text-purple-600">nvoyce</div>
-            <div className="text-xs text-gray-400 mt-1">Professional Proposals & Invoices</div>
+            {userLogo ? (
+              <img src={userLogo} alt="Logo" className="h-16 mx-auto mb-2 object-contain" />
+            ) : (
+              <>
+                <div className="text-4xl font-bold text-purple-600">nvoyce</div>
+                <div className="text-xs text-gray-400 mt-1">Professional Proposals & Invoices</div>
+              </>
+            )}
           </div>
 
           {/* Header */}
@@ -704,6 +725,13 @@ export default function DocumentPage() {
               </div>
             </div>
           )}
+
+          {/* Made with nvoyce footer */}
+          <div className="border-t border-gray-100 mt-12 pt-8 text-center">
+            <p className="text-xs text-gray-400">
+              Made with <span className="text-purple-600 font-semibold">nvoyce</span>
+            </p>
+          </div>
         </div>
       </div>
 

@@ -21,20 +21,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'documentIds array is required' }, { status: 400 })
     }
 
-    // Verify all documents belong to this user before deleting
+    // Verify all documents belong to this user and are drafts before deleting
     const { data: docs, error: fetchError } = await supabase
       .from('documents')
-      .select('id, user_id')
+      .select('id, user_id, status')
       .in('id', documentIds)
 
     if (fetchError) {
       return NextResponse.json({ error: 'Failed to verify documents' }, { status: 500 })
     }
 
-    // Check ownership
+    // Check ownership and status
     const unauthorized = docs?.some((doc) => doc.user_id !== userId)
     if (unauthorized) {
       return NextResponse.json({ error: 'Unauthorized: cannot delete documents you do not own' }, { status: 403 })
+    }
+
+    // Only allow deletion of draft documents
+    const nonDrafts = docs?.filter((doc) => doc.status !== 'draft')
+    if (nonDrafts && nonDrafts.length > 0) {
+      return NextResponse.json({
+        error: 'Cannot delete sent or accepted documents. Only drafts can be deleted.'
+      }, { status: 400 })
     }
 
     // Delete the documents

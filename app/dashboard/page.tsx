@@ -1398,16 +1398,18 @@ function DashboardContent() {
                                         >
                                           👁️ View Details
                                         </button>
-                                        <button
-                                          onClick={() => {
-                                            deleteDocument(doc.id, doc.doc_type)
-                                            setOpenDropdown(null)
-                                          }}
-                                          disabled={deleting}
-                                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-b-lg disabled:opacity-50"
-                                        >
-                                          🗑️ Delete
-                                        </button>
+                                        {doc.status === 'draft' && (
+                                          <button
+                                            onClick={() => {
+                                              deleteDocument(doc.id, doc.doc_type)
+                                              setOpenDropdown(null)
+                                            }}
+                                            disabled={deleting}
+                                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-b-lg disabled:opacity-50"
+                                          >
+                                            🗑️ Delete Draft
+                                          </button>
+                                        )}
                                       </div>
                                     )}
                                   </div>
@@ -1458,16 +1460,18 @@ function DashboardContent() {
                                       >
                                         👁️ View Details
                                       </button>
-                                      <button
-                                        onClick={() => {
-                                          deleteDocument(doc.id, doc.doc_type)
-                                          setOpenDropdown(null)
-                                        }}
-                                        disabled={deleting}
-                                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-b-lg disabled:opacity-50"
-                                      >
-                                        🗑️ Delete
-                                      </button>
+                                      {doc.status === 'draft' && (
+                                        <button
+                                          onClick={() => {
+                                            deleteDocument(doc.id, doc.doc_type)
+                                            setOpenDropdown(null)
+                                          }}
+                                          disabled={deleting}
+                                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-b-lg disabled:opacity-50"
+                                        >
+                                          🗑️ Delete Draft
+                                        </button>
+                                      )}
                                     </div>
                                   )}
                                 </div>

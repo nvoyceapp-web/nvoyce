@@ -202,10 +202,10 @@ export default function DocumentPage() {
         // Redirect to dashboard with success notification, including payment link
         const params = new URLSearchParams()
         if (doc.doc_type === 'invoice') {
-          params.append('invoiceCreated', 'true')
+          params.append('invoiceCreated', doc.id)
           if (paymentLink) params.append('paymentLink', paymentLink)
         } else {
-          params.append('proposalCreated', 'true')
+          params.append('proposalCreated', doc.id)
         }
         router.push(`/dashboard?${params.toString()}`)
       }

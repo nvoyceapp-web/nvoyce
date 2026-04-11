@@ -93,8 +93,8 @@ export default function SettingsPage() {
     try {
       const settingsData = {
         user_id: userId,
-        business_name: businessName || null,
-        logo_url: logoUrl || null,
+        business_name: businessName || undefined,
+        logo_url: logoUrl || undefined,
         updated_at: new Date().toISOString(),
       }
 

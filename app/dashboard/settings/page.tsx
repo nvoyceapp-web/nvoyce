@@ -93,8 +93,8 @@ export default function SettingsPage() {
     try {
       const settingsData = {
         user_id: userId,
-        business_name: businessName || undefined,
-        logo_url: logoUrl || undefined,
+        business_name: businessName || null,
+        logo_url: logoUrl || null,
         updated_at: new Date().toISOString(),
       }
 
@@ -113,7 +113,7 @@ export default function SettingsPage() {
         if (error) throw error
       }
 
-      setSettings(settingsData)
+      setSettings(settingsData as UserSettings)
       setUploadMessage({ type: 'success', text: '✅ Settings saved' })
       setTimeout(() => setUploadMessage(null), 3000)
     } catch (err) {

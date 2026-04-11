@@ -7,6 +7,8 @@ export default clerkMiddleware((auth, req) => {
     '/api/proposals/generate-invoice',
     '/api/proposals/decline',
     '/api/proposals/notify',
+    '/api/webhooks/stripe',
+    '/pay',
   ]
 
   if (publicRoutes.some(route => pathname.startsWith(route))) {

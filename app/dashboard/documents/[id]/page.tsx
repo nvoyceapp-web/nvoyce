@@ -1,21 +1,18 @@
 'use client'
+
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { supabase, type Document } from '@/lib/supabase'
 
 export default function DocumentPage() {
   const { id } = useParams()
-  const router = useRouter()
   const [doc, setDoc] = useState<Document | null>(null)
   const [loading, setLoading] = useState(true)
   const [generatingLink, setGeneratingLink] = useState(false)
   const [copied, setCopied] = useState(false)
   const [amountPaid, setAmountPaid] = useState<number>(0)
   const [paymentNotes, setPaymentNotes] = useState<string>('')
-  const [sending, setSending] = useState(false)
-  const [sent, setSent] = useState(false)
 
   useEffect(() => {
     async function fetchDoc() {
@@ -24,9 +21,11 @@ export default function DocumentPage() {
         .select('*')
         .eq('id', id)
         .single()
+
       if (!error && data) {
         console.log('Loaded document:', data)
         setDoc(data as Document)
+        if (data.amount_paid) setAmountPaid(data.amount_paid)
       } else {
         console.error('Error loading document:', error)
       }
@@ -45,14 +44,18 @@ export default function DocumentPage() {
         description: `${doc.doc_type} from ${doc.business_name}`,
         clientEmail: doc.client_email,
       }
+      console.log('Sending payment link request:', payload)
       const res = await fetch('/api/payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
       const data = await res.json()
+      console.log('Payment link response:', data)
       if (data.paymentLink) {
         setDoc((prev) => prev ? { ...prev, stripe_payment_link: data.paymentLink } : prev)
+      } else {
+        console.error('No payment link in response:', data)
       }
     } catch (error) {
       console.error('Payment link error:', error)
@@ -68,36 +71,25 @@ export default function DocumentPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const sendToClient = async () => {
-    if (!doc) return
-    setSending(true)
-    try {
-      const res = await fetch('/api/proposals/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ proposalId: id }),
-      })
-      if (res.ok) {
-        setSent(true)
-        setDoc((prev) => prev ? { ...prev, status: 'sent' } : prev)
-      } else {
-        console.error('Failed to send proposal')
-      }
-    } catch (error) {
-      console.error('Send error:', error)
-    } finally {
-      setSending(false)
+  // Compute effective status (overdue is derived, not stored)
+  const getEffectiveStatus = (doc: Document): string => {
+    if (doc.status === 'sent' && doc.generated_content?.dueDate) {
+      const due = new Date(doc.generated_content.dueDate)
+      if (due < new Date()) return 'overdue'
     }
+    return doc.status
   }
 
   const statusColors: Record<string, string> = {
     draft: 'bg-gray-100 text-gray-600',
-    sent: 'bg-blue-100 text-blue-700',
-    fully_paid: 'bg-green-100 text-green-700',
+    sent: 'bg-blue-50 text-blue-600',
+    viewed: 'bg-yellow-50 text-yellow-700',
     partially_paid: 'bg-yellow-100 text-yellow-700',
-    overdue: 'bg-red-100 text-red-700',
-    accepted: 'bg-green-100 text-green-700',
-    declined: 'bg-red-100 text-red-700',
+    fully_paid: 'bg-green-50 text-green-700',
+    overdue: 'bg-red-50 text-red-600',
+    accepted: 'bg-green-50 text-green-700',
+    declined: 'bg-red-50 text-red-600',
+    expired: 'bg-gray-100 text-gray-500',
   }
 
   if (loading) {
@@ -120,61 +112,53 @@ export default function DocumentPage() {
   }
 
   const content = doc.generated_content
+  const effectiveStatus = getEffectiveStatus(doc)
+  const isInvoice = doc.doc_type === 'invoice'
+  const totalAmount = content.total || doc.price
+  const paidAmount = doc.amount_paid || 0
+  const outstandingAmount = Math.max(0, totalAmount - paidAmount)
 
   return (
-    <div className="min-h-screen bg-gray-50 print:bg-white">
-      <style>{`
-        @media print {
-          @page {
-            margin: 0.5in;
-            size: letter;
-          }
-          body {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-        }
-      `}</style>
+    <div className="min-h-screen bg-gray-50">
       {/* Top bar */}
-      <div className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between print:hidden">
+      <div className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="text-sm text-gray-400 hover:text-gray-700">
             ← Dashboard
           </Link>
           <span className="text-gray-200">|</span>
           <span className="text-sm font-medium text-gray-900">{content.documentNumber}</span>
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${statusColors[doc.status]}`}>
-            {doc.status}
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${statusColors[effectiveStatus] || 'bg-gray-100 text-gray-600'}`}>
+            {effectiveStatus === 'fully_paid' ? 'Fully Paid' : effectiveStatus === 'partially_paid' ? 'Partially Paid' : effectiveStatus}
           </span>
         </div>
+
+        {/* Actions */}
         <div className="flex items-center gap-3">
-          {doc.doc_type === 'invoice' && (
+          {isInvoice && effectiveStatus === 'fully_paid' ? (
+            <span className="text-sm text-green-600 font-semibold">✓ Fully Paid</span>
+          ) : isInvoice && doc.stripe_payment_link ? (
             <>
-              {doc.status === 'paid' ? (
-                <span className="text-sm text-green-600 font-semibold">✓ Paid</span>
-              ) : doc.stripe_payment_link ? (
-                <>
-                  <span className="text-xs text-gray-400 max-w-xs truncate hidden md:block">
-                    {doc.stripe_payment_link}
-                  </span>
-                  <button
-                    onClick={copyLink}
-                    className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-                  >
-                    {copied ? '✓ Copied!' : 'Copy payment link'}
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={generatePaymentLink}
-                  disabled={generatingLink}
-                  className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
-                >
-                  {generatingLink ? 'Creating link...' : '⚡ Generate payment link'}
-                </button>
-              )}
+              <span className="text-xs text-gray-400 max-w-xs truncate hidden md:block">
+                {doc.stripe_payment_link}
+              </span>
+              <button
+                onClick={copyLink}
+                className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+              >
+                {copied ? '✓ Copied!' : 'Copy payment link'}
+              </button>
             </>
-          )}
+          ) : isInvoice ? (
+            <button
+              onClick={generatePaymentLink}
+              disabled={generatingLink}
+              className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+            >
+              {generatingLink ? 'Creating link...' : '⚡ Generate payment link'}
+            </button>
+          ) : null}
+
           <button
             onClick={() => window.print()}
             className="text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
@@ -184,130 +168,75 @@ export default function DocumentPage() {
         </div>
       </div>
 
-      {/* Draft proposal action bar */}
-      {doc.doc_type === 'proposal' && doc.status === 'draft' && (
-        <div className="bg-amber-50 border-b border-amber-100 print:hidden">
-          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <div className="text-amber-500 font-semibold text-lg">✎</div>
-              <div>
-                <h3 className="text-sm font-semibold text-amber-900">Review your proposal before sending</h3>
-                <p className="text-sm text-amber-700 mt-0.5">
-                  This proposal is saved as a draft. Send it to <strong>{doc.client_email}</strong> when ready.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                onClick={() => router.push(`/dashboard/new?type=proposal&prefill=${id}`)}
-                className="text-sm border border-amber-300 text-amber-800 px-4 py-2 rounded-lg hover:bg-amber-100 transition"
-              >
-                ← Edit Inputs
-              </button>
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="text-sm border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
-              >
-                Save as Draft
-              </button>
-              <button
-                onClick={sendToClient}
-                disabled={sending}
-                className="text-sm bg-violet-600 text-white px-5 py-2 rounded-lg hover:bg-violet-700 transition font-semibold disabled:opacity-50"
-              >
-                {sending ? 'Sending...' : '✉ Send to Client'}
-              </button>
-            </div>
+      {/* Status banners for invoices */}
+      {isInvoice && effectiveStatus === 'sent' && (
+        <div className="bg-blue-50 border-b border-blue-100 px-8 py-3 flex items-center justify-between print:hidden">
+          <div className="flex items-center gap-2 text-blue-700 text-sm">
+            <span>📬</span>
+            <span>Invoice sent — awaiting payment</span>
           </div>
+          {doc.stripe_payment_link && (
+            <button
+              onClick={copyLink}
+              className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition"
+            >
+              {copied ? '✓ Copied!' : 'Copy payment link'}
+            </button>
+          )}
         </div>
       )}
 
-      {/* Sent confirmation banner */}
-      {doc.doc_type === 'proposal' && (doc.status === 'sent' || sent) && (
-        <div className="bg-green-50 border-b border-green-100 print:hidden">
-          <div className="max-w-3xl mx-auto px-4 py-4">
-            <div className="flex items-center gap-3">
-              <div className="text-green-600 font-semibold text-lg">✓</div>
-              <div>
-                <h3 className="text-sm font-semibold text-green-900">Proposal sent!</h3>
-                <p className="text-sm text-green-700 mt-0.5">
-                  Your proposal has been sent to <strong>{doc.client_email}</strong>. They can review and respond.
-                </p>
-              </div>
-            </div>
+      {isInvoice && effectiveStatus === 'overdue' && (
+        <div className="bg-red-50 border-b border-red-100 px-8 py-3 flex items-center justify-between print:hidden">
+          <div className="flex items-center gap-2 text-red-700 text-sm">
+            <span>⚠️</span>
+            <span>
+              This invoice is overdue — ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding
+            </span>
           </div>
+          {doc.stripe_payment_link && (
+            <button
+              onClick={copyLink}
+              className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition"
+            >
+              {copied ? '✓ Copied!' : 'Copy payment link'}
+            </button>
+          )}
         </div>
       )}
 
-      {/* Invoice sent banner */}
-      {doc.doc_type === 'invoice' && doc.status === 'sent' && (
-        <div className="bg-blue-50 border-b border-blue-100 print:hidden">
-          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <div className="text-blue-500 font-semibold text-lg">✉</div>
-              <div>
-                <h3 className="text-sm font-semibold text-blue-900">Invoice sent — awaiting payment</h3>
-                <p className="text-sm text-blue-700 mt-0.5">Emailed to <strong>{doc.client_email}</strong> with a payment link.</p>
-              </div>
-            </div>
-            {doc.stripe_payment_link && (
-              <button onClick={copyLink} className="text-sm border border-blue-300 text-blue-800 px-4 py-2 rounded-lg hover:bg-blue-100 transition flex-shrink-0">
-                {copied ? '✓ Copied!' : 'Copy payment link'}
-              </button>
-            )}
+      {isInvoice && effectiveStatus === 'partially_paid' && (
+        <div className="bg-yellow-50 border-b border-yellow-100 px-8 py-3 flex items-center justify-between print:hidden">
+          <div className="flex items-center gap-2 text-yellow-700 text-sm">
+            <span>💛</span>
+            <span>
+              Partial payment received — ${paidAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received,{' '}
+              ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding
+            </span>
           </div>
+          {doc.stripe_payment_link && (
+            <button
+              onClick={copyLink}
+              className="text-xs bg-yellow-600 text-white px-3 py-1.5 rounded-lg hover:bg-yellow-700 transition"
+            >
+              {copied ? '✓ Copied!' : 'Copy payment link'}
+            </button>
+          )}
         </div>
       )}
-      {/* Invoice partially paid banner */}
-      {doc.doc_type === 'invoice' && doc.status === 'partially_paid' && (
-        <div className="bg-yellow-50 border-b border-yellow-100 print:hidden">
-          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <div className="text-yellow-500 font-semibold text-lg">◑</div>
-              <div>
-                <h3 className="text-sm font-semibold text-yellow-900">Partial payment received</h3>
-                <p className="text-sm text-yellow-700 mt-0.5">
-                  ${doc.amount_paid?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received — ${((doc.price || 0) - (doc.amount_paid || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding.
-                </p>
-              </div>
-            </div>
-            {doc.stripe_payment_link && (
-              <button onClick={copyLink} className="text-sm border border-yellow-300 text-yellow-800 px-4 py-2 rounded-lg hover:bg-yellow-100 transition flex-shrink-0">
-                {copied ? '✓ Copied!' : 'Copy payment link'}
-              </button>
-            )}
-          </div>
+
+      {isInvoice && effectiveStatus === 'fully_paid' && (
+        <div className="bg-green-50 border-b border-green-100 px-8 py-3 flex items-center gap-2 text-green-700 text-sm print:hidden">
+          <span>✅</span>
+          <span>
+            Payment complete — ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received in full
+          </span>
         </div>
       )}
-      {/* Invoice fully paid banner */}
-      {doc.doc_type === 'invoice' && doc.status === 'fully_paid' && (
-        <div className="bg-green-50 border-b border-green-100 print:hidden">
-          <div className="max-w-3xl mx-auto px-4 py-4">
-            <div className="flex items-center gap-3">
-              <div className="text-green-600 font-semibold text-lg">✓</div>
-              <div>
-                <h3 className="text-sm font-semibold text-green-900">Fully paid!</h3>
-                <p className="text-sm text-green-700 mt-0.5">Full payment received from <strong>{doc.client_email}</strong>.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
       {/* Document */}
       <div className="max-w-3xl mx-auto px-4 py-12 print:py-0 print:px-0">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 print:shadow-none print:border-none print:rounded-none">
-
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <Image
-              src="/logo.png"
-              alt="Nvoyce"
-              width={280}
-              height={90}
-              style={{ objectFit: 'contain' }}
-              priority
-            />
-          </div>
 
           {/* Header */}
           <div className="flex items-start justify-between mb-10">
@@ -356,69 +285,171 @@ export default function DocumentPage() {
             <p className="text-gray-600 text-sm leading-relaxed">{content.introduction}</p>
           </div>
 
-          {/* Line items */}
-          <div className="mb-10">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left py-3 text-gray-400 font-medium">Description</th>
-                  <th className="text-right py-3 text-gray-400 font-medium">Qty</th>
-                  <th className="text-right py-3 text-gray-400 font-medium">Unit Price</th>
-                  <th className="text-right py-3 text-gray-400 font-medium">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {content.lineItems.map((item: any, idx: number) => (
-                  <tr key={idx} className="border-b border-gray-50">
-                    <td className="py-4 text-gray-900">{item.description}</td>
-                    <td className="text-right py-4 text-gray-600">{item.quantity}</td>
-                    <td className="text-right py-4 text-gray-600">${item.unitPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td className="text-right py-4 font-medium text-gray-900">${item.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Line items table */}
+          <div className="mb-8">
+            <div className="grid grid-cols-12 text-xs font-semibold text-gray-400 uppercase tracking-wide pb-2 border-b border-gray-100">
+              <div className="col-span-6">Description</div>
+              <div className="col-span-2 text-right">Qty</div>
+              <div className="col-span-2 text-right">Unit price</div>
+              <div className="col-span-2 text-right">Total</div>
+            </div>
 
-          {/* Totals */}
-          <div className="flex justify-end mb-10">
-            <div className="w-64">
-              <div className="flex justify-between py-2 border-b border-gray-100 text-sm">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="text-gray-900 font-medium">${content.subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            {content.lineItems.map((item: { description: string; quantity: number; unitPrice: number; total: number }, i: number) => (
+              <div
+                key={i}
+                className="grid grid-cols-12 text-sm py-4 border-b border-gray-50"
+              >
+                <div className="col-span-6 text-gray-900">{item.description}</div>
+                <div className="col-span-2 text-right text-gray-600">{item.quantity}</div>
+                <div className="col-span-2 text-right text-gray-600">${item.unitPrice.toLocaleString()}</div>
+                <div className="col-span-2 text-right font-medium text-gray-900">${item.total.toLocaleString()}</div>
               </div>
-              <div className="flex justify-between py-2 border-b border-gray-100 text-sm">
-                <span className="text-gray-600">Tax</span>
-                <span className="text-gray-900 font-medium">${content.tax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between py-3 text-sm">
-                <span className="font-semibold text-gray-900">Total</span>
-                <span className="font-bold text-lg text-gray-900">${content.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            ))}
+
+            {/* Totals */}
+            <div className="mt-4 flex justify-end">
+              <div className="w-56 text-sm space-y-2">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
+                  <span>${content.subtotal.toLocaleString()}</span>
+                </div>
+                {content.tax > 0 && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>Tax</span>
+                    <span>${content.tax.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-gray-900 text-base pt-2 border-t border-gray-200">
+                  <span>Total</span>
+                  <span>${content.total.toLocaleString()}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Timeline & Notes */}
-          <div className="grid grid-cols-2 gap-8 mb-10 border-t border-gray-100 pt-8">
-            {content.timeline && (
-              <div className="text-sm">
-                <div className="text-gray-400 mb-1 font-semibold">Timeline</div>
-                <div className="text-gray-900">{content.timeline}</div>
-              </div>
-            )}
-            {content.notes && (
-              <div className="text-sm">
-                <div className="text-gray-400 mb-1 font-semibold">Notes</div>
-                <div className="text-gray-900">{content.notes}</div>
-              </div>
-            )}
+          {/* Timeline */}
+          {content.timeline && (
+            <div className="bg-gray-50 rounded-xl p-5 mb-6 text-sm">
+              <span className="font-semibold text-gray-700">Timeline: </span>
+              <span className="text-gray-600">{content.timeline}</span>
+            </div>
+          )}
+
+          {/* Notes */}
+          {content.notes && (
+            <div className="text-sm text-gray-600 mb-8">
+              <div className="font-semibold text-gray-700 mb-1">Notes</div>
+              <p className="leading-relaxed">{content.notes}</p>
+            </div>
+          )}
+
+          {/* Payment link banner */}
+          {isInvoice && doc.stripe_payment_link && effectiveStatus !== 'fully_paid' && (
+            <div className="bg-black text-white rounded-xl p-6 text-center mb-8 print:hidden">
+              <p className="text-sm text-gray-300 mb-3">Pay securely online</p>
+              <a
+                href={doc.stripe_payment_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-black text-sm font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-100 transition inline-block"
+              >
+                Pay ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} now →
+              </a>
+            </div>
+          )}
+
+          {isInvoice && effectiveStatus === 'fully_paid' && (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-center mb-8">
+              <p className="text-green-700 font-semibold">✓ Payment received in full</p>
+              <p className="text-green-600 text-sm mt-1">Thank you for your business.</p>
+            </div>
+          )}
+
+          {/* Closing */}
+          <div className="border-t border-gray-100 pt-8 text-sm text-gray-600">
+            <p className="leading-relaxed">{content.closingMessage}</p>
+            <p className="mt-4 font-semibold text-gray-900">{content.from.name}</p>
           </div>
 
-          {/* Closing message */}
-          <div className="border-t border-gray-100 pt-8">
-            <p className="text-gray-600 text-sm leading-relaxed">{content.closingMessage}</p>
-          </div>
+          {/* Payment Tracking — only for invoices not fully paid */}
+          {isInvoice && effectiveStatus !== 'fully_paid' && (
+            <div className="border-t border-gray-100 mt-10 pt-8 print:hidden">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Payment Tracking</h3>
 
+              {/* Summary */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="text-xs text-blue-600 font-semibold uppercase">Total</div>
+                  <div className="text-2xl font-bold text-blue-900">${totalAmount.toLocaleString()}</div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <div className="text-xs text-green-600 font-semibold uppercase">Paid</div>
+                  <div className="text-2xl font-bold text-green-900">${paidAmount.toLocaleString()}</div>
+                </div>
+                <div className={`rounded-lg p-4 ${paidAmount >= totalAmount ? 'bg-green-50' : paidAmount > 0 ? 'bg-yellow-50' : 'bg-red-50'}`}>
+                  <div className={`text-xs font-semibold uppercase ${paidAmount >= totalAmount ? 'text-green-600' : paidAmount > 0 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    Outstanding
+                  </div>
+                  <div className={`text-2xl font-bold ${paidAmount >= totalAmount ? 'text-green-900' : paidAmount > 0 ? 'text-yellow-900' : 'text-red-900'}`}>
+                    ${outstandingAmount.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Status badge */}
+              <div className="mb-6">
+                {effectiveStatus === 'partially_paid' && (
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                    ⚠ Partially Paid (${paidAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} of ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                  </span>
+                )}
+                {(effectiveStatus === 'sent' || effectiveStatus === 'draft') && paidAmount === 0 && (
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-700">
+                    ⧗ Awaiting Payment
+                  </span>
+                )}
+                {effectiveStatus === 'overdue' && (
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-red-100 text-red-700">
+                    🔴 Overdue
+                  </span>
+                )}
+              </div>
+
+              {/* Record Payment Form */}
+              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">Amount Paid</label>
+                  <input
+                    type="number"
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(Math.max(0, Number(e.target.value)))}
+                    placeholder="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Enter total amount received (including partial payments)</p>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">Payment Notes (optional)</label>
+                  <textarea
+                    value={paymentNotes}
+                    onChange={(e) => setPaymentNotes(e.target.value)}
+                    placeholder="e.g., Received partial payment, remaining due by..."
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    console.log('Record payment:', { amountPaid, paymentNotes })
+                    alert(`Payment of $${amountPaid.toLocaleString()} recorded${paymentNotes ? ' with note: ' + paymentNotes : ''}`)
+                  }}
+                  className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm"
+                >
+                  ✓ Save Payment
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

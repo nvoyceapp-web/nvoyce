@@ -10,9 +10,11 @@ const supabase = createClient(
 )
 
 // This endpoint listens for events from Stripe and updates invoice status
-// Set this URL in your Stripe Dashboard → Webhooks
+// Register this URL in: Stripe Dashboard → Webhooks → Add endpoint
+// URL: https://nvoyce.ai/api/webhooks/stripe
+// Events: checkout.session.completed, customer.subscription.deleted
 export async function POST(req: NextRequest) {
-  const body = await req.text()
+  const body = await req.text() // Must use raw body for signature verification
   const sig = req.headers.get('stripe-signature')!
 
   let event: Stripe.Event
@@ -24,30 +26,43 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
-  // Handle payment success
-  if (event.type === 'payment_intent.succeeded') {
-    const paymentIntent = event.data.object as Stripe.PaymentIntent
-    const documentId = paymentIntent.metadata?.documentId
-
-    if (documentId) {
-      await supabase
-        .from('documents')
-        .update({
-          status: 'paid',
-          paid_at: new Date().toISOString(),
-          stripe_payment_intent_id: paymentIntent.id,
-        })
-        .eq('id', documentId)
-
-      console.log(`Document ${documentId} marked as paid`)
-    }
-  }
-
-  // Handle checkout session completed (for subscriptions)
+  // Handle invoice payment via checkout session (Payment Links)
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    const userId = session.metadata?.userId
 
+    // Check if this is an invoice payment (has documentId in metadata)
+    const documentId = session.metadata?.documentId
+
+    if (documentId && session.payment_status === 'paid') {
+      const amountPaidNow = (session.amount_total || 0) / 100
+
+      // Fetch current document to compute new totals
+      const { data: doc, error: fetchError } = await supabase
+        .from('documents')
+        .select('price, amount_paid, status')
+        .eq('id', documentId)
+        .single()
+
+      if (fetchError || !doc) {
+        console.error('Could not find document for webhook:', documentId, fetchError)
+      } else {
+        const totalPaid = (doc.amount_paid || 0) + amountPaidNow
+        const newStatus = totalPaid >= doc.price ? 'fully_paid' : 'partially_paid'
+
+        await supabase
+          .from('documents')
+          .update({
+            status: newStatus,
+            amount_paid: totalPaid,
+          })
+          .eq('id', documentId)
+
+        console.log(`Document ${documentId}: ${doc.status} → ${newStatus} ($${totalPaid} of $${doc.price})`)
+      }
+    }
+
+    // Check if this is a subscription upgrade (has userId in metadata)
+    const userId = session.metadata?.userId
     if (userId && session.subscription) {
       await supabase
         .from('subscriptions')
@@ -70,6 +85,8 @@ export async function POST(req: NextRequest) {
       .from('subscriptions')
       .update({ status: 'cancelled' })
       .eq('stripe_subscription_id', subscription.id)
+
+    console.log(`Subscription ${subscription.id} cancelled`)
   }
 
   return NextResponse.json({ received: true })

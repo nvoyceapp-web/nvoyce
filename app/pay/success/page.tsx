@@ -1,35 +1,61 @@
 'use client'
+
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
 function SuccessContent() {
   const searchParams = useSearchParams()
   const [countdown, setCountdown] = useState(10)
+  const documentId = searchParams.get('documentId')
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) { clearInterval(timer); window.location.href = '/' }
-        return c - 1
-      })
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
+    if (countdown <= 0) return
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [countdown])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-purple-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-green-100 p-10 text-center">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-4xl">✓</span>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center px-4">
+      <div className="max-w-md w-full text-center">
+        {/* Success checkmark */}
+        <div className="flex justify-center mb-6">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+            <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">Payment Successful!</h1>
-        <p className="text-gray-600 mb-2">Your payment has been processed securely.</p>
-        <p className="text-gray-500 text-sm mb-8">The freelancer has been notified and your invoice has been updated.</p>
-        <div className="bg-green-50 rounded-xl p-4 mb-8 border border-green-100">
-          <p className="text-sm text-green-800 font-medium">🎉 Thank you for your payment</p>
-          <p className="text-xs text-green-600 mt-1">A receipt has been sent to your email by Stripe.</p>
+
+        <h1 className="text-3xl font-bold text-gray-900 mb-3">Payment Successful!</h1>
+        <p className="text-gray-500 text-base mb-8">
+          Your payment has been processed. You&apos;ll receive a confirmation shortly.
+        </p>
+
+        {/* Countdown card */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+          <p className="text-sm text-gray-500 mb-1">Thank you for your payment</p>
+          <p className="text-gray-700 text-sm">
+            {countdown > 0
+              ? `This page will close in ${countdown} second${countdown !== 1 ? 's' : ''}.`
+              : 'You may close this tab.'}
+          </p>
         </div>
-        <p className="text-xs text-gray-400">Redirecting in {countdown}s...</p>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-3">
+          <a
+            href="/"
+            className="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition text-sm"
+          >
+            Back to homepage
+          </a>
+          {documentId && (
+            <p className="text-xs text-gray-400 mt-1">
+              Reference: {documentId}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -37,7 +63,11 @@ function SuccessContent() {
 
 export default function PaySuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-green-50 flex items-center justify-center">
+        <div className="text-gray-400 text-sm">Loading...</div>
+      </div>
+    }>
       <SuccessContent />
     </Suspense>
   )

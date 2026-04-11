@@ -357,9 +357,24 @@ export default function DashboardPage() {
   const markSelectedAsPaid = () => {
     const unpaidIds = Array.from(selectedDocs).filter((id) => stats.documents.find((d) => d.id === id)?.status !== 'fully_paid')
     unpaidIds.forEach((docId) => {
-      console.log('Mark as fully_paid:', docId)
+      console.log('Mark as paid:', docId)
+    })
+    alert(`Marked ${unpaidIds.length} invoice(s) as paid`)
+    setSelectedDocs(new Set())
+  }
+
+  const unmarkSelectedAsPaid = () => {
+    const paidIds = Array.from(selectedDocs).filter((id) => stats.documents.find((d) => d.id === id)?.status === 'fully_paid')
     paidIds.forEach((docId) => {
-      console.log('Unmark as fully_paid:', docId)
+      console.log('Unmark as paid:', docId)
+    })
+    alert(`Unmarked ${paidIds.length} invoice(s) as paid`)
+    setSelectedDocs(new Set())
+  }
+
+  const sendRemindersToSelected = () => {
+    selectedDocs.forEach((docId) => {
+      console.log('Send reminder:', docId)
     })
     alert(`Reminders sent to ${selectedDocs.size} client(s)`)
     setSelectedDocs(new Set())
@@ -426,7 +441,7 @@ export default function DashboardPage() {
           const now = new Date()
 
           const totalSent = data.length
-          const pendingProposals = data.filter((doc) => doc.doc_type === 'proposal' && doc.status !== 'fully_paid').length
+          const pendingProposals = data.filter((doc) => doc.doc_type === 'proposal' && doc.status !== 'accepted').length
           const outstanding = data
             .filter((doc) => doc.status !== 'fully_paid')
             .reduce((sum, doc) => sum + (doc.price || 0), 0)
@@ -649,12 +664,12 @@ export default function DashboardPage() {
                     <div className="text-4xl font-bold mb-2">${stats.outstanding.toLocaleString()}</div>
                     <div className="text-sm text-blue-300">
                       {stats.overdue > 0 && <span className="text-orange-400 font-semibold">🚨 {stats.overdue} overdue • </span>}
-                      {stats.documents.filter((d) => d.status !== 'fully_paid').length} invoices pending
+                      {stats.documents.filter((d) => d.status !== 'fully_paid' && d.doc_type === 'invoice').length} invoices pending
                     </div>
                   </div>
                   <div className="text-right">
                     {(() => {
-                      const unpaidDocs = stats.documents.filter((d) => d.status !== 'fully_paid')
+                      const unpaidDocs = stats.documents.filter((d) => d.status !== 'fully_paid' && d.doc_type === 'invoice')
                       if (unpaidDocs.length === 0) return null
                       const oldest = unpaidDocs.reduce((oldest, current) => {
                         return new Date(current.created_at) < new Date(oldest.created_at) ? current : oldest
@@ -764,7 +779,7 @@ export default function DashboardPage() {
                           {showPendingProposals && stats.pendingProposals > 0 && (
                             <div className="bg-gray-50 rounded-lg p-3 space-y-2 border border-gray-200">
                               {stats.documents
-                                .filter((d) => d.doc_type === 'proposal' && d.status !== 'fully_paid')
+                                .filter((d) => d.doc_type === 'proposal' && d.status !== 'accepted')
                                 .slice(0, 5)
                                 .map((proposal) => (
                                   <div key={proposal.id} className="flex items-center justify-between text-xs p-2 bg-white rounded border border-gray-100">
@@ -777,7 +792,7 @@ export default function DashboardPage() {
                                     </Link>
                                   </div>
                                 ))}
-                              {stats.documents.filter((d) => d.doc_type === 'proposal' && d.status !== 'fully_paid').length === 0 && (
+                              {stats.documents.filter((d) => d.doc_type === 'proposal' && d.status !== 'accepted').length === 0 && (
                                 <div className="text-xs text-gray-500 p-2">No pending proposals</div>
                               )}
                             </div>
@@ -1069,10 +1084,11 @@ export default function DashboardPage() {
                         const statusColors: Record<string, string> = {
                           draft: 'bg-gray-100 text-gray-700',
                           sent: 'bg-blue-100 text-blue-700',
+                          partially_paid: 'bg-yellow-100 text-yellow-700',
                           fully_paid: 'bg-green-100 text-green-700',
                           overdue: 'bg-red-100 text-red-700',
                         }
-                        const isOverdue = doc.status !== 'fully_paid' && daysOld > 30
+                        const isOverdue = (doc.status === 'sent' || doc.status === 'partially_paid') && daysOld > 30
 
                         return (
                           <tr key={doc.id} className={`border-b border-gray-100 ${getRowColor(doc)} transition`}>
@@ -1115,15 +1131,23 @@ export default function DashboardPage() {
                                 // Invoice status - status display only
                                 doc.status === 'fully_paid' ? (
                                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
-                                    ✓ Paid
+                                    ✓ Fully Paid
                                   </span>
-                                ) : doc.status === 'overdue' ? (
+                                ) : doc.status === 'partially_paid' ? (
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                                    💛 Partial
+                                  </span>
+                                ) : isOverdue ? (
                                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
                                     🚨 Overdue
                                   </span>
+                                ) : doc.status === 'sent' ? (
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
+                                    📤 Sent
+                                  </span>
                                 ) : (
-                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-100 text-orange-700">
-                                    ⏳ Unpaid
+                                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700">
+                                    📝 {doc.status}
                                   </span>
                                 )
                               )}
@@ -1233,12 +1257,15 @@ export default function DashboardPage() {
                                         <button
                                           onClick={() => {
                                             // Mark as paid (will implement API call)
-                                            console.log('Mark as fully_paid:', doc.id)
+                                            console.log('Mark as paid:', doc.id)
+                                            setOpenDropdown(null)
                                           }}
-                                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
                                         >
-                                          ✓ Mark as Paid
+                                          ✓ Mark Paid
                                         </button>
+                                      )}
+                                      {doc.status !== 'fully_paid' && daysOld > 14 && (
                                         <button
                                           onClick={() => {
                                             // Send reminder

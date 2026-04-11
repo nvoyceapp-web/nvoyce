@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getTopPaymeActions, PaymeAction } from '@/lib/payme-scoring'
 import Logo from '@/components/Logo'
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart } from 'recharts'
 
 interface Document {
   id: string
@@ -990,226 +990,184 @@ function DashboardContent() {
               )
             })()}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10 auto-rows-max">
-              {/* Left: Metrics Block with Dropdown */}
-              <div className="col-span-1 space-y-4 h-fit">
-                <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-6">
-                  {(() => {
-                    const now = new Date()
-                    const dateFrom = getDateRange()
-                    const periodDocs = stats.documents.filter((d) => !dateFrom || new Date(d.created_at) >= dateFrom)
+            {/* ── Metrics strip — full width, 2 rows of 3 ── */}
+            {(() => {
+              const dateFrom = getDateRange()
+              const periodDocs = stats.documents.filter((d) => !dateFrom || new Date(d.created_at) >= dateFrom)
+              const paidDocs = periodDocs.filter((d) => d.status === 'fully_paid').length
+              const totalInPeriod = periodDocs.length
+              const revenueInPeriod = periodDocs.filter((d) => d.status === 'fully_paid').reduce((s, d) => s + (d.price || 0), 0)
+              const uniqueClients = new Set(stats.documents.map((d) => d.client_name)).size
+              const collectionRate = totalInPeriod > 0 ? ((paidDocs / totalInPeriod) * 100).toFixed(0) : 0
+              const avgInvoiceValue = totalInPeriod > 0 ? Math.round(revenueInPeriod / totalInPeriod) : 0
 
-                    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-                    const thisMonthRevenue = stats.documents
-                      .filter((d) => d.status === 'fully_paid' && new Date(d.created_at) >= thisMonthStart)
-                      .reduce((sum, d) => sum + (d.price || 0), 0)
+              const metrics = [
+                { label: 'Period Revenue', value: loading ? '—' : `$${revenueInPeriod.toLocaleString()}`, sub: 'collected' },
+                { label: 'Total Sent', value: loading ? '—' : stats.totalSent.toString(), sub: 'invoices & proposals' },
+                { label: 'Collection Rate', value: loading ? '—' : `${collectionRate}%`, sub: 'of invoices paid' },
+                { label: 'Avg Invoice Value', value: loading ? '—' : `$${avgInvoiceValue.toLocaleString()}`, sub: 'per invoice' },
+                { label: 'Avg Days to Payment', value: loading ? '—' : stats.avgDaysToPayment.toString(), sub: 'after sending' },
+                { label: 'Clients', value: loading ? '—' : uniqueClients.toString(), sub: 'unique clients' },
+              ]
 
-                    const paidDocs = periodDocs.filter((d) => d.status === 'fully_paid').length
-                    const totalInvoicesInPeriod = periodDocs.length
-                    const totalRevenueInPeriod = periodDocs.filter((d) => d.status === 'fully_paid').reduce((sum, d) => sum + (d.price || 0), 0)
-                    const uniqueClients = new Set(stats.documents.map((d) => d.client_name)).size
-                    const collectionRate = totalInvoicesInPeriod > 0 ? ((paidDocs / totalInvoicesInPeriod) * 100).toFixed(0) : 0
-                    const avgInvoiceValue = totalInvoicesInPeriod > 0 ? (totalRevenueInPeriod / totalInvoicesInPeriod).toFixed(0) : 0
-
-                    // Primary metrics (always visible)
-                    const primary = [
-                      { label: 'Period Revenue', value: loading ? '-' : `$${totalRevenueInPeriod.toLocaleString()}`, sub: 'for selected period' },
-                      { label: 'Total Sent', value: loading ? '-' : stats.totalSent.toString(), sub: 'invoices & proposals' },
-                      { label: 'Collection Rate', value: loading ? '-' : `${collectionRate}%`, sub: 'of invoices paid' },
-                    ]
-
-                    // Additional metrics (selectable via dropdown)
-                    const additional = {
-                      avgInvoice: { label: 'Avg Invoice Value', value: loading ? '-' : `$${Number(avgInvoiceValue).toLocaleString()}`, sub: 'per invoice' },
-                      avgDaysToPayment: { label: 'Avg Days to Payment', value: loading ? '-' : stats.avgDaysToPayment.toString(), sub: 'after sending' },
-                      clientCount: { label: 'Client Count', value: loading ? '-' : uniqueClients.toString(), sub: 'unique clients' },
-                    }
-
-                    return (
-                      <>
-                        {/* Primary metrics grid */}
-                        <div className="grid grid-cols-3 gap-3">
-                          {primary.map(({ label, value, sub }) => (
-                            <div key={label} className="bg-gray-50 rounded-lg p-4">
-                              <div className="text-xs text-gray-500 mb-1">{label}</div>
-                              <div className="text-xl font-bold text-gray-900">{value}</div>
-                              <div className="text-xs text-gray-400 mt-1">{sub}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Additional metrics grid */}
-                        <div className="grid grid-cols-3 gap-3">
-                          {Object.values(additional).map(({ label, value, sub }) => (
-                            <div key={label} className="bg-gray-50 rounded-lg p-4">
-                              <div className="text-xs text-gray-500 mb-1">{label}</div>
-                              <div className="text-xl font-bold text-gray-900">{value}</div>
-                              <div className="text-xs text-gray-400 mt-1">{sub}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Secondary info card */}
-                        <div className="border-t border-gray-100 pt-6 space-y-4">
-                          <button
-                            onClick={() => setShowPendingProposals(!showPendingProposals)}
-                            className="w-full text-left hover:bg-gray-50 rounded-lg p-2 -m-2 transition"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="text-sm text-gray-500 mb-2">Pending Proposals</div>
-                                <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.pendingProposals}</div>
-                                <div className="text-xs text-gray-400 mt-1">awaiting approval</div>
-                              </div>
-                              <div className="text-xl text-gray-400">{showPendingProposals ? '▼' : '▶'}</div>
-                            </div>
-                          </button>
-
-                          {showPendingProposals && stats.pendingProposals > 0 && (
-                            <div className="bg-gray-50 rounded-lg p-3 space-y-2 border border-gray-200">
-                              {stats.documents
-                                .filter((d) => d.doc_type === 'proposal' && d.status !== 'accepted')
-                                .slice(0, 5)
-                                .map((proposal) => (
-                                  <div key={proposal.id} className="flex items-center justify-between text-xs p-2 bg-white rounded border border-gray-100">
-                                    <div>
-                                      <div className="font-medium text-gray-900">{proposal.client_name}</div>
-                                      <div className="text-gray-500">${proposal.price.toLocaleString()}</div>
-                                    </div>
-                                    <Link href={`/dashboard/documents/${proposal.id}`} className="text-blue-600 hover:text-blue-700 font-semibold">
-                                      View
-                                    </Link>
-                                  </div>
-                                ))}
-                              {stats.documents.filter((d) => d.doc_type === 'proposal' && d.status !== 'accepted').length === 0 && (
-                                <div className="text-xs text-gray-500 p-2">No pending proposals</div>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="border-t border-gray-100 pt-4">
-                            <div className="text-sm text-gray-500 mb-2">Avg Days to Payment</div>
-                            <div className="text-2xl font-bold text-gray-900">{loading ? '-' : stats.avgDaysToPayment}</div>
-                            <div className="text-xs text-gray-400 mt-1">after sending</div>
-                          </div>
-                        </div>
-                      </>
-                    )
-                  })()}
-                </div>
-              </div>
-
-              {/* Right: Charts - Stacked Vertically */}
-              <div className="col-span-1 space-y-4 flex flex-col">
-                {/* Revenue Trend Chart — Recharts ComposedChart */}
-                {(() => {
-                  const chartData = getChartData()
-                  if (chartData.length === 0) return null
-
-                  // Scale Y-axis: start slightly below min so variance is visible
-                  const revenues = chartData.map((d) => d.revenue)
-                  const minRev = Math.min(...revenues)
-                  const maxRev = Math.max(...revenues)
-                  const padding = (maxRev - minRev) * 0.2 || maxRev * 0.1
-                  const yMin = Math.max(0, Math.floor((minRev - padding) / 100) * 100)
-                  const yMax = Math.ceil((maxRev + padding) / 100) * 100
-
-                  const formatY = (val: number) =>
-                    val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`
-
-                  return (
-                    <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-96">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
-                          <p className="text-xs text-gray-400 mt-0.5">Collected revenue by month</p>
-                        </div>
-                        <select
-                          value={timePeriod}
-                          onChange={(e) => setTimePeriod(e.target.value as any)}
-                          className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
-                        >
-                          <option value="thisMonth">This Month</option>
-                          <option value="ytd">YTD</option>
-                          <option value="30days">Last 30 Days</option>
-                          <option value="all">All Time</option>
-                        </select>
+              return (
+                <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-gray-900">Overview</h3>
+                    <select
+                      value={timePeriod}
+                      onChange={(e) => setTimePeriod(e.target.value as any)}
+                      className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                    >
+                      <option value="thisMonth">This Month</option>
+                      <option value="ytd">YTD</option>
+                      <option value="30days">Last 30 Days</option>
+                      <option value="all">All Time</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+                    {metrics.map(({ label, value, sub }) => (
+                      <div key={label} className="bg-gray-50 rounded-lg p-4">
+                        <div className="text-xs text-gray-500 mb-1 leading-tight">{label}</div>
+                        <div className="text-xl font-bold text-gray-900">{value}</div>
+                        <div className="text-xs text-gray-400 mt-1">{sub}</div>
                       </div>
-                      <div className="flex-1">
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* ── Charts row — 3 equal columns ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+
+              {/* 1. Revenue Trend — ComposedChart */}
+              {(() => {
+                const chartData = getChartData()
+                if (chartData.length === 0) return null
+                const revenues = chartData.map((d) => d.revenue)
+                const minRev = Math.min(...revenues)
+                const maxRev = Math.max(...revenues)
+                const pad = (maxRev - minRev) * 0.2 || maxRev * 0.1
+                const yMin = Math.max(0, Math.floor((minRev - pad) / 100) * 100)
+                const yMax = Math.ceil((maxRev + pad) / 100) * 100
+                const fmtY = (v: number) => v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v}`
+                return (
+                  <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col h-72">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900">Revenue Trend</h3>
+                        <p className="text-xs text-gray-400">collected by month</p>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart data={chartData.slice(-6)} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                          <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                          <YAxis domain={[yMin, yMax]} tickFormatter={fmtY} tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={46} />
+                          <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, 'Revenue']} contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }} />
+                          <Bar dataKey="revenue" fill="#ea580c" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                          <Line type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} dot={{ fill: '#f97316', r: 3 }} strokeDasharray="4 2" />
+                        </ComposedChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* 2. Invoice Status — Recharts donut */}
+              {(() => {
+                const { paid, pending, overdue, total } = getStatusBreakdown()
+                if (total === 0) return null
+                const data = [
+                  { name: 'Paid', value: paid, color: '#10b981' },
+                  { name: 'Pending', value: pending, color: '#f59e0b' },
+                  { name: 'Overdue', value: overdue, color: '#ef4444' },
+                ]
+                return (
+                  <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col h-72">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Invoice Status</h3>
+                    <div className="flex-1 flex items-center gap-4">
+                      <div className="flex-1 h-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <ComposedChart data={chartData.slice(-8)} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-                            <XAxis
-                              dataKey="label"
-                              tick={{ fontSize: 11, fill: '#9ca3af' }}
-                              axisLine={false}
-                              tickLine={false}
-                            />
-                            <YAxis
-                              domain={[yMin, yMax]}
-                              tickFormatter={formatY}
-                              tick={{ fontSize: 11, fill: '#9ca3af' }}
-                              axisLine={false}
-                              tickLine={false}
-                              width={52}
-                            />
-                            <Tooltip
-                              formatter={(val: number) => [`$${val.toLocaleString()}`, 'Revenue']}
-                              contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
-                            />
-                            <Bar dataKey="revenue" fill="#ea580c" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                            <Line
-                              type="monotone"
-                              dataKey="revenue"
-                              stroke="#f97316"
-                              strokeWidth={2}
-                              dot={{ fill: '#f97316', r: 3 }}
-                              strokeDasharray="4 2"
-                            />
-                          </ComposedChart>
+                          <PieChart>
+                            <Pie
+                              data={data}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius="55%"
+                              outerRadius="80%"
+                              paddingAngle={3}
+                              dataKey="value"
+                            >
+                              {data.map((entry, i) => (
+                                <Cell key={i} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <Tooltip formatter={(v: number, name: string) => [v, name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }} />
+                          </PieChart>
                         </ResponsiveContainer>
                       </div>
-                    </div>
-                  )
-                })()}
-
-                {/* Invoice Status Pie Chart */}
-                {(() => {
-                  const { paid, pending, overdue, total } = getStatusBreakdown()
-                  if (total === 0) return null
-                  const paidPercent = (paid / total) * 100
-                  const pendingPercent = (pending / total) * 100
-                  const overduePercent = (overdue / total) * 100
-                  return (
-                    <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col h-96">
-                      <h3 className="text-sm font-semibold text-gray-900 mb-6">Invoice Status</h3>
-                      <div className="flex-1 flex items-center justify-center gap-8 px-6">
-                        <svg className="w-40 h-40 flex-shrink-0" viewBox="0 0 120 120">
-                          <circle cx="60" cy="60" r="45" fill="none" stroke="#10b981" strokeWidth="30" strokeDasharray={`${(paidPercent / 100) * 282.7} 282.7`} transform="rotate(-90 60 60)" />
-                          <circle cx="60" cy="60" r="45" fill="none" stroke="#f59e0b" strokeWidth="30" strokeDasharray={`${(pendingPercent / 100) * 282.7} 282.7`} strokeDashoffset={`${-((paidPercent / 100) * 282.7)}`} transform="rotate(-90 60 60)" />
-                          <circle cx="60" cy="60" r="45" fill="none" stroke="#ef4444" strokeWidth="30" strokeDasharray={`${(overduePercent / 100) * 282.7} 282.7`} strokeDashoffset={`${-(((paidPercent + pendingPercent) / 100) * 282.7)}`} transform="rotate(-90 60 60)" />
-                          <text x="60" y="65" textAnchor="middle" fontSize="14" fontWeight="bold" fill="#111827">{total}</text>
-                          <text x="60" y="82" textAnchor="middle" fontSize="10" fill="#6b7280">total</text>
-                        </svg>
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-green-500" />
-                            <div><div className="text-xs font-semibold text-gray-900">{paid} Paid</div><div className="text-xs text-gray-500">{paidPercent.toFixed(0)}%</div></div>
+                      <div className="space-y-3 flex-shrink-0">
+                        <div className="text-xs text-gray-400 font-medium">{total} total</div>
+                        {data.map(({ name, value, color }) => (
+                          <div key={name} className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                            <div>
+                              <div className="text-xs font-semibold text-gray-900">{value} {name}</div>
+                              <div className="text-xs text-gray-400">{total > 0 ? ((value / total) * 100).toFixed(0) : 0}%</div>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-amber-500" />
-                            <div><div className="text-xs font-semibold text-gray-900">{pending} Pending</div><div className="text-xs text-gray-500">{pendingPercent.toFixed(0)}%</div></div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-red-500" />
-                            <div><div className="text-xs font-semibold text-gray-900">{overdue} Overdue</div><div className="text-xs text-gray-500">{overduePercent.toFixed(0)}%</div></div>
-                          </div>
-                        </div>
+                        ))}
                       </div>
                     </div>
-                  )
-                })()}
-              </div>
+                  </div>
+                )
+              })()}
+
+              {/* 3. Top Clients — horizontal BarChart */}
+              {(() => {
+                const topClients = getTopClients()
+                if (topClients.length === 0) return null
+                const data = topClients.map((c) => ({ name: c.name.split(' ')[0], fullName: c.name, revenue: c.revenue }))
+                return (
+                  <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col h-72">
+                    <div className="mb-3">
+                      <h3 className="text-sm font-semibold text-gray-900">Top Clients</h3>
+                      <p className="text-xs text-gray-400">by total billed</p>
+                    </div>
+                    <div className="flex-1">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data} layout="vertical" margin={{ top: 0, right: 12, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
+                          <XAxis
+                            type="number"
+                            tickFormatter={(v) => v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${v}`}
+                            tick={{ fontSize: 10, fill: '#9ca3af' }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            type="category"
+                            dataKey="name"
+                            tick={{ fontSize: 11, fill: '#374151' }}
+                            axisLine={false}
+                            tickLine={false}
+                            width={56}
+                          />
+                          <Tooltip
+                            formatter={(v: number, _: any, props: any) => [`$${v.toLocaleString()}`, props.payload.fullName]}
+                            contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
+                          />
+                          <Bar dataKey="revenue" fill="#7c3aed" radius={[0, 4, 4, 0]} maxBarSize={20} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )
+              })()}
+
             </div>
 
             {stats.documents.length > 0 ? (

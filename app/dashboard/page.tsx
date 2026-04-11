@@ -1444,9 +1444,16 @@ function DashboardContent() {
           <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">
-                {viewingDocument.doc_type.charAt(0).toUpperCase() + viewingDocument.doc_type.slice(1)} Details
-              </h2>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {viewingDocument.doc_type.charAt(0).toUpperCase() + viewingDocument.doc_type.slice(1)} Details
+                </h2>
+                {viewingDocument.document_number && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    <span className="font-mono font-semibold text-gray-900">{viewingDocument.document_number}</span>
+                  </p>
+                )}
+              </div>
               <button
                 onClick={() => setViewingDocument(null)}
                 className="text-gray-500 hover:text-gray-700 text-2xl font-light"

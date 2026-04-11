@@ -357,9 +357,9 @@ export default function DashboardPage() {
   const markSelectedAsPaid = () => {
     const unpaidIds = Array.from(selectedDocs).filter((id) => stats.documents.find((d) => d.id === id)?.status !== 'fully_paid')
     unpaidIds.forEach((docId) => {
-      console.log('Mark as fully_paid: 'bg-green-100 text-green-700'fully_paid')
+      console.log('Mark as fully_paid:', docId)
     paidIds.forEach((docId) => {
-      console.log('Unmark as fully_paid: 'bg-green-100 text-green-700'Send reminder:', docId)
+      console.log('Unmark as fully_paid:', docId)
     })
     alert(`Reminders sent to ${selectedDocs.size} client(s)`)
     setSelectedDocs(new Set())
@@ -1233,7 +1233,12 @@ export default function DashboardPage() {
                                         <button
                                           onClick={() => {
                                             // Mark as paid (will implement API call)
-                                            console.log('Mark as fully_paid: 'bg-green-100 text-green-700'fully_paid' && daysOld > 14 && (
+                                            console.log('Mark as fully_paid:', doc.id)
+                                          }}
+                                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                        >
+                                          ✓ Mark as Paid
+                                        </button>
                                         <button
                                           onClick={() => {
                                             // Send reminder

@@ -805,7 +805,7 @@ function DashboardContent() {
               <div className="relative">
                 <button
                   onClick={() => setShowCreateDropdown(!showCreateDropdown)}
-                  className="bg-black text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-800 transition font-semibold"
+                  className="text-sm text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition font-semibold"
                 >
                   ✨ Create
                 </button>
@@ -1281,22 +1281,22 @@ function DashboardContent() {
                         </option>
                       ))}
                     </select>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none select-none">From</span>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-gray-400 font-medium px-1">From</label>
                       <input
                         type="date"
                         value={dateFrom}
                         onChange={(e) => setDateFrom(e.target.value)}
-                        className="text-sm pl-12 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black w-full"
+                        className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
                       />
                     </div>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none select-none">To</span>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-gray-400 font-medium px-1">To</label>
                       <input
                         type="date"
                         value={dateTo}
                         onChange={(e) => setDateTo(e.target.value)}
-                        className="text-sm pl-8 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black w-full"
+                        className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
                       />
                     </div>
                   </div>

@@ -464,8 +464,8 @@ function DashboardContent() {
       try {
         const { data, error } = await supabase
           .from('documents')
-          .select('id, client_name, client_email, business_name, doc_type, price, status, created_at, document_number, amount_paid, stripe_payment_link, form_data, generated_content')
-          .eq('user_id', 'test-user')
+          .select('*')
+          .eq('user_id', userId)
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -511,8 +511,8 @@ function DashboardContent() {
       }
     }
 
-    fetchStats()
-  }, [])
+    if (userId) fetchStats()
+  }, [userId])
 
   return (
     <div className="min-h-screen bg-gray-50">

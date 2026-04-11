@@ -422,10 +422,7 @@ export default function DocumentPage() {
             {userLogo ? (
               <img src={userLogo} alt="Logo" className="h-16 mx-auto mb-2 object-contain" />
             ) : (
-              <>
-                <div className="text-4xl font-bold text-purple-600">nvoyce</div>
-                <div className="text-xs text-gray-400 mt-1">Professional Proposals & Invoices</div>
-              </>
+              <img src="/logo.png" alt="Nvoyce" className="h-16 mx-auto mb-2 object-contain" />
             )}
           </div>
 

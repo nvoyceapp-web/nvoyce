@@ -11,6 +11,7 @@ export default function DocumentPage() {
   const [loading, setLoading] = useState(true)
   const [generatingLink, setGeneratingLink] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [sending, setSending] = useState(false)
   const [amountPaid, setAmountPaid] = useState<number>(0)
   const [paymentNotes, setPaymentNotes] = useState<string>('')
 
@@ -61,6 +62,33 @@ export default function DocumentPage() {
       console.error('Payment link error:', error)
     } finally {
       setGeneratingLink(false)
+    }
+  }
+
+  const sendToClient = async () => {
+    if (!doc) return
+    setSending(true)
+    try {
+      const endpoint = doc.doc_type === 'invoice' ? '/api/invoices/send' : '/api/proposals/send'
+      const bodyKey = doc.doc_type === 'invoice' ? 'invoiceId' : 'proposalId'
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [bodyKey]: doc.id }),
+      })
+      const data = await res.json()
+      if (data.success || data.alreadySent) {
+        setDoc((prev) => prev ? {
+          ...prev,
+          status: 'sent',
+          document_number: data.documentNumber || prev.document_number,
+          stripe_payment_link: data.paymentLink || prev.stripe_payment_link,
+        } : prev)
+      }
+    } catch (err) {
+      console.error('Send error:', err)
+    } finally {
+      setSending(false)
     }
   }
 
@@ -135,6 +163,24 @@ export default function DocumentPage() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          {/* Draft: show Send to Client button */}
+          {effectiveStatus === 'draft' && (
+            <>
+              <Link
+                href={`/dashboard/new?prefill=${doc.id}`}
+                className="text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
+              >
+                ← Edit Draft
+              </Link>
+              <button
+                onClick={sendToClient}
+                disabled={sending}
+                className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50 font-semibold"
+              >
+                {sending ? 'Sending...' : `📤 Send to Client`}
+              </button>
+            </>
+          )}
           {isInvoice && effectiveStatus === 'fully_paid' ? (
             <span className="text-sm text-green-600 font-semibold">✓ Fully Paid</span>
           ) : isInvoice && doc.stripe_payment_link ? (

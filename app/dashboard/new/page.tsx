@@ -145,9 +145,8 @@ function NewDocumentContent() {
       })
       const data = await res.json()
       if (data.id) {
-        // Redirect to dashboard with success banner, not the client-facing document view
-        const successParam = form.docType === 'invoice' ? `invoiceCreated=${data.id}` : `proposalCreated=${data.id}`
-        router.push(`/dashboard?${successParam}`)
+        // Redirect to draft detail page so user can review before sending to client
+        router.push(`/dashboard/documents/${data.id}`)
       }
     } catch (err) {
       console.error(err)
@@ -413,7 +412,7 @@ function NewDocumentContent() {
               disabled={loading}
               className="bg-orange-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-orange-700 transition disabled:opacity-50"
             >
-              {loading ? 'Generating...' : '✨ Generate with AI'}
+              {loading ? 'Generating...' : '✨ Generate Draft'}
             </button>
           )}
         </div>

@@ -272,7 +272,7 @@ function NewDocumentContent() {
 
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-2">
-                Timeline / deadline {form.docType === 'proposal' && <span className="text-red-500">*</span>}
+                When will service/delivery be completed? {form.docType === 'proposal' && <span className="text-red-500">*</span>}
                 <span className="text-gray-400 font-normal text-xs ml-1">{form.docType === 'invoice' ? '(optional)' : '(required for proposals)'}</span>
               </label>
               <textarea

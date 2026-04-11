@@ -402,6 +402,12 @@ export default function DocumentPage() {
       <div className="max-w-3xl mx-auto px-4 py-12 print:py-0 print:px-0">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 print:shadow-none print:border-none print:rounded-none">
 
+          {/* Nvoyce Logo */}
+          <div className="text-center mb-12 pb-8 border-b border-gray-100">
+            <div className="text-4xl font-bold text-purple-600">nvoyce</div>
+            <div className="text-xs text-gray-400 mt-1">Professional Proposals & Invoices</div>
+          </div>
+
           {/* Header */}
           <div className="flex items-start justify-between mb-10">
             <div className="flex-1 mr-8">

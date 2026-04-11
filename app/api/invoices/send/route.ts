@@ -78,6 +78,7 @@ export async function POST(req: NextRequest) {
         amount: invoice.price,
         invoiceNumber: documentNumber,
         dueDate: invoice.generated_content?.dueDate,
+        userId: invoice.user_id,
       })
       console.log('Invoice sent to:', invoice.client_email, 'as', documentNumber)
     } catch (emailError) {

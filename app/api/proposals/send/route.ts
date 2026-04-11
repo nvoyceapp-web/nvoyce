@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
           proposal.generated_content?.subject ||
           'Professional Services',
         amount: parseFloat(String(proposal.price).replace(/,/g, '')) || 0,
+        userId: proposal.user_id,
       })
       console.log('Proposal email sent to:', proposal.client_email)
     } catch (emailError) {

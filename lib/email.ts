@@ -1,7 +1,30 @@
 import { Resend } from 'resend'
+import { createClient } from '@supabase/supabase-js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+async function getUserLogo(userId: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabase
+      .from('user_settings')
+      .select('logo_url')
+      .eq('user_id', userId)
+      .single()
+
+    if (!error && data?.logo_url) {
+      return data.logo_url
+    }
+  } catch (err) {
+    console.error('Error fetching user logo:', err)
+  }
+  return null
+}
 
 export async function sendInvoiceEmail({
   clientEmail,
@@ -12,6 +35,7 @@ export async function sendInvoiceEmail({
   amount,
   invoiceNumber = 'INV-2026-001',
   dueDate,
+  userId,
 }: {
   clientEmail: string
   clientName: string
@@ -21,10 +45,19 @@ export async function sendInvoiceEmail({
   amount: number
   invoiceNumber?: string
   dueDate?: string
+  userId?: string
 }) {
   try {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://nvoyce.ai'
-    const logoUrl = `${appUrl}/logo.png`
+    let logoUrl = `${appUrl}/logo.png`
+
+    // Try to get user's logo if userId provided
+    if (userId) {
+      const userLogo = await getUserLogo(userId)
+      if (userLogo) {
+        logoUrl = userLogo
+      }
+    }
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,
@@ -179,6 +212,7 @@ export async function sendProposalSentEmail({
   serviceDescription,
   amount,
   timeline = '2 weeks',
+  userId,
 }: {
   clientEmail: string
   clientName: string
@@ -187,10 +221,19 @@ export async function sendProposalSentEmail({
   serviceDescription: string
   amount: number
   timeline?: string
+  userId?: string
 }) {
   try {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://nvoyce.ai'
-    const logoUrl = `${appUrl}/logo.png`
+    let logoUrl = `${appUrl}/logo.png`
+
+    // Try to get user's logo if userId provided
+    if (userId) {
+      const userLogo = await getUserLogo(userId)
+      if (userLogo) {
+        logoUrl = userLogo
+      }
+    }
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,

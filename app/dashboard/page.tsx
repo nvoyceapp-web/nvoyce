@@ -95,7 +95,16 @@ function DashboardContent() {
   // Filter and sort documents
   const filteredDocuments = stats.documents
     .filter((doc) => {
-      const matchesSearch = doc.client_name.toLowerCase().includes(searchQuery.toLowerCase())
+      const q = searchQuery.toLowerCase()
+      const matchesSearch = !q || [
+        doc.client_name,
+        doc.document_number ?? '',
+        doc.status,
+        doc.doc_type,
+        doc.client_email ?? '',
+        doc.business_name ?? '',
+        doc.price?.toString() ?? '',
+      ].some((field) => field.toLowerCase().includes(q))
       const matchesClient = !filterClient || doc.client_name === filterClient
       const docDate = new Date(doc.created_at)
       const matchesDateFrom = !dateFrom || docDate >= new Date(dateFrom)
@@ -1264,7 +1273,7 @@ function DashboardContent() {
                   <div className="grid grid-cols-4 gap-3">
                     <input
                       type="text"
-                      placeholder="Search client..."
+                      placeholder="Search..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"

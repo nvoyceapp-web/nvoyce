@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
       if (isInvoice && document.status !== 'fully_paid') {
         return NextResponse.json({ error: 'Only fully paid invoices can be archived' }, { status: 400 })
       }
-      if (isProposal && document.status !== 'sent') {
-        return NextResponse.json({ error: 'Only sent proposals can be archived' }, { status: 400 })
+      if (isProposal && document.status !== 'accepted') {
+        return NextResponse.json({ error: 'Only accepted proposals can be archived' }, { status: 400 })
       }
     }
 

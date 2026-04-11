@@ -519,16 +519,16 @@ function DashboardContent() {
 
   const bulkArchiveSelected = async () => {
     const selectedDocuments = stats.documents.filter((d) => selectedDocs.has(d.id))
-    // Eligible: invoices that are fully_paid, proposals that are sent — and not already archived
+    // Eligible: invoices that are fully_paid, proposals that are accepted — and not already archived
     const eligible = selectedDocuments.filter((d) => {
       if (d.is_archived) return false
-      if (d.doc_type.toLowerCase() === 'proposal') return d.status === 'sent'
+      if (d.doc_type.toLowerCase() === 'proposal') return d.status === 'accepted'
       return d.status === 'fully_paid'
     })
     const skipped = selectedDocuments.length - eligible.length
 
     if (eligible.length === 0) {
-      setBulkActionNotice({ type: 'warning', text: 'No eligible documents to archive. Only fully paid invoices and sent proposals can be archived.' })
+      setBulkActionNotice({ type: 'warning', text: 'No eligible documents to archive. Only fully paid invoices and accepted proposals can be archived.' })
       setTimeout(() => setBulkActionNotice(null), 5000)
       return
     }
@@ -720,7 +720,7 @@ function DashboardContent() {
   const canArchive = (doc: Document) => {
     if (doc.is_archived) return true // can always unarchive
     if (doc.doc_type === 'invoice') return doc.status === 'fully_paid'
-    if (doc.doc_type === 'proposal') return doc.status === 'sent'
+    if (doc.doc_type === 'proposal') return doc.status === 'accepted'
     return false
   }
 
@@ -1215,10 +1215,10 @@ function DashboardContent() {
                       return !['fully_paid', 'draft'].includes(d.status)
                     }
                   })
-                  // Eligible for archive: fully_paid invoices, sent proposals, not already archived
+                  // Eligible for archive: fully_paid invoices, accepted proposals, not already archived
                   const archiveEligible = selectedDocuments.filter((d) => {
                     if (d.is_archived) return false
-                    if (d.doc_type.toLowerCase() === 'proposal') return d.status === 'sent'
+                    if (d.doc_type.toLowerCase() === 'proposal') return d.status === 'accepted'
                     return d.status === 'fully_paid'
                   })
                   const draftCount = selectedDocuments.filter((d) => d.status === 'draft').length

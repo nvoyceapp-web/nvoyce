@@ -68,6 +68,7 @@ function DashboardContent() {
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
   const [assigningNumbers, setAssigningNumbers] = useState(false)
   const [assignmentMessage, setAssignmentMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -420,6 +421,35 @@ function DashboardContent() {
       })
     } finally {
       setAssigningNumbers(false)
+    }
+  }
+
+  const deleteDocument = async (docId: string, docType: string) => {
+    if (!confirm(`Delete this ${docType}? This action cannot be undone.`)) {
+      return
+    }
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/documents/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentIds: [docId] }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        // Remove from local state
+        setStats((prev) => ({
+          ...prev,
+          documents: prev.documents.filter((d) => d.id !== docId),
+        }))
+        setOpenDropdown(null)
+      } else {
+        alert(`Error: ${data.error}`)
+      }
+    } catch (err) {
+      alert('Failed to delete document')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -1364,9 +1394,19 @@ function DashboardContent() {
                                             setViewingDocument(doc)
                                             setOpenDropdown(null)
                                           }}
-                                          className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 last:rounded-b-lg"
+                                          className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-50"
                                         >
                                           👁️ View Details
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            deleteDocument(doc.id, doc.doc_type)
+                                            setOpenDropdown(null)
+                                          }}
+                                          disabled={deleting}
+                                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-b-lg disabled:opacity-50"
+                                        >
+                                          🗑️ Delete
                                         </button>
                                       </div>
                                     )}
@@ -1414,9 +1454,19 @@ function DashboardContent() {
                                           setViewingDocument(doc)
                                           setOpenDropdown(null)
                                         }}
-                                        className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-50 last:rounded-b-lg"
+                                        className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-50"
                                       >
                                         👁️ View Details
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          deleteDocument(doc.id, doc.doc_type)
+                                          setOpenDropdown(null)
+                                        }}
+                                        disabled={deleting}
+                                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 last:rounded-b-lg disabled:opacity-50"
+                                      >
+                                        🗑️ Delete
                                       </button>
                                     </div>
                                   )}

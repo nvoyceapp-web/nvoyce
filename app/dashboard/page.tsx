@@ -66,6 +66,8 @@ function DashboardContent() {
   const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string; paymentLink?: string } | null>(null)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
+  const [assigningNumbers, setAssigningNumbers] = useState(false)
+  const [assignmentMessage, setAssignmentMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -385,6 +387,42 @@ function DashboardContent() {
     setSelectedDocs(new Set())
   }
 
+  const assignMissingNumbers = async () => {
+    if (!userId) return
+    if (!confirm('Assign document numbers to all invoices/proposals that don\'t have one yet?')) {
+      return
+    }
+    setAssigningNumbers(true)
+    try {
+      const res = await fetch('/api/admin/assign-missing-numbers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setAssignmentMessage({
+          type: 'success',
+          text: `✅ ${data.message}`,
+        })
+        // Refresh stats to show updated numbers
+        setTimeout(() => window.location.reload(), 1500)
+      } else {
+        setAssignmentMessage({
+          type: 'error',
+          text: `❌ ${data.error || 'Failed to assign numbers'}`,
+        })
+      }
+    } catch (err) {
+      setAssignmentMessage({
+        type: 'error',
+        text: '❌ Error assigning numbers',
+      })
+    } finally {
+      setAssigningNumbers(false)
+    }
+  }
+
   // Get row urgency color
   const getRowColor = (doc: Document) => {
     if (doc.status === 'fully_paid') return 'hover:bg-gray-50'
@@ -561,6 +599,15 @@ function DashboardContent() {
             <Link href="/about" className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
               ℹ️ About Nvoyce
             </Link>
+            <div className="border-t border-purple-200 mt-4 pt-4">
+              <button
+                onClick={assignMissingNumbers}
+                disabled={assigningNumbers}
+                className="w-full px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-purple-100 transition disabled:opacity-50 text-left"
+              >
+                🔢 {assigningNumbers ? 'Assigning...' : 'Assign missing #s'}
+              </button>
+            </div>
           </nav>
         </aside>
 
@@ -595,6 +642,15 @@ function DashboardContent() {
                 )}
               </div>
             </div>
+
+            {/* Assignment message */}
+            {assignmentMessage && (
+              <div className={`rounded-xl p-4 mb-10 border ${assignmentMessage.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <p className={`text-sm font-medium ${assignmentMessage.type === 'success' ? 'text-green-900' : 'text-red-900'}`}>
+                  {assignmentMessage.text}
+                </p>
+              </div>
+            )}
 
             {/* Smart Assistant Card */}
             {/* Success notification for invoice/proposal send */}

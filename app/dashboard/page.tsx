@@ -142,7 +142,7 @@ export default function DashboardPage() {
     const dateFrom = getDateRange()
     const monthlyData: { [key: string]: number } = {}
     stats.documents.forEach((doc) => {
-      if (doc.status === 'paid') {
+      if (doc.status === 'fully_paid') {
         const date = new Date(doc.created_at)
         if (dateFrom && date < dateFrom) return
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
@@ -165,8 +165,8 @@ export default function DashboardPage() {
       return new Date(d.created_at) >= dateFrom
     })
 
-    const paid = filteredDocs.filter((d) => d.status === 'paid').length
-    const unpaid = filteredDocs.filter((d) => d.status !== 'paid')
+    const paid = filteredDocs.filter((d) => d.status === 'fully_paid').length
+    const unpaid = filteredDocs.filter((d) => d.status !== 'fully_paid')
 
     // Split unpaid into pending and overdue based on days old
     const now = new Date()
@@ -200,8 +200,8 @@ export default function DashboardPage() {
       (d) => new Date(d.created_at) >= lastMonthStart && new Date(d.created_at) <= lastMonthEnd
     )
 
-    const thisMonthRate = thisMonthDocs.length > 0 ? (thisMonthDocs.filter((d) => d.status === 'paid').length / thisMonthDocs.length) * 100 : 0
-    const lastMonthRate = lastMonthDocs.length > 0 ? (lastMonthDocs.filter((d) => d.status === 'paid').length / lastMonthDocs.length) * 100 : 0
+    const thisMonthRate = thisMonthDocs.length > 0 ? (thisMonthDocs.filter((d) => d.status === 'fully_paid').length / thisMonthDocs.length) * 100 : 0
+    const lastMonthRate = lastMonthDocs.length > 0 ? (lastMonthDocs.filter((d) => d.status === 'fully_paid').length / lastMonthDocs.length) * 100 : 0
 
     return {
       current: Math.round(thisMonthRate),
@@ -222,7 +222,7 @@ export default function DashboardPage() {
       }
       clientStats[doc.client_name].revenue += doc.price
       clientStats[doc.client_name].totalCount += 1
-      if (doc.status === 'paid') {
+      if (doc.status === 'fully_paid') {
         clientStats[doc.client_name].paidCount += 1
         const days = Math.floor((new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24))
         clientStats[doc.client_name].avgDays += days
@@ -349,32 +349,17 @@ export default function DashboardPage() {
   // Check payment status of selected documents
   const getSelectedPaymentStatus = () => {
     const selected = Array.from(selectedDocs)
-    const paidCount = selected.filter((id) => stats.documents.find((d) => d.id === id)?.status === 'paid').length
+    const paidCount = selected.filter((id) => stats.documents.find((d) => d.id === id)?.status === 'fully_paid').length
     const unpaidCount = selected.length - paidCount
     return { paidCount, unpaidCount, hasMixed: paidCount > 0 && unpaidCount > 0 }
   }
 
   const markSelectedAsPaid = () => {
-    const unpaidIds = Array.from(selectedDocs).filter((id) => stats.documents.find((d) => d.id === id)?.status !== 'paid')
+    const unpaidIds = Array.from(selectedDocs).filter((id) => stats.documents.find((d) => d.id === id)?.status !== 'fully_paid')
     unpaidIds.forEach((docId) => {
-      console.log('Mark as paid:', docId)
-    })
-    alert(`Marked ${unpaidIds.length} invoice(s) as paid`)
-    setSelectedDocs(new Set())
-  }
-
-  const unmarkSelectedAsPaid = () => {
-    const paidIds = Array.from(selectedDocs).filter((id) => stats.documents.find((d) => d.id === id)?.status === 'paid')
+      console.log('Mark as fully_paid: 'bg-green-100 text-green-700'fully_paid')
     paidIds.forEach((docId) => {
-      console.log('Unmark as paid:', docId)
-    })
-    alert(`Unmarked ${paidIds.length} invoice(s) as paid`)
-    setSelectedDocs(new Set())
-  }
-
-  const sendRemindersToSelected = () => {
-    selectedDocs.forEach((docId) => {
-      console.log('Send reminder:', docId)
+      console.log('Unmark as fully_paid: 'bg-green-100 text-green-700'Send reminder:', docId)
     })
     alert(`Reminders sent to ${selectedDocs.size} client(s)`)
     setSelectedDocs(new Set())
@@ -382,7 +367,7 @@ export default function DashboardPage() {
 
   // Get row urgency color
   const getRowColor = (doc: Document) => {
-    if (doc.status === 'paid') return 'hover:bg-gray-50'
+    if (doc.status === 'fully_paid') return 'hover:bg-gray-50'
     const daysOld = Math.floor((new Date().getTime() - new Date(doc.created_at).getTime()) / (1000 * 60 * 60 * 24))
     if (daysOld > 30) return 'bg-red-50'
     return 'hover:bg-gray-50'
@@ -405,7 +390,7 @@ export default function DashboardPage() {
         'Amount': `$${doc.price.toLocaleString()}`,
         'Status': doc.status,
         'Date Sent': createdDate.toLocaleDateString(),
-        'Days Outstanding': doc.status === 'paid' ? '—' : daysOld,
+        'Days Outstanding': doc.status === 'fully_paid' ? '—' : daysOld,
       }
     })
 
@@ -441,16 +426,16 @@ export default function DashboardPage() {
           const now = new Date()
 
           const totalSent = data.length
-          const pendingProposals = data.filter((doc) => doc.doc_type === 'proposal' && doc.status !== 'paid').length
+          const pendingProposals = data.filter((doc) => doc.doc_type === 'proposal' && doc.status !== 'fully_paid').length
           const outstanding = data
-            .filter((doc) => doc.status !== 'paid')
+            .filter((doc) => doc.status !== 'fully_paid')
             .reduce((sum, doc) => sum + (doc.price || 0), 0)
           const collected = data
-            .filter((doc) => doc.status === 'paid')
+            .filter((doc) => doc.status === 'fully_paid')
             .reduce((sum, doc) => sum + (doc.price || 0), 0)
 
           // Calculate average days to payment for paid invoices
-          const paidDocs = data.filter((doc) => doc.status === 'paid')
+          const paidDocs = data.filter((doc) => doc.status === 'fully_paid')
           const avgDaysToPayment = paidDocs.length > 0
             ? Math.round(
                 paidDocs.reduce((sum, doc) => {
@@ -463,7 +448,7 @@ export default function DashboardPage() {
 
           // Count overdue (unpaid for more than 30 days)
           const overdue = data.filter((doc) => {
-            if (doc.status === 'paid') return false
+            if (doc.status === 'fully_paid') return false
             const createdDate = new Date(doc.created_at)
             const daysOld = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
             return daysOld > 30
@@ -664,12 +649,12 @@ export default function DashboardPage() {
                     <div className="text-4xl font-bold mb-2">${stats.outstanding.toLocaleString()}</div>
                     <div className="text-sm text-blue-300">
                       {stats.overdue > 0 && <span className="text-orange-400 font-semibold">🚨 {stats.overdue} overdue • </span>}
-                      {stats.documents.filter((d) => d.status !== 'paid').length} invoices pending
+                      {stats.documents.filter((d) => d.status !== 'fully_paid').length} invoices pending
                     </div>
                   </div>
                   <div className="text-right">
                     {(() => {
-                      const unpaidDocs = stats.documents.filter((d) => d.status !== 'paid')
+                      const unpaidDocs = stats.documents.filter((d) => d.status !== 'fully_paid')
                       if (unpaidDocs.length === 0) return null
                       const oldest = unpaidDocs.reduce((oldest, current) => {
                         return new Date(current.created_at) < new Date(oldest.created_at) ? current : oldest
@@ -702,12 +687,12 @@ export default function DashboardPage() {
 
                     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
                     const thisMonthRevenue = stats.documents
-                      .filter((d) => d.status === 'paid' && new Date(d.created_at) >= thisMonthStart)
+                      .filter((d) => d.status === 'fully_paid' && new Date(d.created_at) >= thisMonthStart)
                       .reduce((sum, d) => sum + (d.price || 0), 0)
 
-                    const paidDocs = periodDocs.filter((d) => d.status === 'paid').length
+                    const paidDocs = periodDocs.filter((d) => d.status === 'fully_paid').length
                     const totalInvoicesInPeriod = periodDocs.length
-                    const totalRevenueInPeriod = periodDocs.filter((d) => d.status === 'paid').reduce((sum, d) => sum + (d.price || 0), 0)
+                    const totalRevenueInPeriod = periodDocs.filter((d) => d.status === 'fully_paid').reduce((sum, d) => sum + (d.price || 0), 0)
                     const uniqueClients = new Set(stats.documents.map((d) => d.client_name)).size
                     const collectionRate = totalInvoicesInPeriod > 0 ? ((paidDocs / totalInvoicesInPeriod) * 100).toFixed(0) : 0
                     const avgInvoiceValue = totalInvoicesInPeriod > 0 ? (totalRevenueInPeriod / totalInvoicesInPeriod).toFixed(0) : 0
@@ -779,7 +764,7 @@ export default function DashboardPage() {
                           {showPendingProposals && stats.pendingProposals > 0 && (
                             <div className="bg-gray-50 rounded-lg p-3 space-y-2 border border-gray-200">
                               {stats.documents
-                                .filter((d) => d.doc_type === 'proposal' && d.status !== 'paid')
+                                .filter((d) => d.doc_type === 'proposal' && d.status !== 'fully_paid')
                                 .slice(0, 5)
                                 .map((proposal) => (
                                   <div key={proposal.id} className="flex items-center justify-between text-xs p-2 bg-white rounded border border-gray-100">
@@ -792,7 +777,7 @@ export default function DashboardPage() {
                                     </Link>
                                   </div>
                                 ))}
-                              {stats.documents.filter((d) => d.doc_type === 'proposal' && d.status !== 'paid').length === 0 && (
+                              {stats.documents.filter((d) => d.doc_type === 'proposal' && d.status !== 'fully_paid').length === 0 && (
                                 <div className="text-xs text-gray-500 p-2">No pending proposals</div>
                               )}
                             </div>
@@ -1084,10 +1069,10 @@ export default function DashboardPage() {
                         const statusColors: Record<string, string> = {
                           draft: 'bg-gray-100 text-gray-700',
                           sent: 'bg-blue-100 text-blue-700',
-                          paid: 'bg-green-100 text-green-700',
+                          fully_paid: 'bg-green-100 text-green-700',
                           overdue: 'bg-red-100 text-red-700',
                         }
-                        const isOverdue = doc.status !== 'paid' && daysOld > 30
+                        const isOverdue = doc.status !== 'fully_paid' && daysOld > 30
 
                         return (
                           <tr key={doc.id} className={`border-b border-gray-100 ${getRowColor(doc)} transition`}>
@@ -1128,7 +1113,7 @@ export default function DashboardPage() {
                                 )
                               ) : (
                                 // Invoice status - status display only
-                                doc.status === 'paid' ? (
+                                doc.status === 'fully_paid' ? (
                                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
                                     ✓ Paid
                                   </span>
@@ -1156,7 +1141,7 @@ export default function DashboardPage() {
                                 )
                               ) : (
                                 // Invoices: show days outstanding
-                                doc.status === 'paid' ? (
+                                doc.status === 'fully_paid' ? (
                                   '—'
                                 ) : (
                                   <span className={isOverdue ? 'text-red-600 font-semibold' : ''}>
@@ -1244,19 +1229,11 @@ export default function DashboardPage() {
                                   </button>
                                   {openDropdown === doc.id && (
                                     <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">
-                                      {doc.status !== 'paid' && (
+                                      {doc.status !== 'fully_paid' && (
                                         <button
                                           onClick={() => {
                                             // Mark as paid (will implement API call)
-                                            console.log('Mark as paid:', doc.id)
-                                            setOpenDropdown(null)
-                                          }}
-                                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
-                                        >
-                                          ✓ Mark Paid
-                                        </button>
-                                      )}
-                                      {doc.status !== 'paid' && daysOld > 14 && (
+                                            console.log('Mark as fully_paid: 'bg-green-100 text-green-700'fully_paid' && daysOld > 14 && (
                                         <button
                                           onClick={() => {
                                             // Send reminder

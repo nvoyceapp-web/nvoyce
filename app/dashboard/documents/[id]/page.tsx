@@ -92,10 +92,12 @@ export default function DocumentPage() {
 
   const statusColors: Record<string, string> = {
     draft: 'bg-gray-100 text-gray-600',
-    sent: 'bg-blue-50 text-blue-600',
-    viewed: 'bg-yellow-50 text-yellow-700',
-    paid: 'bg-green-50 text-green-700',
-    overdue: 'bg-red-50 text-red-600',
+    sent: 'bg-blue-100 text-blue-700',
+    fully_paid: 'bg-green-100 text-green-700',
+    partially_paid: 'bg-yellow-100 text-yellow-700',
+    overdue: 'bg-red-100 text-red-700',
+    accepted: 'bg-green-100 text-green-700',
+    declined: 'bg-red-100 text-red-700',
   }
 
   if (loading) {
@@ -237,6 +239,60 @@ export default function DocumentPage() {
         </div>
       )}
 
+      {/* Invoice sent banner */}
+      {doc.doc_type === 'invoice' && doc.status === 'sent' && (
+        <div className="bg-blue-50 border-b border-blue-100 print:hidden">
+          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="text-blue-500 font-semibold text-lg">✉</div>
+              <div>
+                <h3 className="text-sm font-semibold text-blue-900">Invoice sent — awaiting payment</h3>
+                <p className="text-sm text-blue-700 mt-0.5">Emailed to <strong>{doc.client_email}</strong> with a payment link.</p>
+              </div>
+            </div>
+            {doc.stripe_payment_link && (
+              <button onClick={copyLink} className="text-sm border border-blue-300 text-blue-800 px-4 py-2 rounded-lg hover:bg-blue-100 transition flex-shrink-0">
+                {copied ? '✓ Copied!' : 'Copy payment link'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      {/* Invoice partially paid banner */}
+      {doc.doc_type === 'invoice' && doc.status === 'partially_paid' && (
+        <div className="bg-yellow-50 border-b border-yellow-100 print:hidden">
+          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="text-yellow-500 font-semibold text-lg">◑</div>
+              <div>
+                <h3 className="text-sm font-semibold text-yellow-900">Partial payment received</h3>
+                <p className="text-sm text-yellow-700 mt-0.5">
+                  ${doc.amount_paid?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received — ${((doc.price || 0) - (doc.amount_paid || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding.
+                </p>
+              </div>
+            </div>
+            {doc.stripe_payment_link && (
+              <button onClick={copyLink} className="text-sm border border-yellow-300 text-yellow-800 px-4 py-2 rounded-lg hover:bg-yellow-100 transition flex-shrink-0">
+                {copied ? '✓ Copied!' : 'Copy payment link'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      {/* Invoice fully paid banner */}
+      {doc.doc_type === 'invoice' && doc.status === 'fully_paid' && (
+        <div className="bg-green-50 border-b border-green-100 print:hidden">
+          <div className="max-w-3xl mx-auto px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div className="text-green-600 font-semibold text-lg">✓</div>
+              <div>
+                <h3 className="text-sm font-semibold text-green-900">Fully paid!</h3>
+                <p className="text-sm text-green-700 mt-0.5">Full payment received from <strong>{doc.client_email}</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Document */}
       <div className="max-w-3xl mx-auto px-4 py-12 print:py-0 print:px-0">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 print:shadow-none print:border-none print:rounded-none">

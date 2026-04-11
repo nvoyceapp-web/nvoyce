@@ -124,9 +124,9 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
 
     console.log('Document saved successfully:', data.id)
 
-    // 6. Create payment link
+    // 6. Create payment link (invoices only)
     let paymentLink = ''
-    try {
+    if (docType === 'invoice') try {
       const documentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${data.id}`
       paymentLink = await createPaymentLink({
         documentId: data.id,
@@ -135,9 +135,9 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
         clientEmail: clientEmail,
       })
       console.log('Payment link created:', paymentLink)
+      await supabase.from('documents').update({ stripe_payment_link: paymentLink }).eq('id', data.id)
     } catch (paymentError) {
       console.error('Payment link creation error:', paymentError)
-      // Don't fail the whole request if payment link fails
     }
 
     // 7. Send email to client (invoices only — proposals require user review before sending)
@@ -151,7 +151,10 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
           paymentLink: paymentLink,
           businessName: businessName,
           amount: parseFloat(price.replace(',', '')),
+          invoiceNumber: generatedDoc.documentNumber,
+          dueDate: generatedDoc.dueDate,
         })
+        await supabase.from('documents').update({ status: 'sent' }).eq('id', data.id)
         console.log('Invoice email sent to:', clientEmail)
       } catch (emailError) {
         console.error('Email sending error:', emailError)

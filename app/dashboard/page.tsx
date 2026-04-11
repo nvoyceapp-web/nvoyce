@@ -74,6 +74,7 @@ function DashboardContent() {
   const [showArchived, setShowArchived] = useState(false)
   const [archiving, setArchiving] = useState(false)
   const [bulkActionNotice, setBulkActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -808,6 +809,60 @@ function DashboardContent() {
         </aside>
 
         <main className="flex-1 overflow-auto w-full">
+          {/* Mobile top bar — only visible on small screens */}
+          <div className="lg:hidden bg-purple-50 border-b border-purple-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+            <Logo showTagline={false} size="small" />
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 rounded-lg text-gray-600 hover:bg-purple-100 transition"
+              aria-label="Toggle menu"
+            >
+              {showMobileMenu ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
+          {/* Mobile menu dropdown */}
+          {showMobileMenu && (
+            <div className="lg:hidden bg-purple-50 border-b border-purple-200 px-4 py-3 space-y-1 z-30">
+              <button
+                onClick={() => { setShowCreateDropdown(!showCreateDropdown) }}
+                className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition font-medium"
+              >
+                ✨ Create
+              </button>
+              {showCreateDropdown && (
+                <div className="ml-4 space-y-1 border-l-2 border-purple-200 pl-3">
+                  <Link href="/dashboard/new?type=invoice" onClick={() => { setShowMobileMenu(false); setShowCreateDropdown(false) }}
+                    className="block px-2 py-1.5 text-sm text-gray-600 hover:text-gray-900">
+                    📄 Invoice
+                  </Link>
+                  <Link href="/dashboard/new?type=proposal" onClick={() => { setShowMobileMenu(false); setShowCreateDropdown(false) }}
+                    className="block px-2 py-1.5 text-sm text-gray-600 hover:text-gray-900">
+                    💼 Proposal
+                  </Link>
+                </div>
+              )}
+              <Link href="/dashboard/faq" onClick={() => setShowMobileMenu(false)}
+                className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition">
+                ❓ FAQ
+              </Link>
+              <Link href="/dashboard/settings" onClick={() => setShowMobileMenu(false)}
+                className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition">
+                ⚙️ Settings
+              </Link>
+              <Link href="/about" onClick={() => setShowMobileMenu(false)}
+                className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition">
+                ℹ️ About Nvoyce
+              </Link>
+            </div>
+          )}
           <div className="px-4 lg:px-10 py-8">
             <div className="flex items-center justify-between mb-8">
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -1310,9 +1365,20 @@ function DashboardContent() {
                     </div>
                   </div>
 
-                  {filteredDocuments.length !== stats.documents.length && (
-                    <div className="text-xs text-gray-500">
-                      Showing {filteredDocuments.length} of {stats.documents.length} documents
+                  {/* Clear filters */}
+                  {(searchQuery || filterClient || dateFrom || dateTo) && (
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => { setSearchQuery(''); setFilterClient(''); setDateFrom(''); setDateTo('') }}
+                        className="text-xs text-orange-600 hover:text-orange-700 font-semibold flex items-center gap-1"
+                      >
+                        ✕ Clear filters
+                      </button>
+                      {filteredDocuments.length !== stats.documents.length && (
+                        <span className="text-xs text-gray-400">
+                          Showing {filteredDocuments.length} of {stats.documents.length} documents
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1709,8 +1775,20 @@ function DashboardContent() {
                       })
                       ) : (
                         <tr>
-                          <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                            No documents found. Try adjusting your filters.
+                          <td colSpan={documentTab === 'proposals' ? 9 : 8} className="px-6 py-16 text-center">
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="text-4xl">🔍</div>
+                              <div className="text-gray-700 font-semibold text-sm">No {documentTab} match your filters</div>
+                              <div className="text-gray-400 text-xs">Try adjusting your search or date range</div>
+                              {(searchQuery || filterClient || dateFrom || dateTo) && (
+                                <button
+                                  onClick={() => { setSearchQuery(''); setFilterClient(''); setDateFrom(''); setDateTo('') }}
+                                  className="mt-1 text-xs text-orange-600 hover:text-orange-700 font-semibold border border-orange-200 px-3 py-1.5 rounded-lg hover:bg-orange-50 transition"
+                                >
+                                  ✕ Clear filters
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       )}

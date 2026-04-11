@@ -453,6 +453,45 @@ function DashboardContent() {
     }
   }
 
+  const deleteSelectedDrafts = async () => {
+    const selectedDocuments = stats.documents.filter((d) => selectedDocs.has(d.id))
+    const draftCount = selectedDocuments.filter((d) => d.status === 'draft').length
+
+    if (draftCount === 0) {
+      alert('No drafts selected')
+      return
+    }
+
+    if (!confirm(`Delete ${draftCount} draft(s)? This action cannot be undone.`)) {
+      return
+    }
+
+    setDeleting(true)
+    try {
+      const draftIds = selectedDocuments.filter((d) => d.status === 'draft').map((d) => d.id)
+      const res = await fetch('/api/documents/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentIds: draftIds }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        // Remove from local state
+        setStats((prev) => ({
+          ...prev,
+          documents: prev.documents.filter((d) => !draftIds.includes(d.id)),
+        }))
+        setSelectedDocs(new Set())
+      } else {
+        alert(`Error: ${data.error}`)
+      }
+    } catch (err) {
+      alert('Failed to delete drafts')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   // Get row urgency color
   const getRowColor = (doc: Document) => {
     if (doc.status === 'fully_paid') return 'hover:bg-gray-50'
@@ -1094,6 +1133,20 @@ function DashboardContent() {
                         {hasMixed && (
                           <span className="text-xs text-gray-600 italic">Cannot batch act on mixed document types. Select invoices or proposals separately.</span>
                         )}
+                        {(() => {
+                          const allDrafts = selectedDocuments.every((d) => d.status === 'draft')
+                          const draftCount = selectedDocuments.filter((d) => d.status === 'draft').length
+                          return draftCount > 0 && (
+                            <button
+                              onClick={deleteSelectedDrafts}
+                              disabled={deleting}
+                              className="text-sm bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition font-semibold disabled:opacity-50"
+                              title={allDrafts ? `Delete ${draftCount} draft(s)` : `Delete ${draftCount} draft(s) (${selectedDocuments.length - draftCount} non-drafts will remain selected)`}
+                            >
+                              🗑️ Delete {draftCount} Draft{draftCount !== 1 ? 's' : ''}
+                            </button>
+                          )
+                        })()}
                         <button
                           onClick={() => setSelectedDocs(new Set())}
                           className="text-sm bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-300 transition"

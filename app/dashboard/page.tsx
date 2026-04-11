@@ -72,6 +72,7 @@ function DashboardContent() {
   const [deleting, setDeleting] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
   const [archiving, setArchiving] = useState(false)
+  const [bulkActionNotice, setBulkActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -384,10 +385,31 @@ function DashboardContent() {
   }
 
   const sendRemindersToSelected = () => {
-    selectedDocs.forEach((docId) => {
-      console.log('Send reminder:', docId)
+    const selectedDocuments = stats.documents.filter((d) => selectedDocs.has(d.id))
+    // Eligible: invoices not fully_paid/draft; proposals not accepted/declined/expired/draft
+    const eligible = selectedDocuments.filter((d) => {
+      if (d.doc_type.toLowerCase() === 'proposal') {
+        return !['accepted', 'declined', 'expired', 'draft'].includes(d.status)
+      } else {
+        return !['fully_paid', 'draft'].includes(d.status)
+      }
     })
-    alert(`Reminders sent to ${selectedDocs.size} client(s)`)
+    const skipped = selectedDocuments.length - eligible.length
+
+    if (eligible.length === 0) {
+      setBulkActionNotice({ type: 'warning', text: 'No eligible documents for reminders. Only unpaid/pending documents can receive reminders.' })
+      setTimeout(() => setBulkActionNotice(null), 5000)
+      return
+    }
+
+    // TODO: wire to actual email API when ready
+    eligible.forEach((doc) => console.log('Send reminder:', doc.id))
+
+    let message = `📧 Reminders sent to ${eligible.length} document${eligible.length !== 1 ? 's' : ''}.`
+    if (skipped > 0) message += ` ${skipped} skipped — not eligible (already paid, accepted, or draft).`
+
+    setBulkActionNotice({ type: 'success', text: message })
+    setTimeout(() => setBulkActionNotice(null), 6000)
     setSelectedDocs(new Set())
   }
 
@@ -492,6 +514,57 @@ function DashboardContent() {
       alert('Failed to delete drafts')
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const bulkArchiveSelected = async () => {
+    const selectedDocuments = stats.documents.filter((d) => selectedDocs.has(d.id))
+    // Eligible: invoices that are fully_paid, proposals that are sent — and not already archived
+    const eligible = selectedDocuments.filter((d) => {
+      if (d.is_archived) return false
+      if (d.doc_type.toLowerCase() === 'proposal') return d.status === 'sent'
+      return d.status === 'fully_paid'
+    })
+    const skipped = selectedDocuments.length - eligible.length
+
+    if (eligible.length === 0) {
+      setBulkActionNotice({ type: 'warning', text: 'No eligible documents to archive. Only fully paid invoices and sent proposals can be archived.' })
+      setTimeout(() => setBulkActionNotice(null), 5000)
+      return
+    }
+
+    setArchiving(true)
+    try {
+      await Promise.all(
+        eligible.map((doc) =>
+          fetch('/api/documents/archive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ documentId: doc.id, action: 'archive' }),
+          })
+        )
+      )
+
+      // Refetch documents
+      const { data: updated } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_archived', showArchived)
+        .order('created_at', { ascending: false })
+      if (updated) setStats((prev) => ({ ...prev, documents: updated }))
+
+      let message = `🗂 Archived ${eligible.length} document${eligible.length !== 1 ? 's' : ''}.`
+      if (skipped > 0) message += ` ${skipped} skipped — not eligible (must be fully paid invoice or sent proposal).`
+
+      setBulkActionNotice({ type: 'success', text: message })
+      setTimeout(() => setBulkActionNotice(null), 6000)
+      setSelectedDocs(new Set())
+    } catch (err) {
+      setBulkActionNotice({ type: 'error', text: '❌ Failed to archive some documents. Please try again.' })
+      setTimeout(() => setBulkActionNotice(null), 5000)
+    } finally {
+      setArchiving(false)
     }
   }
 
@@ -771,6 +844,29 @@ function DashboardContent() {
                 <p className={`text-sm font-medium ${assignmentMessage.type === 'success' ? 'text-green-900' : 'text-red-900'}`}>
                   {assignmentMessage.text}
                 </p>
+              </div>
+            )}
+
+            {/* Bulk action notice (skip/success toast) */}
+            {bulkActionNotice && (
+              <div className={`rounded-xl p-4 mb-6 border flex items-start gap-3 ${
+                bulkActionNotice.type === 'success' ? 'bg-green-50 border-green-200' :
+                bulkActionNotice.type === 'warning' ? 'bg-yellow-50 border-yellow-200' :
+                'bg-red-50 border-red-200'
+              }`}>
+                <p className={`text-sm font-medium flex-1 ${
+                  bulkActionNotice.type === 'success' ? 'text-green-900' :
+                  bulkActionNotice.type === 'warning' ? 'text-yellow-900' :
+                  'text-red-900'
+                }`}>
+                  {bulkActionNotice.text}
+                </p>
+                <button
+                  onClick={() => setBulkActionNotice(null)}
+                  className={`text-lg ${bulkActionNotice.type === 'success' ? 'text-green-600' : bulkActionNotice.type === 'warning' ? 'text-yellow-600' : 'text-red-600'}`}
+                >
+                  ✕
+                </button>
               </div>
             )}
 
@@ -1111,66 +1207,68 @@ function DashboardContent() {
                   const invoiceCount = selectedDocuments.filter((d) => d.doc_type.toLowerCase() !== 'proposal').length
                   const proposalCount = selectedDocuments.filter((d) => d.doc_type.toLowerCase() === 'proposal').length
 
-                  // Check if selected proposals are already accepted
-                  const selectedProposals = selectedDocuments.filter((d) => d.doc_type.toLowerCase() === 'proposal')
-                  const allProposalsAccepted = selectedProposals.length > 0 && selectedProposals.every((p) => p.status === 'accepted')
-                  const anyProposalPending = selectedProposals.some((p) => p.status !== 'accepted' && p.status !== 'declined')
+                  // Eligible for reminders: invoices not fully_paid/draft; proposals not accepted/declined/expired/draft
+                  const reminderEligible = selectedDocuments.filter((d) => {
+                    if (d.doc_type.toLowerCase() === 'proposal') {
+                      return !['accepted', 'declined', 'expired', 'draft'].includes(d.status)
+                    } else {
+                      return !['fully_paid', 'draft'].includes(d.status)
+                    }
+                  })
+                  // Eligible for archive: fully_paid invoices, sent proposals, not already archived
+                  const archiveEligible = selectedDocuments.filter((d) => {
+                    if (d.is_archived) return false
+                    if (d.doc_type.toLowerCase() === 'proposal') return d.status === 'sent'
+                    return d.status === 'fully_paid'
+                  })
+                  const draftCount = selectedDocuments.filter((d) => d.status === 'draft').length
+
+                  const reminderLabel = reminderEligible.length < selectedDocuments.length && reminderEligible.length > 0
+                    ? `📧 Send Reminders (${reminderEligible.length} of ${selectedDocuments.length})`
+                    : `📧 Send Reminders (${reminderEligible.length})`
+                  const archiveLabel = archiveEligible.length < selectedDocuments.length && archiveEligible.length > 0
+                    ? `🗂 Archive (${archiveEligible.length} of ${selectedDocuments.length})`
+                    : `🗂 Archive (${archiveEligible.length})`
 
                   return (
-                    <div className="bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between">
+                    <div className="bg-blue-50 border-b border-blue-200 p-4 flex items-center justify-between flex-wrap gap-2">
                       <div className="text-sm font-semibold text-blue-900">
                         {selectedDocs.size} document{selectedDocs.size !== 1 ? 's' : ''} selected
-                        {hasMixed && <span className="text-xs text-gray-600 ml-2">({invoiceCount} invoices, {proposalCount} proposals)</span>}
-                        {hasProposals && !hasMixed && allProposalsAccepted && <span className="text-xs text-green-600 ml-2">(all accepted)</span>}
+                        {hasMixed && <span className="text-xs text-gray-500 ml-2">({invoiceCount} invoice{invoiceCount !== 1 ? 's' : ''}, {proposalCount} proposal{proposalCount !== 1 ? 's' : ''})</span>}
                       </div>
-                      <div className="flex gap-2">
-                        {hasProposals && !hasMixed && (
-                          <span className="text-xs text-gray-600 font-semibold">
-                            {allProposalsAccepted ? '✓ All accepted' : 'Waiting for client response via shareable link'}
-                          </span>
+                      <div className="flex gap-2 flex-wrap items-center">
+                        {reminderEligible.length > 0 && (
+                          <button
+                            onClick={sendRemindersToSelected}
+                            className="text-sm bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition font-semibold"
+                            title="Send reminders to eligible documents only"
+                          >
+                            {reminderLabel}
+                          </button>
                         )}
-                        {hasInvoices && !hasMixed && (
-                          <>
-                            <button
-                              onClick={markSelectedAsPaid}
-                              className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold"
-                              title="Mark selected invoices as paid"
-                            >
-                              ✓ Mark as Paid
-                            </button>
-                            <button
-                              onClick={unmarkSelectedAsPaid}
-                              className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition font-semibold"
-                              title="Unmark selected invoices as paid"
-                            >
-                              ↩ Unmark as Paid
-                            </button>
-                            <button
-                              onClick={sendRemindersToSelected}
-                              className="text-sm bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 transition font-semibold"
-                              title="Send payment reminders"
-                            >
-                              📧 Send Reminders
-                            </button>
-                          </>
+                        {archiveEligible.length > 0 && (
+                          <button
+                            onClick={bulkArchiveSelected}
+                            disabled={archiving}
+                            className="text-sm bg-gray-600 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700 transition font-semibold disabled:opacity-50"
+                            title="Archive eligible documents only (fully paid invoices, sent proposals)"
+                          >
+                            {archiveLabel}
+                          </button>
                         )}
-                        {hasMixed && (
-                          <span className="text-xs text-gray-600 italic">Cannot batch act on mixed document types. Select invoices or proposals separately.</span>
+                        {draftCount > 0 && (
+                          <button
+                            onClick={deleteSelectedDrafts}
+                            disabled={deleting}
+                            className="text-sm bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition font-semibold disabled:opacity-50"
+                            title={`Delete ${draftCount} draft(s)`}
+                          >
+                            🗑️ Delete {draftCount} Draft{draftCount !== 1 ? 's' : ''}
+                          </button>
                         )}
-                        {(() => {
-                          const allDrafts = selectedDocuments.every((d) => d.status === 'draft')
-                          const draftCount = selectedDocuments.filter((d) => d.status === 'draft').length
-                          return draftCount > 0 && (
-                            <button
-                              onClick={deleteSelectedDrafts}
-                              disabled={deleting}
-                              className="text-sm bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition font-semibold disabled:opacity-50"
-                              title={allDrafts ? `Delete ${draftCount} draft(s)` : `Delete ${draftCount} draft(s) (${selectedDocuments.length - draftCount} non-drafts will remain selected)`}
-                            >
-                              🗑️ Delete {draftCount} Draft{draftCount !== 1 ? 's' : ''}
-                            </button>
-                          )
-                        })()}
+                        {reminderEligible.length === 0 && archiveEligible.length === 0 && draftCount === 0 && (
+                          <span className="text-xs text-gray-500 italic">No bulk actions available for these documents</span>
+                        )}
                         <button
                           onClick={() => setSelectedDocs(new Set())}
                           className="text-sm bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-300 transition"

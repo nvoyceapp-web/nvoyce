@@ -758,9 +758,9 @@ function DashboardContent() {
             <Logo showTagline={true} size="small" />
           </div>
           <nav className="flex flex-col gap-0 flex-1">
-            <Link href="/dashboard" className="px-3 py-1.5 rounded-lg bg-gray-100 text-sm font-medium text-gray-900">
-              Navigation
-            </Link>
+            <div className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Menu
+            </div>
             <button
               onClick={() => setShowCreateDropdown(!showCreateDropdown)}
               className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 text-left w-full transition"
@@ -1042,25 +1042,15 @@ function DashboardContent() {
                           ))}
                         </div>
 
-                        {/* Additional metric with dropdown selector */}
-                        <div className="space-y-3">
-                          <label className="text-xs font-semibold text-gray-600 block">More metrics</label>
-                          <div>
-                            <select
-                              value={selectedMetric}
-                              onChange={(e) => setSelectedMetric(e.target.value as any)}
-                              className="text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black w-full mb-3"
-                            >
-                              <option value="avgInvoice">Avg Invoice Value</option>
-                              <option value="avgDaysToPayment">Avg Days to Payment</option>
-                              <option value="clientCount">Client Count</option>
-                            </select>
-                            <div className="bg-gray-50 rounded-lg p-4">
-                              <div className="text-xs text-gray-500 mb-1">{additional[selectedMetric].label}</div>
-                              <div className="text-2xl font-bold text-gray-900">{additional[selectedMetric].value}</div>
-                              <div className="text-xs text-gray-400 mt-1">{additional[selectedMetric].sub}</div>
+                        {/* Additional metrics grid */}
+                        <div className="grid grid-cols-3 gap-3">
+                          {Object.values(additional).map(({ label, value, sub }) => (
+                            <div key={label} className="bg-gray-50 rounded-lg p-4">
+                              <div className="text-xs text-gray-500 mb-1">{label}</div>
+                              <div className="text-xl font-bold text-gray-900">{value}</div>
+                              <div className="text-xs text-gray-400 mt-1">{sub}</div>
                             </div>
-                          </div>
+                          ))}
                         </div>
 
                         {/* Secondary info card */}
@@ -1275,9 +1265,9 @@ function DashboardContent() {
                     <h2 className="text-lg font-semibold text-gray-900">Invoices & Proposals</h2>
                     <button
                       onClick={exportToExcel}
-                      className="text-sm bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition font-semibold"
+                      className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition"
                     >
-                      ⬇️ Export to CSV
+                      ⬇ Export CSV
                     </button>
                   </div>
 
@@ -1302,18 +1292,24 @@ function DashboardContent() {
                         </option>
                       ))}
                     </select>
-                    <input
-                      type="date"
-                      value={dateFrom}
-                      onChange={(e) => setDateFrom(e.target.value)}
-                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
-                    />
-                    <input
-                      type="date"
-                      value={dateTo}
-                      onChange={(e) => setDateTo(e.target.value)}
-                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none select-none">From</span>
+                      <input
+                        type="date"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                        className="text-sm pl-12 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black w-full"
+                      />
+                    </div>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none select-none">To</span>
+                      <input
+                        type="date"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
+                        className="text-sm pl-8 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black w-full"
+                      />
+                    </div>
                   </div>
 
                   {filteredDocuments.length !== stats.documents.length && (
@@ -1414,7 +1410,7 @@ function DashboardContent() {
                       {filteredDocuments.length > 0 ? (
                         filteredDocuments.map((doc) => {
                         const createdDate = new Date(doc.created_at)
-                        const daysOld = Math.floor((new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
+                        const daysOld = Math.max(0, Math.floor((new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)))
                         const statusColors: Record<string, string> = {
                           draft: 'bg-gray-100 text-gray-700',
                           sent: 'bg-blue-100 text-blue-700',
@@ -1540,7 +1536,7 @@ function DashboardContent() {
                                       className="text-xs bg-gray-600 text-white px-2.5 py-1 rounded hover:bg-gray-700 transition"
                                       title="Actions menu"
                                     >
-                                      ⋯ Select
+                                      ⋯ Actions
                                     </button>
                                     {openDropdown === doc.id && (
                                       <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">

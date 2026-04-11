@@ -1553,17 +1553,19 @@ function DashboardContent() {
                                     </button>
                                     {openDropdown === doc.id && (
                                       <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">
-                                        <button
-                                          onClick={() => {
-                                            const proposalUrl = `${window.location.origin}/p/${doc.id}`
-                                            navigator.clipboard.writeText(proposalUrl)
-                                            alert('Proposal link copied!')
-                                            setOpenDropdown(null)
-                                          }}
-                                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
-                                        >
-                                          🔗 Copy Link
-                                        </button>
+                                        {doc.status !== 'draft' && (
+                                          <button
+                                            onClick={() => {
+                                              const proposalUrl = `${window.location.origin}/p/${doc.id}`
+                                              navigator.clipboard.writeText(proposalUrl)
+                                              alert('Proposal link copied!')
+                                              setOpenDropdown(null)
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
+                                          >
+                                            🔗 Copy Link
+                                          </button>
+                                        )}
                                         {doc.status !== 'accepted' && doc.status !== 'declined' && daysOld > 7 && (
                                           <button
                                             onClick={() => {
@@ -1625,7 +1627,7 @@ function DashboardContent() {
                                   </button>
                                   {openDropdown === doc.id && (
                                     <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">
-                                      {doc.stripe_payment_link && (
+                                      {doc.stripe_payment_link && doc.status !== 'draft' && (
                                         <button
                                           onClick={() => {
                                             navigator.clipboard.writeText(doc.stripe_payment_link!)

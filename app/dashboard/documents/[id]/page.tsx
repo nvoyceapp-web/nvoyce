@@ -212,13 +212,12 @@ export default function DocumentPage() {
       })
       const data = await res.json()
       if (data.success || data.alreadySent) {
-        const paymentLink = data.paymentLink || doc.stripe_payment_link
         setHasUnsavedChanges(false)
-        // Redirect to dashboard with success notification, including payment link
+        // Redirect to dashboard with success notification
+        // Do NOT pass paymentLink in URL — Stripe URLs contain '?' which breaks query string parsing
         const params = new URLSearchParams()
         if (doc.doc_type === 'invoice') {
           params.append('invoiceCreated', doc.id)
-          if (paymentLink) params.append('paymentLink', paymentLink)
         } else {
           params.append('proposalCreated', doc.id)
         }

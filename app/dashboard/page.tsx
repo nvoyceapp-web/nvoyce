@@ -22,6 +22,7 @@ interface Document {
   stripe_payment_link?: string
   form_data?: Record<string, any>
   generated_content?: Record<string, any>
+  is_archived?: boolean
 }
 
 interface Stats {
@@ -63,12 +64,14 @@ function DashboardContent() {
   const [showCreateDropdown, setShowCreateDropdown] = useState(false)
   const [documentTab, setDocumentTab] = useState<'invoices' | 'proposals'>('invoices')
   const [generatingInvoices, setGeneratingInvoices] = useState<Set<string>>(new Set())
-  const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string; paymentLink?: string } | null>(null)
+  const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string } | null>(null)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
   const [assigningNumbers, setAssigningNumbers] = useState(false)
   const [assignmentMessage, setAssignmentMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [showArchived, setShowArchived] = useState(false)
+  const [archiving, setArchiving] = useState(false)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -542,7 +545,6 @@ function DashboardContent() {
   useEffect(() => {
     const invoiceId = searchParams.get('invoiceCreated')
     const proposalId = searchParams.get('proposalCreated')
-    const paymentLink = searchParams.get('paymentLink')
     if (invoiceId || proposalId) {
       // Trigger a refetch of stats to show the newly sent document
       const refetchStats = async () => {
@@ -551,6 +553,7 @@ function DashboardContent() {
             .from('documents')
             .select('*')
             .eq('user_id', userId)
+            .eq('is_archived', false)
             .order('created_at', { ascending: false })
           if (!error && data) {
             setStats((prev) => ({ ...prev, documents: data }))
@@ -566,13 +569,11 @@ function DashboardContent() {
         docId: invoiceId,
         invoiceId,
         message: '✅ Invoice successfully sent to your client!',
-        paymentLink: paymentLink || undefined,
       })
       setDocumentTab('invoices')
       // Clear param from URL without reload
       const url = new URL(window.location.href)
       url.searchParams.delete('invoiceCreated')
-      url.searchParams.delete('paymentLink')
       window.history.replaceState({}, '', url.toString())
     } else if (proposalId) {
       setSuccessMessage({
@@ -594,6 +595,7 @@ function DashboardContent() {
           .from('documents')
           .select('*')
           .eq('user_id', userId)
+          .eq('is_archived', showArchived)
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -640,7 +642,40 @@ function DashboardContent() {
     }
 
     if (userId) fetchStats()
-  }, [userId])
+  }, [userId, showArchived])
+
+  const canArchive = (doc: Document) => {
+    if (doc.is_archived) return true // can always unarchive
+    if (doc.doc_type === 'invoice') return doc.status === 'fully_paid'
+    if (doc.doc_type === 'proposal') return doc.status === 'sent'
+    return false
+  }
+
+  const archiveDocument = async (docId: string, isCurrentlyArchived: boolean) => {
+    setArchiving(true)
+    try {
+      const res = await fetch('/api/documents/archive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: docId, action: isCurrentlyArchived ? 'unarchive' : 'archive' }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        // Refetch to update the list
+        const { data: updated } = await supabase
+          .from('documents')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('is_archived', showArchived)
+          .order('created_at', { ascending: false })
+        if (updated) setStats((prev) => ({ ...prev, documents: updated }))
+      }
+    } catch (err) {
+      console.error('Archive error:', err)
+    } finally {
+      setArchiving(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -754,17 +789,6 @@ function DashboardContent() {
                       >
                         View details →
                       </Link>
-                      {successMessage.paymentLink && (
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(successMessage.paymentLink!)
-                            alert('Payment link copied!')
-                          }}
-                          className="text-sm text-green-600 hover:text-green-700 font-semibold inline-block"
-                        >
-                          📋 Copy payment link
-                        </button>
-                      )}
                     </div>
                   </div>
                   <button
@@ -1210,27 +1234,39 @@ function DashboardContent() {
                   )}
                 </div>
 
-                {/* Document Type Tabs */}
-                <div className="flex gap-1 border-b border-gray-200 mb-4">
+                {/* Document Type Tabs + Archive Toggle */}
+                <div className="flex items-center justify-between border-b border-gray-200 mb-4">
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setDocumentTab('invoices')}
+                      className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                        documentTab === 'invoices'
+                          ? 'border-orange-600 text-gray-900'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      🧾 Invoices ({stats.documents.filter((d) => d.doc_type.toLowerCase() !== 'proposal').length})
+                    </button>
+                    <button
+                      onClick={() => setDocumentTab('proposals')}
+                      className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                        documentTab === 'proposals'
+                          ? 'border-purple-600 text-gray-900'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      📋 Proposals ({stats.documents.filter((d) => d.doc_type.toLowerCase() === 'proposal').length})
+                    </button>
+                  </div>
                   <button
-                    onClick={() => setDocumentTab('invoices')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-                      documentTab === 'invoices'
-                        ? 'border-orange-600 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    onClick={() => setShowArchived(!showArchived)}
+                    className={`text-xs px-3 py-1.5 rounded-lg border transition mb-1 ${
+                      showArchived
+                        ? 'bg-gray-700 text-white border-gray-700'
+                        : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
                     }`}
                   >
-                    🧾 Invoices ({stats.documents.filter((d) => d.doc_type.toLowerCase() !== 'proposal').length})
-                  </button>
-                  <button
-                    onClick={() => setDocumentTab('proposals')}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-                      documentTab === 'proposals'
-                        ? 'border-purple-600 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    📋 Proposals ({stats.documents.filter((d) => d.doc_type.toLowerCase() === 'proposal').length})
+                    🗂 {showArchived ? 'Archived' : 'View Archived'}
                   </button>
                 </div>
 
@@ -1451,6 +1487,18 @@ function DashboardContent() {
                                         >
                                           👁️ View Details
                                         </button>
+                                        {canArchive(doc) && (
+                                          <button
+                                            onClick={() => {
+                                              archiveDocument(doc.id, doc.is_archived || false)
+                                              setOpenDropdown(null)
+                                            }}
+                                            disabled={archiving}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                                          >
+                                            🗂 {doc.is_archived ? 'Unarchive' : 'Archive'}
+                                          </button>
+                                        )}
                                         {doc.status === 'draft' && (
                                           <button
                                             onClick={() => {
@@ -1513,6 +1561,18 @@ function DashboardContent() {
                                       >
                                         👁️ View Details
                                       </button>
+                                      {canArchive(doc) && (
+                                        <button
+                                          onClick={() => {
+                                            archiveDocument(doc.id, doc.is_archived || false)
+                                            setOpenDropdown(null)
+                                          }}
+                                          disabled={archiving}
+                                          className="block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                                        >
+                                          🗂 {doc.is_archived ? 'Unarchive' : 'Archive'}
+                                        </button>
+                                      )}
                                       {doc.status === 'draft' && (
                                         <button
                                           onClick={() => {

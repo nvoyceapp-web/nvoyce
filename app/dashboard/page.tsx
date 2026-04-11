@@ -474,6 +474,24 @@ function DashboardContent() {
     const invoiceId = searchParams.get('invoiceCreated')
     const proposalId = searchParams.get('proposalCreated')
     const paymentLink = searchParams.get('paymentLink')
+    if (invoiceId || proposalId) {
+      // Trigger a refetch of stats to show the newly sent document
+      const refetchStats = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('documents')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+          if (!error && data) {
+            setStats((prev) => ({ ...prev, documents: data }))
+          }
+        } catch (err) {
+          console.error('Error refetching stats:', err)
+        }
+      }
+      refetchStats()
+    }
     if (invoiceId) {
       setSuccessMessage({
         docId: invoiceId,
@@ -498,7 +516,7 @@ function DashboardContent() {
       url.searchParams.delete('proposalCreated')
       window.history.replaceState({}, '', url.toString())
     }
-  }, [searchParams])
+  }, [searchParams, userId])
 
   useEffect(() => {
     async function fetchStats() {

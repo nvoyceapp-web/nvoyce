@@ -7,7 +7,7 @@ export const supabase = createClient(
 )
 
 // Database types — keep in sync with your Supabase schema
-export type DocumentStatus = 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue'
+export type DocumentStatus = 'draft' | 'sent' | 'viewed' | 'partially_paid' | 'fully_paid' | 'overdue' | 'accepted' | 'declined' | 'expired'
 export type DocType = 'invoice' | 'proposal'
 
 export interface Document {
@@ -23,6 +23,7 @@ export interface Document {
   form_data: Record<string, string>
   stripe_payment_link?: string
   stripe_payment_intent_id?: string
+  amount_paid?: number
   paid_at?: string
   created_at: string
   updated_at: string

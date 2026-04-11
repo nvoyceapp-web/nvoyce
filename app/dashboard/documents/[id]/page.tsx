@@ -420,9 +420,9 @@ export default function DocumentPage() {
           {/* Logo Section */}
           <div className="text-center mb-12 pb-8 border-b border-gray-100">
             {userLogo ? (
-              <img src={userLogo} alt="Logo" className="h-16 mx-auto mb-2 object-contain" />
+              <img src={userLogo} alt="Logo" className="max-w-sm max-h-48 mx-auto mb-2 object-contain" />
             ) : (
-              <img src="/logo.png" alt="Nvoyce" className="h-16 mx-auto mb-2 object-contain" />
+              <img src="/logo.png" alt="Nvoyce" className="max-w-sm max-h-48 mx-auto mb-2 object-contain" />
             )}
           </div>
 

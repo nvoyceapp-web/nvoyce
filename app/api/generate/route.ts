@@ -17,6 +17,10 @@ export async function POST(req: NextRequest) {
   // Auth temporarily disabled while debugging Clerk session issue
   const userId = 'test-user'
 
+  // Compute today's date server-side so Claude always gets the real date
+  const today = new Date()
+  const todayFormatted = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+
   const body = await req.json()
   const {
     docType,
@@ -37,8 +41,8 @@ export async function POST(req: NextRequest) {
 Generate a professional ${docType} in JSON format. The output must be ONLY valid JSON — absolutely no markdown formatting, no triple backticks, no code blocks, no extra text. Return only the raw JSON object with this structure:
 {
   "documentNumber": "string (e.g. INV-2024-001 or PROP-2024-001)",
-  "date": "string (today's date formatted as Month DD, YYYY)",
-  "dueDate": "string (based on payment terms)",
+  "date": "string (use exactly: ${todayFormatted})",
+  "dueDate": "string (calculate from ${todayFormatted} + payment terms, formatted as Month DD, YYYY)",
   "from": {
     "name": "string",
     "tagline": "string (a short professional tagline for their business)"

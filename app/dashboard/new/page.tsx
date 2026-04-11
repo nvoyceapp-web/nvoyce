@@ -145,7 +145,9 @@ function NewDocumentContent() {
       })
       const data = await res.json()
       if (data.id) {
-        router.push(`/dashboard/documents/${data.id}`)
+        // Redirect to dashboard with success banner, not the client-facing document view
+        const successParam = form.docType === 'invoice' ? `invoiceCreated=${data.id}` : `proposalCreated=${data.id}`
+        router.push(`/dashboard?${successParam}`)
       }
     } catch (err) {
       console.error(err)

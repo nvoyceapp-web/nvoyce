@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useAuth } from '@clerk/nextjs'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getTopPaymeActions, PaymeAction } from '@/lib/payme-scoring'
 import Logo from '@/components/Logo'
@@ -30,8 +31,9 @@ interface Stats {
   documents: Document[]
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { userId } = useAuth()
+  const searchParams = useSearchParams()
   const [stats, setStats] = useState<Stats>({
     totalSent: 0,
     outstanding: 0,
@@ -425,6 +427,34 @@ export default function DashboardPage() {
     a.click()
     window.URL.revokeObjectURL(url)
   }
+
+  // Show success banner when redirected back from /new after creating a doc
+  useEffect(() => {
+    const invoiceId = searchParams.get('invoiceCreated')
+    const proposalId = searchParams.get('proposalCreated')
+    if (invoiceId) {
+      setSuccessMessage({
+        docId: invoiceId,
+        invoiceId,
+        message: '✅ Invoice created and sent to your client!',
+      })
+      setDocumentTab('invoices')
+      // Clear param from URL without reload
+      const url = new URL(window.location.href)
+      url.searchParams.delete('invoiceCreated')
+      window.history.replaceState({}, '', url.toString())
+    } else if (proposalId) {
+      setSuccessMessage({
+        docId: proposalId,
+        invoiceId: proposalId,
+        message: '✅ Proposal created and sent to your client!',
+      })
+      setDocumentTab('proposals')
+      const url = new URL(window.location.href)
+      url.searchParams.delete('proposalCreated')
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [searchParams])
 
   useEffect(() => {
     async function fetchStats() {
@@ -1427,5 +1457,13 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+      <DashboardContent />
+    </Suspense>
   )
 }

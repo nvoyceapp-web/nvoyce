@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 // Payment link + email + number assignment happen in /api/invoices/send and /api/proposals/send
@@ -14,8 +15,11 @@ const supabase = createClient(
 )
 
 export async function POST(req: NextRequest) {
-  // Auth temporarily disabled while debugging Clerk session issue
-  const userId = 'test-user'
+  const { userId } = await auth()
+
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   // Compute today's date server-side so Claude always gets the real date
   const today = new Date()

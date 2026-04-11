@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { supabase, type Document } from '@/lib/supabase'
+import { supabase, type Document, type GeneratedDocument } from '@/lib/supabase'
 
 // Editable text field — shows plain text when sent, input when draft
 function EditableText({
@@ -143,7 +143,7 @@ export default function DocumentPage() {
       .update({ generated_content: editingContent })
       .eq('id', doc.id)
     if (!error) {
-      setDoc((prev) => prev ? { ...prev, generated_content: editingContent } : prev)
+      setDoc((prev) => prev ? { ...prev, generated_content: editingContent as unknown as GeneratedDocument } : prev)
       setHasUnsavedChanges(false)
     }
     setSaving(false)

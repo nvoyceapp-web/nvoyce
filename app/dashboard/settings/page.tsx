@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
+import { useAuth } from '@clerk/nextjs'
+import { supabase } from '@/lib/supabase'
 
 const TIMEZONES = [
   { value: 'EST', label: 'Eastern Time (ET)', offset: '-5' },
@@ -21,9 +23,13 @@ const TIMEZONES = [
 
 export default function SettingsPage() {
   const { user } = useUser()
+  const { userId } = useAuth()
   const [businessName, setBusinessName] = useState('')
   const [editingName, setEditingName] = useState(false)
   const [nameInput, setNameInput] = useState('')
+  const [logoUrl, setLogoUrl] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     if (user) {
@@ -32,6 +38,95 @@ export default function SettingsPage() {
       setNameInput(saved)
     }
   }, [user])
+
+  useEffect(() => {
+    if (!userId) return
+
+    async function fetchLogo() {
+      try {
+        const { data, error } = await supabase
+          .from('user_settings')
+          .select('logo_url')
+          .eq('user_id', userId)
+          .single()
+
+        if (!error && data?.logo_url) {
+          setLogoUrl(data.logo_url)
+        }
+      } catch (err) {
+        console.error('Error fetching logo:', err)
+      }
+    }
+
+    fetchLogo()
+  }, [userId])
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!userId || !e.target.files?.[0]) return
+
+    const file = e.target.files[0]
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadMessage({ type: 'error', text: 'Logo must be under 5MB' })
+      return
+    }
+
+    setUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${userId}-logo-${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(fileName, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName)
+
+      setLogoUrl(publicUrl)
+
+      // Save to user_settings
+      const { error: saveError } = await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: userId,
+          logo_url: publicUrl,
+          updated_at: new Date().toISOString(),
+        })
+
+      if (saveError) throw saveError
+
+      setUploadMessage({ type: 'success', text: '✅ Logo uploaded successfully' })
+      setTimeout(() => setUploadMessage(null), 3000)
+    } catch (err) {
+      console.error('Upload error:', err)
+      setUploadMessage({ type: 'error', text: '❌ Failed to upload logo' })
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleRemoveLogo = async () => {
+    if (!userId) return
+
+    try {
+      const { error } = await supabase
+        .from('user_settings')
+        .update({ logo_url: null })
+        .eq('user_id', userId)
+
+      if (error) throw error
+
+      setLogoUrl('')
+      setUploadMessage({ type: 'success', text: '✅ Logo removed' })
+      setTimeout(() => setUploadMessage(null), 3000)
+    } catch (err) {
+      console.error('Remove error:', err)
+      setUploadMessage({ type: 'error', text: '❌ Failed to remove logo' })
+    }
+  }
 
   async function saveBusinessName() {
     if (!user) return
@@ -144,23 +239,78 @@ export default function SettingsPage() {
             {/* Business Settings */}
             <div className="mt-12 pt-8 border-t border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Business Settings</h2>
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">Timezone</h3>
-                    <p className="text-sm text-gray-600 mt-1">All dates and times will be displayed in your selected timezone</p>
+              <div className="space-y-4">
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-gray-900">Timezone</h3>
+                      <p className="text-sm text-gray-600 mt-1">All dates and times will be displayed in your selected timezone</p>
+                    </div>
+                    <select
+                      value={timezone}
+                      onChange={(e) => setTimezone(e.target.value)}
+                      className="ml-4 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                    >
+                      {TIMEZONES.map((tz) => (
+                        <option key={tz.value} value={tz.value}>
+                          {tz.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <select
-                    value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
-                    className="ml-4 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
-                  >
-                    {TIMEZONES.map((tz) => (
-                      <option key={tz.value} value={tz.value}>
-                        {tz.label}
-                      </option>
-                    ))}
-                  </select>
+                </div>
+
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                  <div className="mb-4">
+                    <h3 className="font-medium text-gray-900">Business Logo</h3>
+                    <p className="text-sm text-gray-600 mt-1">Upload your logo to display on invoices and proposals</p>
+                  </div>
+
+                  {uploadMessage && (
+                    <div className={`mb-4 p-3 rounded text-sm ${uploadMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                      {uploadMessage.text}
+                    </div>
+                  )}
+
+                  {logoUrl ? (
+                    <div className="space-y-4">
+                      <div className="flex justify-center">
+                        <img src={logoUrl} alt="Your logo" className="max-h-32 max-w-xs" />
+                      </div>
+                      <div className="flex gap-2">
+                        <label className="flex-1 px-4 py-2 border-2 border-purple-200 rounded-lg text-center cursor-pointer hover:bg-purple-50 transition">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoUpload}
+                            disabled={uploading}
+                            className="hidden"
+                          />
+                          <span className="text-sm font-medium text-purple-600">{uploading ? 'Uploading...' : 'Change Logo'}</span>
+                        </label>
+                        <button
+                          onClick={handleRemoveLogo}
+                          className="px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition text-sm font-medium"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-purple-300 transition">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        disabled={uploading}
+                        className="hidden"
+                      />
+                      <div className="text-sm">
+                        <p className="font-medium text-gray-900">{uploading ? 'Uploading...' : 'Click to upload logo'}</p>
+                        <p className="text-gray-600 mt-1">PNG, JPG up to 5MB</p>
+                      </div>
+                    </label>
+                  )}
                 </div>
               </div>
             </div>

@@ -33,9 +33,11 @@ export async function sendInvoiceEmail({
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <div style="text-align: center; padding: 30px 20px; border-bottom: 1px solid #e5e7eb;">
-            <img src="${logoUrl}" alt="Nvoyce" style="max-width: 320px; height: auto;" />
-            <div style="margin-top: 15px; display: inline-block; background-color: #f0fdf4; padding: 8px 16px; border-radius: 4px; border: 1px solid #d1fae5;">
-              <p style="margin: 0; font-size: 13px; font-weight: bold; color: #047857;">✓ Invoice Ready for Payment</p>
+            <img src="${logoUrl}" alt="Nvoyce" style="max-width: 320px; height: auto; display: block; margin: 0 auto;" />
+            <div style="margin-top: 15px; text-align: center;">
+              <div style="display: inline-block; background-color: #f0fdf4; padding: 8px 16px; border-radius: 4px; border: 1px solid #d1fae5;">
+                <p style="margin: 0; font-size: 13px; font-weight: bold; color: #047857;">✓ Invoice Ready for Payment</p>
+              </div>
             </div>
           </div>
           <div style="padding: 30px 20px;">

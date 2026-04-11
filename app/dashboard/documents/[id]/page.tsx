@@ -1,9 +1,49 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, type Document } from '@/lib/supabase'
+
+// Editable text field — shows plain text when sent, input when draft
+function EditableText({
+  value,
+  onChange,
+  className = '',
+  multiline = false,
+  placeholder = '',
+  isDraft,
+}: {
+  value: string
+  onChange: (v: string) => void
+  className?: string
+  multiline?: boolean
+  placeholder?: string
+  isDraft: boolean
+}) {
+  if (!isDraft) {
+    return multiline
+      ? <p className={className}>{value}</p>
+      : <span className={className}>{value}</span>
+  }
+  return multiline ? (
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={3}
+      className={`${className} w-full bg-orange-50 border border-orange-200 rounded px-2 py-1 focus:outline-none focus:border-orange-400 resize-none text-sm`}
+    />
+  ) : (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`${className} bg-orange-50 border border-orange-200 rounded px-2 py-1 focus:outline-none focus:border-orange-400 w-full`}
+    />
+  )
+}
 
 export default function DocumentPage() {
   const { id } = useParams()
@@ -12,8 +52,11 @@ export default function DocumentPage() {
   const [generatingLink, setGeneratingLink] = useState(false)
   const [copied, setCopied] = useState(false)
   const [sending, setSending] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [amountPaid, setAmountPaid] = useState<number>(0)
   const [paymentNotes, setPaymentNotes] = useState<string>('')
+  const [editingContent, setEditingContent] = useState<Record<string, any> | null>(null)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   useEffect(() => {
     async function fetchDoc() {
@@ -24,8 +67,8 @@ export default function DocumentPage() {
         .single()
 
       if (!error && data) {
-        console.log('Loaded document:', data)
         setDoc(data as Document)
+        setEditingContent(data.generated_content)
         if (data.amount_paid) setAmountPaid(data.amount_paid)
       } else {
         console.error('Error loading document:', error)
@@ -35,28 +78,94 @@ export default function DocumentPage() {
     fetchDoc()
   }, [id])
 
+  const updateField = useCallback((path: string, value: any) => {
+    setEditingContent((prev) => {
+      if (!prev) return prev
+      const next = { ...prev }
+      const keys = path.split('.')
+      let obj: any = next
+      for (let i = 0; i < keys.length - 1; i++) {
+        obj[keys[i]] = { ...obj[keys[i]] }
+        obj = obj[keys[i]]
+      }
+      obj[keys[keys.length - 1]] = value
+      return next
+    })
+    setHasUnsavedChanges(true)
+  }, [])
+
+  const updateLineItem = useCallback((index: number, field: string, value: any) => {
+    setEditingContent((prev) => {
+      if (!prev) return prev
+      const items = prev.lineItems.map((item: any, i: number) => {
+        if (i !== index) return item
+        const updated = { ...item, [field]: value }
+        // Auto-compute total when qty or unitPrice changes
+        if (field === 'quantity' || field === 'unitPrice') {
+          const qty = field === 'quantity' ? Number(value) : Number(item.quantity)
+          const price = field === 'unitPrice' ? Number(value) : Number(item.unitPrice)
+          updated.total = qty * price
+        }
+        return updated
+      })
+      // Recompute subtotal and total
+      const subtotal = items.reduce((sum: number, item: any) => sum + (Number(item.total) || 0), 0)
+      const tax = prev.tax || 0
+      return { ...prev, lineItems: items, subtotal, total: subtotal + tax }
+    })
+    setHasUnsavedChanges(true)
+  }, [])
+
+  const addLineItem = useCallback(() => {
+    setEditingContent((prev) => {
+      if (!prev) return prev
+      const newItem = { description: 'New item', quantity: 1, unitPrice: 0, total: 0 }
+      return { ...prev, lineItems: [...prev.lineItems, newItem] }
+    })
+    setHasUnsavedChanges(true)
+  }, [])
+
+  const removeLineItem = useCallback((index: number) => {
+    setEditingContent((prev) => {
+      if (!prev) return prev
+      const items = prev.lineItems.filter((_: any, i: number) => i !== index)
+      const subtotal = items.reduce((sum: number, item: any) => sum + (Number(item.total) || 0), 0)
+      return { ...prev, lineItems: items, subtotal, total: subtotal + (prev.tax || 0) }
+    })
+    setHasUnsavedChanges(true)
+  }, [])
+
+  const saveChanges = async () => {
+    if (!doc || !editingContent) return
+    setSaving(true)
+    const { error } = await supabase
+      .from('documents')
+      .update({ generated_content: editingContent })
+      .eq('id', doc.id)
+    if (!error) {
+      setDoc((prev) => prev ? { ...prev, generated_content: editingContent } : prev)
+      setHasUnsavedChanges(false)
+    }
+    setSaving(false)
+  }
+
   const generatePaymentLink = async () => {
     if (!doc) return
     setGeneratingLink(true)
     try {
-      const payload = {
-        documentId: id,
-        amount: doc.price,
-        description: `${doc.doc_type} from ${doc.business_name}`,
-        clientEmail: doc.client_email,
-      }
-      console.log('Sending payment link request:', payload)
       const res = await fetch('/api/payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          documentId: id,
+          amount: doc.price,
+          description: `${doc.doc_type} from ${doc.business_name}`,
+          clientEmail: doc.client_email,
+        }),
       })
       const data = await res.json()
-      console.log('Payment link response:', data)
       if (data.paymentLink) {
         setDoc((prev) => prev ? { ...prev, stripe_payment_link: data.paymentLink } : prev)
-      } else {
-        console.error('No payment link in response:', data)
       }
     } catch (error) {
       console.error('Payment link error:', error)
@@ -65,8 +174,17 @@ export default function DocumentPage() {
     }
   }
 
+  const copyLink = async () => {
+    if (!doc?.stripe_payment_link) return
+    await navigator.clipboard.writeText(doc.stripe_payment_link)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const sendToClient = async () => {
     if (!doc) return
+    // Save any unsaved changes first
+    if (hasUnsavedChanges) await saveChanges()
     setSending(true)
     try {
       const endpoint = doc.doc_type === 'invoice' ? '/api/invoices/send' : '/api/proposals/send'
@@ -84,19 +202,13 @@ export default function DocumentPage() {
           document_number: data.documentNumber || prev.document_number,
           stripe_payment_link: data.paymentLink || prev.stripe_payment_link,
         } : prev)
+        setHasUnsavedChanges(false)
       }
     } catch (err) {
       console.error('Send error:', err)
     } finally {
       setSending(false)
     }
-  }
-
-  const copyLink = async () => {
-    if (!doc?.stripe_payment_link) return
-    await navigator.clipboard.writeText(doc.stripe_payment_link)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   // Compute effective status (overdue is derived, not stored)
@@ -128,7 +240,7 @@ export default function DocumentPage() {
     )
   }
 
-  if (!doc) {
+  if (!doc || !editingContent) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -139,8 +251,9 @@ export default function DocumentPage() {
     )
   }
 
-  const content = doc.generated_content
+  const content = editingContent
   const effectiveStatus = getEffectiveStatus(doc)
+  const isDraft = effectiveStatus === 'draft'
   const isInvoice = doc.doc_type === 'invoice'
   const totalAmount = content.total || doc.price
   const paidAmount = doc.amount_paid || 0
@@ -155,7 +268,9 @@ export default function DocumentPage() {
             ← Dashboard
           </Link>
           <span className="text-gray-200">|</span>
-          <span className="text-sm font-medium text-gray-900">{doc.document_number || content.documentNumber}</span>
+          <span className="text-sm font-medium text-gray-900">
+            {doc.document_number || content.documentNumber || 'Draft'}
+          </span>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${statusColors[effectiveStatus] || 'bg-gray-100 text-gray-600'}`}>
             {effectiveStatus === 'fully_paid' ? 'Fully Paid' : effectiveStatus === 'partially_paid' ? 'Partially Paid' : effectiveStatus}
           </span>
@@ -163,39 +278,46 @@ export default function DocumentPage() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          {/* Draft: show Send to Client button */}
-          {effectiveStatus === 'draft' && (
+          {isDraft && (
             <>
+              {hasUnsavedChanges && (
+                <button
+                  onClick={saveChanges}
+                  disabled={saving}
+                  className="text-sm border border-orange-300 text-orange-600 px-4 py-2 rounded-lg hover:bg-orange-50 transition disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : '💾 Save changes'}
+                </button>
+              )}
               <Link
                 href={`/dashboard/new?prefill=${doc.id}`}
                 className="text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
               >
-                ← Edit Draft
+                ← Re-generate
               </Link>
               <button
                 onClick={sendToClient}
                 disabled={sending}
                 className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50 font-semibold"
               >
-                {sending ? 'Sending...' : `📤 Send to Client`}
+                {sending ? 'Sending...' : '📤 Send to Client'}
               </button>
             </>
           )}
-          {isInvoice && effectiveStatus === 'fully_paid' ? (
+          {!isDraft && isInvoice && effectiveStatus === 'fully_paid' && (
             <span className="text-sm text-green-600 font-semibold">✓ Fully Paid</span>
-          ) : isInvoice && doc.stripe_payment_link ? (
+          )}
+          {!isDraft && isInvoice && doc.stripe_payment_link && effectiveStatus !== 'fully_paid' && (
             <>
               <span className="text-xs text-gray-400 max-w-xs truncate hidden md:block">
                 {doc.stripe_payment_link}
               </span>
-              <button
-                onClick={copyLink}
-                className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-              >
+              <button onClick={copyLink} className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition">
                 {copied ? '✓ Copied!' : 'Copy payment link'}
               </button>
             </>
-          ) : isInvoice ? (
+          )}
+          {!isDraft && isInvoice && !doc.stripe_payment_link && effectiveStatus !== 'fully_paid' && (
             <button
               onClick={generatePaymentLink}
               disabled={generatingLink}
@@ -203,18 +325,25 @@ export default function DocumentPage() {
             >
               {generatingLink ? 'Creating link...' : '⚡ Generate payment link'}
             </button>
-          ) : null}
-
-          <button
-            onClick={() => window.print()}
-            className="text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
-          >
+          )}
+          <button onClick={() => window.print()} className="text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
             Print / Save PDF
           </button>
         </div>
       </div>
 
-      {/* Status banners for invoices */}
+      {/* AI disclosure banner — drafts only */}
+      {isDraft && (
+        <div className="bg-orange-50 border-b border-orange-100 px-8 py-3 flex items-center justify-between print:hidden">
+          <div className="flex items-center gap-2 text-orange-700 text-sm">
+            <span>✨</span>
+            <span>AI-generated draft — review and edit before sending to your client. Click any field to make changes.</span>
+          </div>
+          <span className="text-xs text-orange-400 font-medium">NOT sent yet</span>
+        </div>
+      )}
+
+      {/* Sent status banners */}
       {isInvoice && effectiveStatus === 'sent' && (
         <div className="bg-blue-50 border-b border-blue-100 px-8 py-3 flex items-center justify-between print:hidden">
           <div className="flex items-center gap-2 text-blue-700 text-sm">
@@ -222,35 +351,25 @@ export default function DocumentPage() {
             <span>Invoice sent — awaiting payment</span>
           </div>
           {doc.stripe_payment_link && (
-            <button
-              onClick={copyLink}
-              className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition"
-            >
+            <button onClick={copyLink} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">
               {copied ? '✓ Copied!' : 'Copy payment link'}
             </button>
           )}
         </div>
       )}
-
       {isInvoice && effectiveStatus === 'overdue' && (
         <div className="bg-red-50 border-b border-red-100 px-8 py-3 flex items-center justify-between print:hidden">
           <div className="flex items-center gap-2 text-red-700 text-sm">
             <span>⚠️</span>
-            <span>
-              This invoice is overdue — ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding
-            </span>
+            <span>This invoice is overdue — ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding</span>
           </div>
           {doc.stripe_payment_link && (
-            <button
-              onClick={copyLink}
-              className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition"
-            >
+            <button onClick={copyLink} className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition">
               {copied ? '✓ Copied!' : 'Copy payment link'}
             </button>
           )}
         </div>
       )}
-
       {isInvoice && effectiveStatus === 'partially_paid' && (
         <div className="bg-yellow-50 border-b border-yellow-100 px-8 py-3 flex items-center justify-between print:hidden">
           <div className="flex items-center gap-2 text-yellow-700 text-sm">
@@ -261,22 +380,16 @@ export default function DocumentPage() {
             </span>
           </div>
           {doc.stripe_payment_link && (
-            <button
-              onClick={copyLink}
-              className="text-xs bg-yellow-600 text-white px-3 py-1.5 rounded-lg hover:bg-yellow-700 transition"
-            >
+            <button onClick={copyLink} className="text-xs bg-yellow-600 text-white px-3 py-1.5 rounded-lg hover:bg-yellow-700 transition">
               {copied ? '✓ Copied!' : 'Copy payment link'}
             </button>
           )}
         </div>
       )}
-
       {isInvoice && effectiveStatus === 'fully_paid' && (
         <div className="bg-green-50 border-b border-green-100 px-8 py-3 flex items-center gap-2 text-green-700 text-sm print:hidden">
           <span>✅</span>
-          <span>
-            Payment complete — ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received in full
-          </span>
+          <span>Payment complete — ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received in full</span>
         </div>
       )}
 
@@ -286,13 +399,27 @@ export default function DocumentPage() {
 
           {/* Header */}
           <div className="flex items-start justify-between mb-10">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{content.from.name}</h1>
-              <p className="text-gray-400 text-sm mt-1">{content.from.tagline}</p>
+            <div className="flex-1 mr-8">
+              <EditableText
+                value={content.from.name}
+                onChange={(v) => updateField('from.name', v)}
+                className="text-3xl font-bold text-gray-900"
+                placeholder="Business name"
+                isDraft={isDraft}
+              />
+              <div className="mt-1">
+                <EditableText
+                  value={content.from.tagline}
+                  onChange={(v) => updateField('from.tagline', v)}
+                  className="text-gray-400 text-sm"
+                  placeholder="Business tagline"
+                  isDraft={isDraft}
+                />
+              </div>
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-gray-900 capitalize">{doc.doc_type}</div>
-              <div className="text-sm text-gray-400 mt-1">{doc.document_number || content.documentNumber}</div>
+              <div className="text-sm text-gray-400 mt-1">{doc.document_number || 'Draft'}</div>
             </div>
           </div>
 
@@ -304,11 +431,29 @@ export default function DocumentPage() {
             </div>
             <div>
               <div className="text-gray-400 mb-0.5">Due date</div>
-              <div className="font-medium text-gray-900">{content.dueDate}</div>
+              {isDraft ? (
+                <input
+                  type="text"
+                  value={content.dueDate}
+                  onChange={(e) => updateField('dueDate', e.target.value)}
+                  className="font-medium text-gray-900 bg-orange-50 border border-orange-200 rounded px-2 py-0.5 focus:outline-none focus:border-orange-400 text-sm"
+                />
+              ) : (
+                <div className="font-medium text-gray-900">{content.dueDate}</div>
+              )}
             </div>
             <div>
               <div className="text-gray-400 mb-0.5">Payment terms</div>
-              <div className="font-medium text-gray-900">{content.paymentTerms}</div>
+              {isDraft ? (
+                <input
+                  type="text"
+                  value={content.paymentTerms}
+                  onChange={(e) => updateField('paymentTerms', e.target.value)}
+                  className="font-medium text-gray-900 bg-orange-50 border border-orange-200 rounded px-2 py-0.5 focus:outline-none focus:border-orange-400 text-sm"
+                />
+              ) : (
+                <div className="font-medium text-gray-900">{content.paymentTerms}</div>
+              )}
             </div>
           </div>
 
@@ -320,44 +465,117 @@ export default function DocumentPage() {
             </div>
             <div className="text-sm">
               <div className="text-gray-400 mb-1 uppercase text-xs font-semibold tracking-wide">Bill to</div>
-              <div className="font-semibold text-gray-900">{content.to.name}</div>
-              <div className="text-gray-500">{content.to.email}</div>
+              <EditableText
+                value={content.to.name}
+                onChange={(v) => updateField('to.name', v)}
+                className="font-semibold text-gray-900"
+                placeholder="Client name"
+                isDraft={isDraft}
+              />
+              <div className="mt-1">
+                <EditableText
+                  value={content.to.email}
+                  onChange={(v) => updateField('to.email', v)}
+                  className="text-gray-500"
+                  placeholder="Client email"
+                  isDraft={isDraft}
+                />
+              </div>
             </div>
           </div>
 
           {/* Subject + intro */}
           <div className="border-t border-gray-100 pt-8 mb-8">
-            <h2 className="font-semibold text-gray-900 mb-3">{content.subject}</h2>
-            <p className="text-gray-600 text-sm leading-relaxed">{content.introduction}</p>
+            <div className="mb-3">
+              <EditableText
+                value={content.subject}
+                onChange={(v) => updateField('subject', v)}
+                className="font-semibold text-gray-900 text-base"
+                placeholder="Subject line"
+                isDraft={isDraft}
+              />
+            </div>
+            <EditableText
+              value={content.introduction}
+              onChange={(v) => updateField('introduction', v)}
+              className="text-gray-600 text-sm leading-relaxed"
+              placeholder="Introduction paragraph"
+              multiline
+              isDraft={isDraft}
+            />
           </div>
 
-          {/* Line items table */}
+          {/* Line items */}
           <div className="mb-8">
             <div className="grid grid-cols-12 text-xs font-semibold text-gray-400 uppercase tracking-wide pb-2 border-b border-gray-100">
               <div className="col-span-6">Description</div>
               <div className="col-span-2 text-right">Qty</div>
               <div className="col-span-2 text-right">Unit price</div>
-              <div className="col-span-2 text-right">Total</div>
+              <div className="col-span-2 text-right">{isDraft ? 'Total' : 'Total'}</div>
             </div>
 
             {content.lineItems.map((item: { description: string; quantity: number; unitPrice: number; total: number }, i: number) => (
-              <div
-                key={i}
-                className="grid grid-cols-12 text-sm py-4 border-b border-gray-50"
-              >
-                <div className="col-span-6 text-gray-900">{item.description}</div>
-                <div className="col-span-2 text-right text-gray-600">{item.quantity}</div>
-                <div className="col-span-2 text-right text-gray-600">${item.unitPrice.toLocaleString()}</div>
-                <div className="col-span-2 text-right font-medium text-gray-900">${item.total.toLocaleString()}</div>
+              <div key={i} className="grid grid-cols-12 text-sm py-4 border-b border-gray-50 items-center">
+                <div className="col-span-6 text-gray-900">
+                  {isDraft ? (
+                    <input
+                      type="text"
+                      value={item.description}
+                      onChange={(e) => updateLineItem(i, 'description', e.target.value)}
+                      className="w-full bg-orange-50 border border-orange-200 rounded px-2 py-1 focus:outline-none focus:border-orange-400 text-sm"
+                    />
+                  ) : item.description}
+                </div>
+                <div className="col-span-2 text-right text-gray-600">
+                  {isDraft ? (
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) => updateLineItem(i, 'quantity', e.target.value)}
+                      className="w-16 bg-orange-50 border border-orange-200 rounded px-2 py-1 focus:outline-none focus:border-orange-400 text-sm text-right ml-auto block"
+                    />
+                  ) : item.quantity}
+                </div>
+                <div className="col-span-2 text-right text-gray-600">
+                  {isDraft ? (
+                    <input
+                      type="number"
+                      value={item.unitPrice}
+                      onChange={(e) => updateLineItem(i, 'unitPrice', e.target.value)}
+                      className="w-24 bg-orange-50 border border-orange-200 rounded px-2 py-1 focus:outline-none focus:border-orange-400 text-sm text-right ml-auto block"
+                    />
+                  ) : `$${item.unitPrice.toLocaleString()}`}
+                </div>
+                <div className="col-span-2 text-right font-medium text-gray-900 flex items-center justify-end gap-2">
+                  ${(item.total || 0).toLocaleString()}
+                  {isDraft && (
+                    <button
+                      onClick={() => removeLineItem(i)}
+                      className="text-red-400 hover:text-red-600 text-xs ml-1"
+                      title="Remove line item"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
+
+            {isDraft && (
+              <button
+                onClick={addLineItem}
+                className="mt-3 text-xs text-orange-600 hover:text-orange-700 font-semibold border border-dashed border-orange-300 rounded-lg px-4 py-2 w-full hover:bg-orange-50 transition"
+              >
+                + Add line item
+              </button>
+            )}
 
             {/* Totals */}
             <div className="mt-4 flex justify-end">
               <div className="w-56 text-sm space-y-2">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>${content.subtotal.toLocaleString()}</span>
+                  <span>${(content.subtotal || 0).toLocaleString()}</span>
                 </div>
                 {content.tax > 0 && (
                   <div className="flex justify-between text-gray-600">
@@ -367,29 +585,46 @@ export default function DocumentPage() {
                 )}
                 <div className="flex justify-between font-bold text-gray-900 text-base pt-2 border-t border-gray-200">
                   <span>Total</span>
-                  <span>${content.total.toLocaleString()}</span>
+                  <span>${(content.total || 0).toLocaleString()}</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Timeline */}
-          {content.timeline && (
+          {(content.timeline || isDraft) && (
             <div className="bg-gray-50 rounded-xl p-5 mb-6 text-sm">
               <span className="font-semibold text-gray-700">Timeline: </span>
-              <span className="text-gray-600">{content.timeline}</span>
+              {isDraft ? (
+                <input
+                  type="text"
+                  value={content.timeline || ''}
+                  onChange={(e) => updateField('timeline', e.target.value)}
+                  placeholder="e.g. 2 weeks from project start"
+                  className="bg-orange-50 border border-orange-200 rounded px-2 py-0.5 focus:outline-none focus:border-orange-400 text-sm w-64"
+                />
+              ) : (
+                <span className="text-gray-600">{content.timeline}</span>
+              )}
             </div>
           )}
 
           {/* Notes */}
-          {content.notes && (
+          {(content.notes || isDraft) && (
             <div className="text-sm text-gray-600 mb-8">
               <div className="font-semibold text-gray-700 mb-1">Notes</div>
-              <p className="leading-relaxed">{content.notes}</p>
+              <EditableText
+                value={content.notes || ''}
+                onChange={(v) => updateField('notes', v)}
+                className="leading-relaxed text-gray-600"
+                placeholder="Add any notes for the client..."
+                multiline
+                isDraft={isDraft}
+              />
             </div>
           )}
 
-          {/* Payment link banner */}
+          {/* Payment link banner (sent invoices) */}
           {isInvoice && doc.stripe_payment_link && effectiveStatus !== 'fully_paid' && (
             <div className="bg-black text-white rounded-xl p-6 text-center mb-8 print:hidden">
               <p className="text-sm text-gray-300 mb-3">Pay securely online</p>
@@ -411,18 +646,23 @@ export default function DocumentPage() {
             </div>
           )}
 
-          {/* Closing */}
+          {/* Closing message */}
           <div className="border-t border-gray-100 pt-8 text-sm text-gray-600">
-            <p className="leading-relaxed">{content.closingMessage}</p>
+            <EditableText
+              value={content.closingMessage}
+              onChange={(v) => updateField('closingMessage', v)}
+              className="leading-relaxed text-gray-600"
+              placeholder="Closing message..."
+              multiline
+              isDraft={isDraft}
+            />
             <p className="mt-4 font-semibold text-gray-900">{content.from.name}</p>
           </div>
 
-          {/* Payment Tracking — only for invoices not fully paid */}
-          {isInvoice && effectiveStatus !== 'fully_paid' && (
+          {/* Payment tracking (invoices, not fully paid) */}
+          {isInvoice && effectiveStatus !== 'fully_paid' && !isDraft && (
             <div className="border-t border-gray-100 mt-10 pt-8 print:hidden">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Payment Tracking</h3>
-
-              {/* Summary */}
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="text-xs text-blue-600 font-semibold uppercase">Total</div>
@@ -433,35 +673,12 @@ export default function DocumentPage() {
                   <div className="text-2xl font-bold text-green-900">${paidAmount.toLocaleString()}</div>
                 </div>
                 <div className={`rounded-lg p-4 ${paidAmount >= totalAmount ? 'bg-green-50' : paidAmount > 0 ? 'bg-yellow-50' : 'bg-red-50'}`}>
-                  <div className={`text-xs font-semibold uppercase ${paidAmount >= totalAmount ? 'text-green-600' : paidAmount > 0 ? 'text-yellow-600' : 'text-red-600'}`}>
-                    Outstanding
-                  </div>
+                  <div className={`text-xs font-semibold uppercase ${paidAmount >= totalAmount ? 'text-green-600' : paidAmount > 0 ? 'text-yellow-600' : 'text-red-600'}`}>Outstanding</div>
                   <div className={`text-2xl font-bold ${paidAmount >= totalAmount ? 'text-green-900' : paidAmount > 0 ? 'text-yellow-900' : 'text-red-900'}`}>
                     ${outstandingAmount.toLocaleString()}
                   </div>
                 </div>
               </div>
-
-              {/* Status badge */}
-              <div className="mb-6">
-                {effectiveStatus === 'partially_paid' && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">
-                    ⚠ Partially Paid (${paidAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} of ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
-                  </span>
-                )}
-                {(effectiveStatus === 'sent' || effectiveStatus === 'draft') && paidAmount === 0 && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-700">
-                    ⧗ Awaiting Payment
-                  </span>
-                )}
-                {effectiveStatus === 'overdue' && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-red-100 text-red-700">
-                    🔴 Overdue
-                  </span>
-                )}
-              </div>
-
-              {/* Record Payment Form */}
               <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1">Amount Paid</label>
@@ -469,26 +686,20 @@ export default function DocumentPage() {
                     type="number"
                     value={amountPaid}
                     onChange={(e) => setAmountPaid(Math.max(0, Number(e.target.value)))}
-                    placeholder="0"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Enter total amount received (including partial payments)</p>
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1">Payment Notes (optional)</label>
                   <textarea
                     value={paymentNotes}
                     onChange={(e) => setPaymentNotes(e.target.value)}
-                    placeholder="e.g., Received partial payment, remaining due by..."
                     rows={2}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
                   />
                 </div>
                 <button
-                  onClick={() => {
-                    console.log('Record payment:', { amountPaid, paymentNotes })
-                    alert(`Payment of $${amountPaid.toLocaleString()} recorded${paymentNotes ? ' with note: ' + paymentNotes : ''}`)
-                  }}
+                  onClick={() => alert(`Payment of $${amountPaid.toLocaleString()} recorded`)}
                   className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm"
                 >
                   ✓ Save Payment
@@ -498,6 +709,28 @@ export default function DocumentPage() {
           )}
         </div>
       </div>
+
+      {/* Sticky save bar — appears when there are unsaved changes */}
+      {isDraft && hasUnsavedChanges && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-orange-200 px-8 py-4 flex items-center justify-between shadow-lg z-50 print:hidden">
+          <p className="text-sm text-orange-600 font-medium">You have unsaved changes</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => { setEditingContent(doc.generated_content); setHasUnsavedChanges(false) }}
+              className="text-sm text-gray-500 hover:text-gray-700 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50"
+            >
+              Discard
+            </button>
+            <button
+              onClick={saveChanges}
+              disabled={saving}
+              className="text-sm bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50 font-semibold"
+            >
+              {saving ? 'Saving...' : '💾 Save changes'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

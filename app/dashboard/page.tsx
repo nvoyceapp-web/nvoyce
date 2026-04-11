@@ -1625,14 +1625,44 @@ function DashboardContent() {
                                   </button>
                                   {openDropdown === doc.id && (
                                     <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">
-                                      {doc.status !== 'fully_paid' && (
+                                      {doc.stripe_payment_link && (
                                         <button
                                           onClick={() => {
-                                            // Mark as paid (will implement API call)
-                                            console.log('Mark as paid:', doc.id)
+                                            navigator.clipboard.writeText(doc.stripe_payment_link!)
+                                            alert('Payment link copied!')
                                             setOpenDropdown(null)
                                           }}
                                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
+                                        >
+                                          🔗 Copy Payment Link
+                                        </button>
+                                      )}
+                                      {doc.status !== 'fully_paid' && (
+                                        <button
+                                          onClick={async () => {
+                                            setOpenDropdown(null)
+                                            try {
+                                              const res = await fetch('/api/documents/status', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ documentId: doc.id, status: 'fully_paid' }),
+                                              })
+                                              const data = await res.json()
+                                              if (data.success) {
+                                                setStats((prev) => ({
+                                                  ...prev,
+                                                  documents: prev.documents.map((d) =>
+                                                    d.id === doc.id ? { ...d, status: 'fully_paid' } : d
+                                                  ),
+                                                }))
+                                              } else {
+                                                alert(`Error: ${data.error}`)
+                                              }
+                                            } catch (err) {
+                                              alert('Failed to mark as paid')
+                                            }
+                                          }}
+                                          className="block w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-gray-50"
                                         >
                                           ✓ Mark Paid
                                         </button>
@@ -1640,7 +1670,6 @@ function DashboardContent() {
                                       {doc.status !== 'fully_paid' && daysOld > 14 && (
                                         <button
                                           onClick={() => {
-                                            // Send reminder
                                             console.log('Send reminder to:', doc.client_name)
                                             alert(`Reminder would be sent to ${doc.client_name}`)
                                             setOpenDropdown(null)

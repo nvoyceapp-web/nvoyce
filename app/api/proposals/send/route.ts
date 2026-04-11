@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendProposalSentEmail } from '@/lib/email'
+import { assignDocumentNumber } from '@/lib/document-numbers'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,6 +28,16 @@ export async function POST(req: NextRequest) {
 
     if (proposal.status === 'sent') {
       return NextResponse.json({ success: true, alreadySent: true })
+    }
+
+    // Assign PRO-YYYY-NNN number at send time (drafts have no number)
+    let documentNumber = proposal.document_number
+    if (!documentNumber) {
+      documentNumber = await assignDocumentNumber(
+        proposal.user_id,
+        'proposal',
+        proposalId
+      )
     }
 
     const { error: updateError } = await supabase

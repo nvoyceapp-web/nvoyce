@@ -17,6 +17,9 @@ interface Document {
   price: number
   status: string
   created_at: string
+  document_number?: string
+  amount_paid?: number
+  stripe_payment_link?: string
   form_data?: Record<string, any>
   generated_content?: Record<string, any>
 }
@@ -461,7 +464,7 @@ function DashboardContent() {
       try {
         const { data, error } = await supabase
           .from('documents')
-          .select('id, client_name, client_email, business_name, doc_type, price, status, created_at, form_data, generated_content')
+          .select('id, client_name, client_email, business_name, doc_type, price, status, created_at, document_number, amount_paid, stripe_payment_link, form_data, generated_content')
           .eq('user_id', 'test-user')
           .order('created_at', { ascending: false })
 
@@ -1070,6 +1073,9 @@ function DashboardContent() {
                             className="rounded border-gray-300 cursor-pointer"
                           />
                         </th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600">
+                          #
+                        </th>
                         <th
                           onClick={() => toggleSort('client')}
                           className="px-6 py-3 text-left text-xs font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
@@ -1129,6 +1135,13 @@ function DashboardContent() {
                                 onChange={() => toggleDocSelection(doc.id)}
                                 className="rounded border-gray-300 cursor-pointer"
                               />
+                            </td>
+                            <td className="px-6 py-4">
+                              {doc.document_number ? (
+                                <span className="text-xs font-mono font-semibold text-gray-500">{doc.document_number}</span>
+                              ) : (
+                                <span className="text-xs text-gray-300 italic">Draft</span>
+                              )}
                             </td>
                             <td className="px-6 py-4 text-gray-900 font-medium">{doc.client_name}</td>
                             <td className="px-6 py-4 text-gray-600 text-sm">{createdDate.toLocaleDateString()}</td>

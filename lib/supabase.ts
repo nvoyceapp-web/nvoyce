@@ -21,6 +21,7 @@ export interface Document {
   status: DocumentStatus
   generated_content: GeneratedDocument
   form_data: Record<string, string>
+  document_number?: string
   stripe_payment_link?: string
   stripe_payment_intent_id?: string
   amount_paid?: number

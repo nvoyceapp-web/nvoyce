@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { createPaymentLink } from '@/lib/stripe'
 import { sendInvoiceEmail, sendProposalSentEmail } from '@/lib/email'
+import { assignDocumentNumber } from '@/lib/document-numbers'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
   const systemPrompt = `You are a professional document generator for freelancers and small businesses.
 Generate a professional ${docType} in JSON format. The output must be ONLY valid JSON — absolutely no markdown formatting, no triple backticks, no code blocks, no extra text. Return only the raw JSON object with this structure:
 {
-  "documentNumber": "string (e.g. INV-2024-001 or PROP-2024-001)",
+  "documentNumber": "PENDING",
   "date": "string (use exactly: ${todayFormatted})",
   "dueDate": "string (calculate from ${todayFormatted} + payment terms, formatted as Month DD, YYYY)",
   "from": {
@@ -144,9 +145,14 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
       console.error('Payment link creation error:', paymentError)
     }
 
-    // 7. Send email to client (invoices only — proposals require user review before sending)
+    // 7. Send email + assign document number at send time (invoices only)
+    // Proposals are saved as draft — number assigned when user sends to client
+    let assignedNumber = ''
     if (docType === 'invoice') {
       try {
+        // Assign INV-YYYY-NNN number now (at send time, not draft creation)
+        assignedNumber = await assignDocumentNumber(userId, 'invoice', data.id)
+
         const documentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${data.id}`
         await sendInvoiceEmail({
           clientEmail: clientEmail,
@@ -155,17 +161,17 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
           paymentLink: paymentLink,
           businessName: businessName,
           amount: parseFloat(price.replace(',', '')),
-          invoiceNumber: generatedDoc.documentNumber,
+          invoiceNumber: assignedNumber,
           dueDate: generatedDoc.dueDate,
         })
         await supabase.from('documents').update({ status: 'sent' }).eq('id', data.id)
-        console.log('Invoice email sent to:', clientEmail)
+        console.log('Invoice email sent to:', clientEmail, 'as', assignedNumber)
       } catch (emailError) {
-        console.error('Email sending error:', emailError)
+        console.error('Email/numbering error:', emailError)
       }
     }
-    // Proposals are saved as draft — user must click "Send to Client"
-    return NextResponse.json({ id: data.id, document: generatedDoc, paymentLink })
+
+    return NextResponse.json({ id: data.id, document: generatedDoc, paymentLink, documentNumber: assignedNumber })
   } catch (err: any) {
     console.error('Generation error full:', JSON.stringify(err?.error || err, null, 2))
     console.error('Status:', err?.status)

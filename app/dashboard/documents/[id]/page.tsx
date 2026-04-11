@@ -127,7 +127,7 @@ export default function DocumentPage() {
             ← Dashboard
           </Link>
           <span className="text-gray-200">|</span>
-          <span className="text-sm font-medium text-gray-900">{content.documentNumber}</span>
+          <span className="text-sm font-medium text-gray-900">{doc.document_number || content.documentNumber}</span>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${statusColors[effectiveStatus] || 'bg-gray-100 text-gray-600'}`}>
             {effectiveStatus === 'fully_paid' ? 'Fully Paid' : effectiveStatus === 'partially_paid' ? 'Partially Paid' : effectiveStatus}
           </span>
@@ -246,7 +246,7 @@ export default function DocumentPage() {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-gray-900 capitalize">{doc.doc_type}</div>
-              <div className="text-sm text-gray-400 mt-1">{content.documentNumber}</div>
+              <div className="text-sm text-gray-400 mt-1">{doc.document_number || content.documentNumber}</div>
             </div>
           </div>
 

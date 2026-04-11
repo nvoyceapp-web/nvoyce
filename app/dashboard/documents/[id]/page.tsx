@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, type Document, type GeneratedDocument } from '@/lib/supabase'
 
@@ -47,6 +47,7 @@ function EditableText({
 
 export default function DocumentPage() {
   const { id } = useParams()
+  const router = useRouter()
   const [doc, setDoc] = useState<Document | null>(null)
   const [loading, setLoading] = useState(true)
   const [generatingLink, setGeneratingLink] = useState(false)
@@ -196,13 +197,17 @@ export default function DocumentPage() {
       })
       const data = await res.json()
       if (data.success || data.alreadySent) {
-        setDoc((prev) => prev ? {
-          ...prev,
-          status: 'sent',
-          document_number: data.documentNumber || prev.document_number,
-          stripe_payment_link: data.paymentLink || prev.stripe_payment_link,
-        } : prev)
+        const paymentLink = data.paymentLink || doc.stripe_payment_link
         setHasUnsavedChanges(false)
+        // Redirect to dashboard with success notification, including payment link
+        const params = new URLSearchParams()
+        if (doc.doc_type === 'invoice') {
+          params.append('invoiceCreated', 'true')
+          if (paymentLink) params.append('paymentLink', paymentLink)
+        } else {
+          params.append('proposalCreated', 'true')
+        }
+        router.push(`/dashboard?${params.toString()}`)
       }
     } catch (err) {
       console.error('Send error:', err)
@@ -527,24 +532,10 @@ export default function DocumentPage() {
                   ) : item.description}
                 </div>
                 <div className="col-span-2 text-right text-gray-600">
-                  {isDraft ? (
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => updateLineItem(i, 'quantity', e.target.value)}
-                      className="w-16 bg-orange-50 border border-orange-200 rounded px-2 py-1 focus:outline-none focus:border-orange-400 text-sm text-right ml-auto block"
-                    />
-                  ) : item.quantity}
+                  {item.quantity}
                 </div>
                 <div className="col-span-2 text-right text-gray-600">
-                  {isDraft ? (
-                    <input
-                      type="number"
-                      value={item.unitPrice}
-                      onChange={(e) => updateLineItem(i, 'unitPrice', e.target.value)}
-                      className="w-24 bg-orange-50 border border-orange-200 rounded px-2 py-1 focus:outline-none focus:border-orange-400 text-sm text-right ml-auto block"
-                    />
-                  ) : `$${item.unitPrice.toLocaleString()}`}
+                  ${item.unitPrice.toLocaleString()}
                 </div>
                 <div className="col-span-2 text-right font-medium text-gray-900 flex items-center justify-end gap-2">
                   ${(item.total || 0).toLocaleString()}

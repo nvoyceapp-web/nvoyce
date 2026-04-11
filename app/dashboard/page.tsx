@@ -63,7 +63,7 @@ function DashboardContent() {
   const [showCreateDropdown, setShowCreateDropdown] = useState(false)
   const [documentTab, setDocumentTab] = useState<'invoices' | 'proposals'>('invoices')
   const [generatingInvoices, setGeneratingInvoices] = useState<Set<string>>(new Set())
-  const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string } | null>(null)
+  const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string; paymentLink?: string } | null>(null)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
 
@@ -435,22 +435,25 @@ function DashboardContent() {
   useEffect(() => {
     const invoiceId = searchParams.get('invoiceCreated')
     const proposalId = searchParams.get('proposalCreated')
+    const paymentLink = searchParams.get('paymentLink')
     if (invoiceId) {
       setSuccessMessage({
         docId: invoiceId,
         invoiceId,
-        message: '✅ Invoice created and sent to your client!',
+        message: '✅ Invoice successfully sent to your client!',
+        paymentLink: paymentLink || undefined,
       })
       setDocumentTab('invoices')
       // Clear param from URL without reload
       const url = new URL(window.location.href)
       url.searchParams.delete('invoiceCreated')
+      url.searchParams.delete('paymentLink')
       window.history.replaceState({}, '', url.toString())
     } else if (proposalId) {
       setSuccessMessage({
         docId: proposalId,
         invoiceId: proposalId,
-        message: '✅ Proposal created and sent to your client!',
+        message: '✅ Proposal successfully sent to your client!',
       })
       setDocumentTab('proposals')
       const url = new URL(window.location.href)
@@ -594,19 +597,32 @@ function DashboardContent() {
             </div>
 
             {/* Smart Assistant Card */}
-            {/* Success notification for invoice generation */}
+            {/* Success notification for invoice/proposal send */}
             {successMessage && (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-10">
                 <div className="flex items-start gap-3">
                   <div className="text-2xl">🎉</div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-green-900">{successMessage.message}</p>
-                    <Link
-                      href={`/dashboard/documents/${successMessage.invoiceId}`}
-                      className="text-sm text-green-600 hover:text-green-700 font-semibold mt-2 inline-block"
-                    >
-                      View new invoice →
-                    </Link>
+                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+                      <Link
+                        href={`/dashboard/documents/${successMessage.invoiceId}`}
+                        className="text-sm text-green-600 hover:text-green-700 font-semibold inline-block"
+                      >
+                        View details →
+                      </Link>
+                      {successMessage.paymentLink && (
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(successMessage.paymentLink!)
+                            alert('Payment link copied!')
+                          }}
+                          className="text-sm text-green-600 hover:text-green-700 font-semibold inline-block"
+                        >
+                          📋 Copy payment link
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <button
                     onClick={() => setSuccessMessage(null)}

@@ -794,15 +794,6 @@ function DashboardContent() {
             <Link href="/about" className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
               ℹ️ About Nvoyce
             </Link>
-            <div className="border-t border-purple-200 mt-4 pt-4">
-              <button
-                onClick={assignMissingNumbers}
-                disabled={assigningNumbers}
-                className="w-full px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-purple-100 transition disabled:opacity-50 text-left"
-              >
-                🔢 {assigningNumbers ? 'Assigning...' : 'Assign missing #s'}
-              </button>
-            </div>
           </nav>
         </aside>
 

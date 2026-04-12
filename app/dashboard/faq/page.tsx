@@ -152,6 +152,24 @@ export default function FAQPage() {
         },
       ],
     },
+    {
+      label: 'About Nvoyce',
+      icon: '🟣',
+      faqs: [
+        {
+          id: 'logo-braille',
+          question: 'What do the orange dots inside the N logo mean?',
+          answer:
+            'They\'re not decorative — they spell "VOICE" in Braille.\n\nNvoyce is a fusion of invoice and voice. Every invoice is a freelancer\'s voice: a declaration of their work, their worth, and their right to be paid. The Braille lettering is a nod to universal access, a reminder that financial tools should work for everyone — and a small secret for those who look closely.\n\nIf you know someone who reads Braille, show them the logo.',
+        },
+        {
+          id: 'name-meaning',
+          question: 'What does "Nvoyce" mean?',
+          answer:
+            'Nvoyce is a portmanteau of invoice and voice. The idea: your invoices are your voice in the business world. They represent your work, your professionalism, and your expectation of being paid fairly.\n\nThe name also nods to the idea that freelancers often go unheard — chasing late payments, following up repeatedly, dealing with clients who don\'t respond. Nvoyce gives that voice structure, persistence, and power.',
+        },
+      ],
+    },
   ]
 
   return (
@@ -222,11 +240,17 @@ export default function FAQPage() {
 
             {/* Footer */}
             <div className="mt-16 pt-8 border-t border-gray-200 text-center flex flex-col items-center gap-4">
-              <img
-                src="/logo-icon.png"
-                alt="Nvoyce"
-                className="w-12 h-12 object-contain opacity-80"
-              />
+              <div className="group relative inline-block">
+                <img
+                  src="/logo-icon.png"
+                  alt="Nvoyce N icon — the orange dots spell VOICE in Braille"
+                  className="w-12 h-12 object-contain opacity-70 hover:opacity-100 transition cursor-default"
+                />
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none shadow-lg">
+                  The orange dots spell <span className="text-orange-400 font-semibold">"VOICE"</span> in Braille ✦
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                </div>
+              </div>
               <p className="text-gray-500 text-sm">
                 Still have questions?{' '}
                 <a href="mailto:support@nvoyce.ai" className="text-purple-600 hover:text-purple-700 font-semibold">

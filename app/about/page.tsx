@@ -91,7 +91,7 @@ export default function AboutPage() {
         {/* Brand Story — The Logo */}
         <section className="mb-20">
           <h3 className="text-3xl font-bold text-gray-900 mb-8">The Story Behind the Mark</h3>
-          <div className="bg-gradient-to-r from-purple-950 to-purple-900 rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
+          <div className="bg-gradient-to-r from-purple-700 to-purple-600 rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
             <div className="flex-shrink-0">
               <img
                 src="/logo-icon.png"
@@ -100,13 +100,13 @@ export default function AboutPage() {
               />
             </div>
             <div className="text-white">
-              <p className="text-lg font-semibold text-purple-200 mb-3 tracking-wide uppercase text-sm">
+              <p className="text-lg font-semibold text-purple-100 mb-3 tracking-wide uppercase text-sm">
                 Hidden in plain sight
               </p>
-              <p className="text-xl font-bold mb-4 leading-snug">
-                The orange dots inside the N spell <span className="text-orange-400">"VOICE"</span> in Braille.
+              <p className="text-xl font-bold mb-4 leading-snug text-white">
+                The orange dots inside the N spell <span className="text-orange-300">"VOICE"</span> in Braille.
               </p>
-              <p className="text-purple-200 leading-relaxed">
+              <p className="text-purple-100 leading-relaxed">
                 Nvoyce is a fusion of <em>invoice</em> and <em>voice</em> — because every invoice is a freelancer's voice: a declaration of their work, their worth, and their right to be paid. The Braille lettering is a nod to universal access, a reminder that financial tools should work for everyone, and a tiny secret for those who look closely.
               </p>
             </div>

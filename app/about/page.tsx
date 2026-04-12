@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Logo from '@/components/Logo'
 
 export default function AboutPage() {
   return (
@@ -10,7 +9,7 @@ export default function AboutPage() {
       <header className="border-b border-purple-100 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Logo size="small" />
+            <img src="/logo-icon.png" alt="Nvoyce" className="w-8 h-8 object-contain" />
           </Link>
           <nav className="flex gap-6">
             <Link href="/" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
@@ -164,8 +163,9 @@ export default function AboutPage() {
 
       {/* Footer */}
       <footer className="border-t border-purple-100 bg-white/50 backdrop-blur-sm mt-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-gray-600 text-sm">
-          <p>© 2026 Nvoyce. Built for freelancers and gig workers.</p>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center flex flex-col items-center gap-3">
+          <img src="/logo-icon.png" alt="Nvoyce" className="w-7 h-7 object-contain opacity-50" />
+          <p className="text-gray-500 text-sm">© 2026 Nvoyce. Built for freelancers and gig workers.</p>
         </div>
       </footer>
     </div>

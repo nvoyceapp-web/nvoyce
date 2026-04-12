@@ -10,7 +10,7 @@ export default function AboutPage() {
 
         {/* Sidebar */}
         <aside className="hidden lg:flex lg:flex-col w-60 bg-purple-50 border-r border-purple-200 px-4 py-6 flex-shrink-0">
-          <div className="mb-8">
+          <div className="mb-8 flex justify-center">
             <Logo size="small" />
           </div>
           <nav className="flex flex-col gap-1 flex-1">

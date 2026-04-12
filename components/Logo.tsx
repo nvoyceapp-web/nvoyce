@@ -5,29 +5,18 @@ interface LogoProps {
 
 export default function Logo({ showTagline = false, size = 'medium' }: LogoProps) {
   const imgHeights = {
-    small: 'h-8',
-    medium: 'h-12',
-    large: 'h-16',
-  }
-
-  const taglineSizes = {
-    small: 'text-xs',
-    medium: 'text-sm',
-    large: 'text-base',
+    small: 'h-10',
+    medium: 'h-14',
+    large: 'h-20',
   }
 
   return (
-    <div className="flex flex-col items-start gap-1">
+    <div className="flex flex-col items-start">
       <img
         src="/logo.png"
-        alt="Nvoyce"
+        alt="Nvoyce — We do the hard stuff. You get paid."
         className={`${imgHeights[size]} w-auto object-contain`}
       />
-      {showTagline && (
-        <p className={`text-gray-500 font-medium ${taglineSizes[size]}`}>
-          We do the hard stuff. You get paid.
-        </p>
-      )}
     </div>
   )
 }

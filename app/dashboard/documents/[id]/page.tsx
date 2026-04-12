@@ -723,7 +723,8 @@ export default function DocumentPage() {
           )}
 
           {/* Made with nvoyce footer */}
-          <div className="border-t border-gray-100 mt-12 pt-8 text-center">
+          <div className="border-t border-gray-100 mt-12 pt-8 text-center flex flex-col items-center gap-2">
+            <img src="/logo-icon.png" alt="Nvoyce" className="w-6 h-6 object-contain opacity-50" />
             <p className="text-xs text-gray-400">
               Made with <span className="text-purple-600 font-semibold">nvoyce</span>
             </p>

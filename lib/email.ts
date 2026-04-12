@@ -114,6 +114,7 @@ export async function sendInvoiceEmail({
             </p>
           </div>
           <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+            <img src="${appUrl}/logo-icon.png" alt="Nvoyce" style="width: 28px; height: 28px; object-fit: contain; margin: 0 auto 10px; display: block; opacity: 0.7;" />
             <p style="margin: 0; font-size: 12px; color: #9ca3af;">© 2026 Nvoyce. All rights reserved.</p>
             <p style="margin: 8px 0 0 0; font-size: 11px; color: #d1d5db;">Fast invoicing for gig workers</p>
           </div>
@@ -184,6 +185,7 @@ export async function sendWelcomeEmail({
             </p>
           </div>
           <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+            <img src="${appUrl}/logo-icon.png" alt="Nvoyce" style="width: 28px; height: 28px; object-fit: contain; margin: 0 auto 10px; display: block; opacity: 0.7;" />
             <p style="margin: 0; font-size: 12px; color: #9ca3af;">© 2026 Nvoyce. All rights reserved.</p>
             <p style="margin: 8px 0 0 0; font-size: 11px; color: #d1d5db;">We do the hard stuff. You get paid.</p>
           </div>
@@ -285,6 +287,7 @@ export async function sendProposalSentEmail({
             </p>
           </div>
           <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+            <img src="${appUrl}/logo-icon.png" alt="Nvoyce" style="width: 28px; height: 28px; object-fit: contain; margin: 0 auto 10px; display: block; opacity: 0.7;" />
             <p style="margin: 0; font-size: 12px; color: #9ca3af;">© 2026 Nvoyce. All rights reserved.</p>
             <p style="margin: 8px 0 0 0; font-size: 11px; color: #d1d5db;">Fast invoicing for gig workers</p>
           </div>
@@ -353,6 +356,7 @@ export async function sendProposalAcceptedEmail({
             </p>
           </div>
           <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+            <img src="${appUrl}/logo-icon.png" alt="Nvoyce" style="width: 28px; height: 28px; object-fit: contain; margin: 0 auto 8px; display: block; opacity: 0.7;" />
             <p style="margin: 0; font-size: 11px; color: #d1d5db;">© 2026 Nvoyce. We do the hard stuff. You get paid.</p>
           </div>
         </div>
@@ -414,6 +418,7 @@ export async function sendProposalDeclinedEmail({
             </div>
           </div>
           <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+            <img src="${appUrl}/logo-icon.png" alt="Nvoyce" style="width: 28px; height: 28px; object-fit: contain; margin: 0 auto 8px; display: block; opacity: 0.7;" />
             <p style="margin: 0; font-size: 11px; color: #d1d5db;">© 2026 Nvoyce. We do the hard stuff. You get paid.</p>
           </div>
         </div>

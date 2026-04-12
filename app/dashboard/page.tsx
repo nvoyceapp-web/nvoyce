@@ -811,7 +811,7 @@ function DashboardContent() {
         <main className="flex-1 overflow-auto w-full">
           {/* Mobile top bar — only visible on small screens */}
           <div className="lg:hidden bg-purple-50 border-b border-purple-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-            <Logo showTagline={false} size="small" />
+            <img src="/logo-icon.png" alt="Nvoyce" className="w-8 h-8 object-contain" />
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
               className="p-2 rounded-lg text-gray-600 hover:bg-purple-100 transition"

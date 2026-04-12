@@ -221,7 +221,12 @@ export default function FAQPage() {
             </div>
 
             {/* Footer */}
-            <div className="mt-16 pt-8 border-t border-gray-200 text-center">
+            <div className="mt-16 pt-8 border-t border-gray-200 text-center flex flex-col items-center gap-4">
+              <img
+                src="/logo-icon.png"
+                alt="Nvoyce"
+                className="w-12 h-12 object-contain opacity-80"
+              />
               <p className="text-gray-500 text-sm">
                 Still have questions?{' '}
                 <a href="mailto:support@nvoyce.ai" className="text-purple-600 hover:text-purple-700 font-semibold">

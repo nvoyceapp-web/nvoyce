@@ -4,10 +4,10 @@ interface LogoProps {
 }
 
 export default function Logo({ showTagline = false, size = 'medium' }: LogoProps) {
-  const sizeClasses = {
-    small: 'text-lg',
-    medium: 'text-2xl',
-    large: 'text-4xl',
+  const imgHeights = {
+    small: 'h-8',
+    medium: 'h-12',
+    large: 'h-16',
   }
 
   const taglineSizes = {
@@ -17,12 +17,14 @@ export default function Logo({ showTagline = false, size = 'medium' }: LogoProps
   }
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className={`font-bold text-gray-900 ${sizeClasses[size]} tracking-tight`}>
-        Nvoyce
-      </div>
+    <div className="flex flex-col items-start gap-1">
+      <img
+        src="/logo.png"
+        alt="Nvoyce"
+        className={`${imgHeights[size]} w-auto object-contain`}
+      />
       {showTagline && (
-        <p className={`text-gray-600 font-medium ${taglineSizes[size]}`}>
+        <p className={`text-gray-500 font-medium ${taglineSizes[size]}`}>
           We do the hard stuff. You get paid.
         </p>
       )}

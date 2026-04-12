@@ -766,7 +766,7 @@ function DashboardContent() {
       <div className="flex h-screen flex-col lg:flex-row">
         <aside className="hidden lg:flex lg:flex-col w-full lg:w-60 bg-purple-50 border-r border-purple-200 border-b lg:border-b-0 px-4 py-6">
           <div className="mb-8">
-            <Logo showTagline={true} size="small" />
+            <Logo size="small" />
           </div>
           <nav className="flex flex-col gap-0 flex-1">
             <div className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">

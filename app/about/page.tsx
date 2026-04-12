@@ -1,32 +1,28 @@
 'use client'
 
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50">
-      {/* Header/Nav */}
-      <header className="border-b border-purple-100 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Nvoyce" className="h-8 w-auto object-contain" />
-          </Link>
-          <nav className="flex gap-6">
-            <Link href="/" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
-              Home
-            </Link>
-            <Link href="/about" className="text-gray-900 text-sm font-medium">
-              About
-            </Link>
-            <Link href="/dashboard" className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-medium">
-              Dashboard
+      <div className="flex h-screen flex-col lg:flex-row">
+
+        {/* Sidebar */}
+        <aside className="hidden lg:flex lg:flex-col w-60 bg-purple-50 border-r border-purple-200 px-4 py-6 flex-shrink-0">
+          <div className="mb-8">
+            <Logo showTagline={true} size="small" />
+          </div>
+          <nav className="flex flex-col gap-1 flex-1">
+            <Link href="/dashboard" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-purple-100 transition">
+              ← Back to Dashboard
             </Link>
           </nav>
-        </div>
-      </header>
+        </aside>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         {/* Hero Section */}
         <div className="text-center mb-20">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">We do the hard stuff.</h1>
@@ -159,15 +155,15 @@ export default function AboutPage() {
             Start Using Nvoyce →
           </Link>
         </section>
-      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-purple-100 bg-white/50 backdrop-blur-sm mt-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center flex flex-col items-center gap-3">
-          <img src="/logo-icon.png" alt="Nvoyce" className="w-7 h-7 object-contain opacity-50" />
-          <p className="text-gray-500 text-sm">© 2026 Nvoyce. Built for freelancers and gig workers.</p>
-        </div>
-      </footer>
+          {/* Footer */}
+          <div className="border-t border-purple-100 mt-20 py-8 text-center flex flex-col items-center gap-3">
+            <img src="/logo-icon.png" alt="Nvoyce" className="w-7 h-7 object-contain opacity-50" />
+            <p className="text-gray-500 text-sm">© 2026 Nvoyce. Built for freelancers and gig workers.</p>
+          </div>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

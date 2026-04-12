@@ -16,7 +16,7 @@ export default function Logo({ showTagline = false, size = 'medium' }: LogoProps
     : 'Nvoyce'
 
   return (
-    <div className="flex flex-col items-start">
+    <div className="flex flex-col items-center">
       <img
         src={src}
         alt={alt}

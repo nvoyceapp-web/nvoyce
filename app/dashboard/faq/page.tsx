@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import Logo from '@/components/Logo'
+import Sidebar from '@/components/Sidebar'
 
 interface FAQ {
   id: string
@@ -176,16 +176,7 @@ export default function FAQPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen flex-col lg:flex-row">
         {/* Sidebar */}
-        <aside className="hidden lg:flex lg:flex-col w-full lg:w-60 bg-purple-50 border-r border-purple-200 px-4 py-6">
-          <div className="mb-8 flex justify-center">
-            <Logo size="small" />
-          </div>
-          <nav className="flex flex-col gap-1 flex-1">
-            <Link href="/dashboard" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-purple-100 transition">
-              ← Back to Dashboard
-            </Link>
-          </nav>
-        </aside>
+        <Sidebar activePage="faq" />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">

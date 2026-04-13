@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import Logo from '@/components/Logo'
+import Sidebar from '@/components/Sidebar'
 
 export default function AboutPage() {
   return (
@@ -9,16 +9,7 @@ export default function AboutPage() {
       <div className="flex h-screen flex-col lg:flex-row">
 
         {/* Sidebar */}
-        <aside className="hidden lg:flex lg:flex-col w-60 bg-purple-50 border-r border-purple-200 px-4 py-6 flex-shrink-0">
-          <div className="mb-8 flex justify-center">
-            <Logo size="small" />
-          </div>
-          <nav className="flex flex-col gap-1 flex-1">
-            <Link href="/dashboard" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-purple-100 transition">
-              ← Back to Dashboard
-            </Link>
-          </nav>
-        </aside>
+        <Sidebar activePage="about" />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">

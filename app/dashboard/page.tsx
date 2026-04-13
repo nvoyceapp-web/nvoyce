@@ -6,7 +6,7 @@ import { useAuth } from '@clerk/nextjs'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getTopPaymeActions, PaymeAction } from '@/lib/payme-scoring'
-import Logo from '@/components/Logo'
+import Sidebar from '@/components/Sidebar'
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart } from 'recharts'
 
 interface Document {
@@ -764,49 +764,7 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen flex-col lg:flex-row">
-        <aside className="hidden lg:flex lg:flex-col w-full lg:w-60 bg-purple-50 border-r border-purple-200 border-b lg:border-b-0 px-4 py-6">
-          <div className="mb-8 flex justify-center">
-            <Logo size="small" />
-          </div>
-          <nav className="flex flex-col gap-0 flex-1">
-            <div className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              Menu
-            </div>
-            <button
-              onClick={() => setShowCreateDropdown(!showCreateDropdown)}
-              className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 text-left w-full transition"
-            >
-              ✨ Create
-            </button>
-            {showCreateDropdown && (
-              <div className="ml-2 border-l-2 border-gray-200 space-y-0">
-                <Link
-                  href="/dashboard/new?type=invoice"
-                  onClick={() => setShowCreateDropdown(false)}
-                  className="block px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
-                >
-                  📄 Invoice
-                </Link>
-                <Link
-                  href="/dashboard/new?type=proposal"
-                  onClick={() => setShowCreateDropdown(false)}
-                  className="block px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
-                >
-                  💼 Proposal
-                </Link>
-              </div>
-            )}
-            <Link href="/dashboard/faq" className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
-              ❓ FAQ
-            </Link>
-            <Link href="/dashboard/settings" className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
-              ⚙️ Settings
-            </Link>
-            <Link href="/about" className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
-              ℹ️ About Nvoyce
-            </Link>
-          </nav>
-        </aside>
+        <Sidebar activePage="dashboard" />
 
         <main className="flex-1 overflow-auto w-full">
           {/* Mobile top bar — only visible on small screens */}

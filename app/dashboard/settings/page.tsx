@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import Logo from '@/components/Logo'
+import Sidebar from '@/components/Sidebar'
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useAuth } from '@clerk/nextjs'
@@ -186,16 +186,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen flex-col lg:flex-row">
         {/* Sidebar */}
-        <aside className="hidden lg:flex w-full lg:w-60 bg-purple-50 border-r border-purple-200 flex flex-col px-4 py-6">
-          <div className="mb-8 flex justify-center">
-            <Logo size="small" />
-          </div>
-          <nav className="flex flex-col gap-1 flex-1">
-            <Link href="/dashboard" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition">
-              ← Back to Dashboard
-            </Link>
-          </nav>
-        </aside>
+        <Sidebar activePage="settings" />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">

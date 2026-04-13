@@ -65,10 +65,12 @@ function DashboardContent() {
   const [dismissedRecommendations, setDismissedRecommendations] = useState<Set<string>>(new Set())
   const [expandPayme, setExpandPayme] = useState(false)
   const [showCreateDropdown, setShowCreateDropdown] = useState(false)
+  const createDropdownTimer = useRef<NodeJS.Timeout | null>(null)
   const [documentTab, setDocumentTab] = useState<'invoices' | 'proposals'>('invoices')
   const [generatingInvoices, setGeneratingInvoices] = useState<Set<string>>(new Set())
   const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string } | null>(null)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const actionDropdownTimer = useRef<NodeJS.Timeout | null>(null)
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
   const [assigningNumbers, setAssigningNumbers] = useState(false)
   const [assignmentMessage, setAssignmentMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -866,7 +868,11 @@ function DashboardContent() {
           <div className="px-4 lg:px-10 py-8">
             <div className="flex items-center justify-between mb-8">
               <h1 className="text-2xl font-bold font-display text-gray-900">Dashboard</h1>
-              <div className="relative" onMouseLeave={() => setShowCreateDropdown(false)}>
+              <div
+                className="relative"
+                onMouseEnter={() => { if (createDropdownTimer.current) clearTimeout(createDropdownTimer.current) }}
+                onMouseLeave={() => { createDropdownTimer.current = setTimeout(() => setShowCreateDropdown(false), 150) }}
+              >
                 <button
                   onClick={() => setShowCreateDropdown(!showCreateDropdown)}
                   className="flex items-center gap-2 text-sm text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition font-semibold"
@@ -1614,7 +1620,11 @@ function DashboardContent() {
                               {doc.doc_type.toLowerCase() === 'proposal' ? (
                                 // Proposal actions - dropdown menu
                                 <>
-                                  <div className="relative">
+                                  <div
+                                    className="relative"
+                                    onMouseEnter={() => { if (actionDropdownTimer.current) clearTimeout(actionDropdownTimer.current) }}
+                                    onMouseLeave={() => { actionDropdownTimer.current = setTimeout(() => setOpenDropdown(null), 150) }}
+                                  >
                                     <button
                                       onClick={() => setOpenDropdown(openDropdown === doc.id ? null : doc.id)}
                                       className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition"
@@ -1688,7 +1698,11 @@ function DashboardContent() {
                                 </>
                               ) : (
                                 // Invoice actions - dropdown menu
-                                <div className="relative">
+                                <div
+                                  className="relative"
+                                  onMouseEnter={() => { if (actionDropdownTimer.current) clearTimeout(actionDropdownTimer.current) }}
+                                  onMouseLeave={() => { actionDropdownTimer.current = setTimeout(() => setOpenDropdown(null), 150) }}
+                                >
                                   <button
                                     onClick={() => setOpenDropdown(openDropdown === doc.id ? null : doc.id)}
                                     className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition"

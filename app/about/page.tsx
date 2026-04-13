@@ -18,8 +18,8 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         {/* Hero Section */}
         <div className="text-center mb-20">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">We do the hard stuff.</h1>
-          <h2 className="text-5xl font-bold mb-8 pb-1">
+          <h1 className="text-5xl font-bold font-display text-gray-900 mb-6">We do the hard stuff.</h1>
+          <h2 className="text-5xl font-bold font-display mb-8 pb-1">
             <span className="bg-gradient-to-r from-[#3b2a4a] to-[#d4622a] bg-clip-text text-transparent">You get paid</span><span className="text-orange-500">.</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -29,7 +29,7 @@ export default function AboutPage() {
 
         {/* Mission Section */}
         <section className="mb-20">
-          <h3 className="text-3xl font-bold text-gray-900 mb-6">Our Mission</h3>
+          <h3 className="text-3xl font-bold font-display text-gray-900 mb-6">Our Mission</h3>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
             Invoicing and proposal management shouldn't be complicated. Most freelancers spend valuable time on admin work instead of doing what they love. We're changing that.
           </p>
@@ -40,7 +40,7 @@ export default function AboutPage() {
 
         {/* Core Values */}
         <section className="mb-20">
-          <h3 className="text-3xl font-bold text-gray-900 mb-12">Our Core Values</h3>
+          <h3 className="text-3xl font-bold font-display text-gray-900 mb-12">Our Core Values</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg border border-gray-100 p-6">
               <div className="text-4xl mb-4">⚡</div>
@@ -68,7 +68,7 @@ export default function AboutPage() {
 
         {/* Who We Serve */}
         <section className="mb-20">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8">Who We Serve</h3>
+          <h3 className="text-3xl font-bold font-display text-gray-900 mb-8">Who We Serve</h3>
           <div className="bg-gray-50 rounded-lg border border-gray-200 p-8">
             <p className="text-lg text-gray-700 leading-relaxed">
               <strong>Freelancers & Gig Workers</strong> who manage their own invoices and need to track payment quickly. Whether you're a designer, writer, developer, consultant, or service provider—Nvoyce helps you get paid faster.
@@ -81,7 +81,7 @@ export default function AboutPage() {
 
         {/* Brand Story — The Logo */}
         <section className="mb-20">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8">The Story Behind the Mark</h3>
+          <h3 className="text-3xl font-bold font-display text-gray-900 mb-8">The Story Behind the Mark</h3>
           <div className="bg-gradient-to-r from-orange-500 via-[#1a2f45] to-[#0d1b2a] rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
             <div className="flex-shrink-0">
               <img
@@ -106,7 +106,7 @@ export default function AboutPage() {
 
         {/* Features Highlight */}
         <section className="mb-20">
-          <h3 className="text-3xl font-bold text-gray-900 mb-12">What Makes Nvoyce Different</h3>
+          <h3 className="text-3xl font-bold font-display text-gray-900 mb-12">What Makes Nvoyce Different</h3>
           <div className="space-y-6">
             <div className="flex gap-4">
               <div className="flex-shrink-0 text-2xl">📄</div>

@@ -1,6 +1,13 @@
 import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
+import { Space_Grotesk } from 'next/font/google'
 import './globals.css'
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Nvoyce — Proposals & Invoices in Seconds',
@@ -14,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" className={spaceGrotesk.variable}>
         <body>{children}</body>
       </html>
     </ClerkProvider>

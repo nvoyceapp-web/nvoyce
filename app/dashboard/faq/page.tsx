@@ -239,7 +239,7 @@ export default function FAQPage() {
 
                 {/* Text */}
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">Frequently Asked Questions</h1>
+                  <h1 className="text-3xl font-bold font-display text-gray-900 mb-2">Frequently Asked Questions</h1>
                   <p className="text-gray-500">
                     Everything you need to know about using Nvoyce — statuses, payments, and your dashboard.
                   </p>

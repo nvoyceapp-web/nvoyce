@@ -57,7 +57,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="bg-white rounded-lg border border-gray-100 p-6">
-              <div className="text-4xl mb-4">💪</div>
+              <div className="text-4xl mb-4">💪🏽</div>
               <h4 className="text-lg font-semibold text-gray-900 mb-3">Empowerment</h4>
               <p className="text-gray-600">
                 We're built for freelancers, by people who understand your challenges. Your success is our success.

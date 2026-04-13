@@ -65,7 +65,7 @@ function DashboardContent() {
   const [showPendingProposals, setShowPendingProposals] = useState(false)
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
   const [dismissedRecommendations, setDismissedRecommendations] = useState<Set<string>>(new Set())
-  const [expandPayme, setExpandPayme] = useState(false)
+  const [expandPayme, setExpandPayme] = useState(true)
   const [showCreateDropdown, setShowCreateDropdown] = useState(false)
   const createDropdownTimer = useRef<NodeJS.Timeout | null>(null)
   const [documentTab, setDocumentTab] = useState<'invoices' | 'proposals'>('invoices')
@@ -818,7 +818,7 @@ function DashboardContent() {
           )}
           <MobileNav activePage="dashboard" />
           <div className="px-4 lg:px-10 py-8">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6">
               <h1 className="text-2xl font-bold font-display text-gray-900">Dashboard</h1>
               <div
                 className="relative"
@@ -871,6 +871,84 @@ function DashboardContent() {
                 )}
               </div>
             </div>
+
+            {/* Payme — action recommendations, shown prominently below header */}
+            {(() => {
+              const recs = getRecommendations()
+              if (recs.length === 0) return null
+              const hasUrgent = recs.some(r => r.urgency === 'high')
+              return (
+                <div className={`rounded-xl overflow-hidden mb-6 border ${hasUrgent ? 'border-orange-300' : 'border-[#1a2f45]'}`}>
+                  {/* Header */}
+                  <button
+                    onClick={() => setExpandPayme(!expandPayme)}
+                    className={`w-full flex items-center justify-between px-5 py-3.5 text-white transition ${hasUrgent ? 'bg-gradient-to-r from-[#0d1b2a] to-[#1a2f45]' : 'bg-gradient-to-r from-[#0d1b2a] to-[#1a2f45]'} hover:opacity-90`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                      <span className="font-semibold text-sm tracking-wide">Payme</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${hasUrgent ? 'bg-orange-500/30 text-orange-300' : 'bg-white/10 text-gray-300'}`}>
+                        {recs.length} action{recs.length !== 1 ? 's' : ''} waiting
+                      </span>
+                      {/* Top action preview when collapsed */}
+                      {!expandPayme && (
+                        <span className="text-xs text-gray-400 hidden sm:inline truncate max-w-xs">
+                          — {recs[0].text}
+                        </span>
+                      )}
+                    </div>
+                    <svg className={`w-4 h-4 text-gray-400 transition-transform ${expandPayme ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Body */}
+                  {expandPayme && (
+                    <div className="bg-[#0d1b2a] px-5 pb-5 pt-3 space-y-2 border-t border-white/10">
+                      {recs.map((rec, idx) => (
+                        <div key={idx} className="bg-white/5 rounded-lg p-3.5 border border-white/10 flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-white">{rec.text}</div>
+                            <div className={`text-xs mt-1 font-medium ${rec.urgency === 'high' ? 'text-orange-400' : 'text-gray-400'}`}>
+                              {rec.paymeAction?.type === 'invoice' ? 'Invoice' : 'Proposal'} · {rec.urgency === 'high' ? 'Urgent' : 'Heads up'}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            {rec.action === 'send-reminders' && (
+                              <button
+                                onClick={() => setSelectedDocs(new Set([rec.paymeAction?.id]))}
+                                className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition font-semibold"
+                              >
+                                Remind
+                              </button>
+                            )}
+                            {rec.action === 'follow-up' && (
+                              <button
+                                onClick={() => setFilterClient(rec.paymeAction?.client_name || '')}
+                                className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition font-semibold"
+                              >
+                                Review
+                              </button>
+                            )}
+                            <button
+                              onClick={() => dismissRecommendation(rec.type)}
+                              className="text-gray-500 hover:text-gray-300 transition p-1"
+                              title="Dismiss"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Assignment message */}
             {assignmentMessage && (
@@ -966,71 +1044,6 @@ function DashboardContent() {
                 </div>
               </div>
             )}
-
-            {/* Payme — collapsed strip, expands on click */}
-            {(() => {
-              const recs = getRecommendations()
-              if (recs.length === 0) return null
-              return (
-                <div className="rounded-xl border border-purple-200 mb-6 overflow-hidden">
-                  {/* Always-visible header strip */}
-                  <button
-                    onClick={() => setExpandPayme(!expandPayme)}
-                    className="w-full flex items-center justify-between px-5 py-3 bg-gradient-to-r from-purple-900 to-purple-800 text-white hover:from-purple-800 hover:to-purple-700 transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg">💰</span>
-                      <span className="font-semibold text-sm">Payme</span>
-                      <span className="text-xs text-purple-300 bg-purple-700/50 px-2 py-0.5 rounded-full">
-                        {recs.length} action{recs.length !== 1 ? 's' : ''} waiting
-                      </span>
-                    </div>
-                    <span className="text-purple-300 text-xs">{expandPayme ? '▲ Collapse' : '▼ Expand'}</span>
-                  </button>
-
-                  {/* Expandable body */}
-                  {expandPayme && (
-                    <div className="bg-gradient-to-r from-purple-900 to-purple-800 px-5 pb-5 space-y-2 border-t border-purple-700/50">
-                      {recs.map((rec, idx) => (
-                        <div key={idx} className="bg-white/10 rounded-lg p-3 border border-purple-600/40 flex items-start justify-between gap-2">
-                          <div className="flex-1">
-                            <div className="text-sm font-medium text-purple-100">{rec.text}</div>
-                            <div className={`text-xs mt-1 ${rec.paymeAction?.type === 'invoice' ? 'text-red-300' : 'text-yellow-300'}`}>
-                              {rec.paymeAction?.icon} {rec.paymeAction?.type === 'invoice' ? 'Invoice' : 'Proposal'} — {rec.urgency === 'high' ? 'Urgent' : 'Important'}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            {rec.action === 'send-reminders' && (
-                              <button
-                                onClick={() => setSelectedDocs(new Set([rec.paymeAction?.id]))}
-                                className="text-xs bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
-                              >
-                                Send Reminder
-                              </button>
-                            )}
-                            {rec.action === 'follow-up' && (
-                              <button
-                                onClick={() => setFilterClient(rec.paymeAction?.client_name || '')}
-                                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition font-semibold whitespace-nowrap"
-                              >
-                                Review
-                              </button>
-                            )}
-                            <button
-                              onClick={() => dismissRecommendation(rec.type)}
-                              className="text-xs bg-purple-700/50 hover:bg-purple-700 text-white px-2 py-1 rounded transition whitespace-nowrap"
-                              title="Dismiss"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            })()}
 
             {/* ── Metrics strip — full width, 2 rows of 3 ── */}
             {(() => {

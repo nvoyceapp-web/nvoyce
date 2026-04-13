@@ -437,3 +437,126 @@ export async function sendProposalDeclinedEmail({
     throw error
   }
 }
+
+// ── Trial expiry emails ────────────────────────────────────────────────────
+
+function trialEmailShell(logoUrl: string, appUrl: string, body: string) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+      <div style="text-align: center; padding: 30px 20px; background-color: #0d1b2a;">
+        <img src="${logoUrl}" alt="Nvoyce" style="max-width: 140px; height: auto;" />
+      </div>
+      <div style="padding: 30px 20px;">${body}</div>
+      <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+        <p style="margin: 0; font-size: 11px; color: #9ca3af;">© 2026 Nvoyce · We do the hard stuff. You get paid.</p>
+        <p style="margin: 6px 0 0 0; font-size: 11px; color: #d1d5db;">
+          <a href="${appUrl}/dashboard/settings" style="color: #f97316; text-decoration: none;">Manage your plan</a>
+        </p>
+      </div>
+    </div>
+  `
+}
+
+export async function sendTrialWarningEmail({
+  userEmail,
+  userName,
+  daysLeft,
+}: {
+  userEmail: string
+  userName: string
+  daysLeft: 2 | 1
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.nvoyce.ai'
+  const logoUrl = `${appUrl}/logo.png`
+
+  const isLastDay = daysLeft === 1
+  const subject = isLastDay
+    ? 'Your Nvoyce Pro trial ends tomorrow'
+    : 'Your Nvoyce Pro trial ends in 2 days'
+
+  const urgencyColor = isLastDay ? '#ef4444' : '#f97316'
+  const urgencyText = isLastDay
+    ? 'Last chance — your trial ends tomorrow.'
+    : 'Heads up — your trial ends in 2 days.'
+
+  const body = `
+    <p style="margin: 0 0 8px 0; font-size: 16px; color: #1f2937; font-weight: bold;">Hi ${userName},</p>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #374151; line-height: 1.6;">${urgencyText} After that, you'll drop to the Free plan (3 docs/month).</p>
+
+    <div style="background-color: #fff7ed; border-left: 4px solid ${urgencyColor}; padding: 16px 20px; border-radius: 8px; margin: 0 0 24px 0;">
+      <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #92400e;">What you'll lose on the Free plan:</p>
+      <ul style="margin: 0; padding-left: 18px; color: #b45309; font-size: 13px; line-height: 2;">
+        <li>Unlimited invoices & proposals</li>
+        <li>Invoice tracking (sent / viewed / paid)</li>
+        <li>Follow-up email sequences</li>
+        <li>Client payment portal</li>
+      </ul>
+    </div>
+
+    <div style="text-align: center; margin: 0 0 24px 0;">
+      <a href="${appUrl}/dashboard/settings" style="display: inline-block; padding: 14px 36px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+        Keep Pro — $19.99/mo →
+      </a>
+    </div>
+
+    <p style="margin: 0; font-size: 12px; color: #9ca3af; text-align: center;">No commitment. Cancel anytime.</p>
+  `
+
+  const result = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: userEmail,
+    subject,
+    html: trialEmailShell(logoUrl, appUrl, body),
+  })
+
+  if (result.error) throw result.error
+  console.log(`Trial warning (${daysLeft}d) sent to ${userEmail}:`, result.data?.id)
+  return result
+}
+
+export async function sendTrialExpiredEmail({
+  userEmail,
+  userName,
+}: {
+  userEmail: string
+  userName: string
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.nvoyce.ai'
+  const logoUrl = `${appUrl}/logo.png`
+
+  const body = `
+    <p style="margin: 0 0 8px 0; font-size: 16px; color: #1f2937; font-weight: bold;">Hi ${userName},</p>
+    <p style="margin: 0 0 24px 0; font-size: 14px; color: #374151; line-height: 1.6;">Your 7-day Pro trial has ended. You're now on the <strong>Free plan</strong> — limited to 3 docs/month.</p>
+
+    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin: 0 0 24px 0;">
+      <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: bold; color: #1f2937;">During your trial you had access to:</p>
+      <ul style="margin: 0; padding-left: 18px; color: #374151; font-size: 13px; line-height: 2;">
+        <li>✓ Unlimited invoices & proposals</li>
+        <li>✓ Invoice tracking (sent / viewed / paid)</li>
+        <li>✓ Follow-up email sequences</li>
+        <li>✓ Client payment portal</li>
+      </ul>
+      <p style="margin: 16px 0 0 0; font-size: 13px; color: #6b7280;">All of that is waiting for you when you upgrade.</p>
+    </div>
+
+    <div style="text-align: center; margin: 0 0 16px 0;">
+      <a href="${appUrl}/dashboard/settings" style="display: inline-block; padding: 14px 36px; background-color: #0d1b2a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+        Upgrade to Pro — $19.99/mo →
+      </a>
+    </div>
+
+    <p style="margin: 0; font-size: 12px; color: #9ca3af; text-align: center;">No commitment. Cancel anytime from your settings.</p>
+  `
+
+  const result = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: userEmail,
+    subject: "Your Nvoyce Pro trial has ended",
+    html: trialEmailShell(logoUrl, appUrl, body),
+  })
+
+  if (result.error) throw result.error
+  console.log(`Trial expired email sent to ${userEmail}:`, result.data?.id)
+  return result
+  }
+}

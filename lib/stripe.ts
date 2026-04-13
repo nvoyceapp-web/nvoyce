@@ -52,7 +52,7 @@ export const PLANS = {
   },
   pro: {
     name: 'Pro',
-    price: 19,
+    price: 19.99,
     stripePriceId: process.env.STRIPE_PRO_PRICE_ID,
     invoicesPerMonth: Infinity,
     features: [
@@ -65,7 +65,7 @@ export const PLANS = {
   },
   business: {
     name: 'Business',
-    price: 39,
+    price: 39.99,
     stripePriceId: process.env.STRIPE_BUSINESS_PRICE_ID,
     invoicesPerMonth: Infinity,
     features: ['Everything in Pro', 'Multiple team members', 'Priority support', 'Custom branding'],

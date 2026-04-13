@@ -891,7 +891,7 @@ function DashboardContent() {
                           <line x1="16" y1="13" x2="8" y2="13"/>
                           <line x1="16" y1="17" x2="8" y2="17"/>
                         </svg>
-                        New Invoice
+                        Invoice
                       </span>
                     </Link>
                     <Link
@@ -906,7 +906,7 @@ function DashboardContent() {
                           <line x1="12" y1="12" x2="12" y2="16"/>
                           <line x1="10" y1="14" x2="14" y2="14"/>
                         </svg>
-                        New Proposal
+                        Proposal
                       </span>
                     </Link>
                   </div>

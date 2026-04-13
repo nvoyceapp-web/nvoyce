@@ -721,3 +721,180 @@ export async function sendLaunchAnnouncementEmail({
   console.log(`Launch announcement sent to ${userEmail}:`, result.data?.id)
   return result
 }
+
+// Sent to the CLIENT confirming their payment was received (partial or full)
+export async function sendPaymentConfirmationEmail({
+  clientEmail,
+  clientName,
+  freelancerName,
+  amount,
+  totalPaid,
+  invoiceTotal,
+  documentNumber,
+  isPartial = false,
+}: {
+  clientEmail: string
+  clientName: string
+  freelancerName: string
+  amount: number
+  totalPaid: number
+  invoiceTotal: number
+  documentNumber: string
+  isPartial?: boolean
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.nvoyce.ai'
+  const logoUrl = `${appUrl}/logo.png`
+  const remaining = invoiceTotal - totalPaid
+
+  const result = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: clientEmail,
+    subject: isPartial ? `Partial payment received — ${documentNumber}` : `Payment confirmed — ${documentNumber}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="text-align: center; padding: 30px 20px; background: linear-gradient(135deg, ${isPartial ? '#f59e0b 0%, #d97706' : '#10b981 0%, #059669'} 100%);">
+          <img src="${logoUrl}" alt="Nvoyce" style="max-width: 140px; height: auto; opacity: 0.9;" />
+        </div>
+        <div style="padding: 40px 30px; text-align: center;">
+          <p style="margin: 0 0 12px 0; font-size: 40px;">${isPartial ? '🧾' : '✅'}</p>
+          <h1 style="margin: 0 0 10px 0; font-size: 22px; font-weight: bold; color: #1f2937;">
+            ${isPartial ? 'Partial Payment Received' : 'Payment Received'}
+          </h1>
+          <p style="margin: 0 0 30px 0; font-size: 15px; color: #6b7280;">
+            Hi ${clientName}, your payment has been confirmed.
+          </p>
+
+          <div style="background-color: ${isPartial ? '#fffbeb' : '#f0fdf4'}; border: 1px solid ${isPartial ? '#fde68a' : '#bbf7d0'}; border-radius: 10px; padding: 24px; margin: 0 0 ${isPartial ? '16px' : '30px'} 0; text-align: left;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 6px 0; font-size: 13px; color: #6b7280;">Invoice</td>
+                <td style="padding: 6px 0; font-size: 13px; color: #1f2937; font-weight: bold; text-align: right;">${documentNumber}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 13px; color: #6b7280;">Paid to</td>
+                <td style="padding: 6px 0; font-size: 13px; color: #1f2937; font-weight: bold; text-align: right;">${freelancerName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 13px; color: #6b7280;">This payment</td>
+                <td style="padding: 6px 0; font-size: 15px; color: ${isPartial ? '#d97706' : '#059669'}; font-weight: bold; text-align: right;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 13px; color: #6b7280;">Total paid so far</td>
+                <td style="padding: 6px 0; font-size: 13px; color: #1f2937; font-weight: bold; text-align: right;">$${totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              </tr>
+              <tr style="border-top: 1px solid ${isPartial ? '#fde68a' : '#bbf7d0'};">
+                <td style="padding: 10px 0 4px; font-size: 13px; color: #6b7280;">Invoice total</td>
+                <td style="padding: 10px 0 4px; font-size: 13px; color: #1f2937; text-align: right;">$${invoiceTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              </tr>
+            </table>
+          </div>
+
+          ${isPartial ? `
+          <div style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 14px 20px; margin: 0 0 30px 0; text-align: left;">
+            <p style="margin: 0; font-size: 13px; color: #9a3412;">
+              <strong>Remaining balance:</strong> $${remaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} — please complete payment at your earliest convenience.
+            </p>
+          </div>` : ''}
+
+          <p style="margin: 0; font-size: 13px; color: #9ca3af;">Keep this email as your payment receipt. Questions? Reply directly to this email.</p>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+          <p style="margin: 0; font-size: 11px; color: #d1d5db;">Powered by Nvoyce · nvoyce.ai</p>
+        </div>
+      </div>
+    `,
+  })
+
+  if (result.error) throw result.error
+  console.log(`Payment confirmation sent to client ${clientEmail}:`, result.data?.id)
+  return result
+}
+
+// Sent to the FREELANCER notifying them of any payment (partial or full)
+export async function sendPaymentReceivedEmail({
+  freelancerEmail,
+  freelancerName,
+  clientName,
+  amount,
+  totalPaid,
+  invoiceTotal,
+  documentNumber,
+  isPartial = false,
+  dashboardLink,
+}: {
+  freelancerEmail: string
+  freelancerName: string
+  clientName: string
+  amount: number
+  totalPaid: number
+  invoiceTotal: number
+  documentNumber: string
+  isPartial?: boolean
+  dashboardLink: string
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.nvoyce.ai'
+  const logoUrl = `${appUrl}/logo.png`
+  const remaining = invoiceTotal - totalPaid
+
+  const result = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: freelancerEmail,
+    subject: isPartial
+      ? `💛 Partial payment — $${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${clientName}`
+      : `💰 You got paid — $${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${clientName}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="text-align: center; padding: 30px 20px; background-color: #0d1b2a;">
+          <img src="${logoUrl}" alt="Nvoyce" style="max-width: 140px; height: auto;" />
+        </div>
+        <div style="padding: 40px 30px; text-align: center;">
+          <p style="margin: 0 0 8px 0; font-size: 40px;">${isPartial ? '💛' : '💰'}</p>
+          <h1 style="margin: 0 0 10px 0; font-size: 24px; font-weight: bold; color: #1f2937;">
+            ${isPartial ? `Partial payment from ${clientName}` : `You got paid, ${freelancerName}!`}
+          </h1>
+          <p style="margin: 0 0 30px 0; font-size: 15px; color: #6b7280;">
+            <strong>${clientName}</strong> paid <strong>$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> toward invoice <strong>${documentNumber}</strong>.
+          </p>
+
+          <div style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 24px; margin: 0 0 16px 0; text-align: left;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 6px 0; font-size: 13px; color: #9a3412;">This payment</td>
+                <td style="padding: 6px 0; font-size: 18px; color: #f97316; font-weight: bold; text-align: right;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 13px; color: #9a3412;">Total paid so far</td>
+                <td style="padding: 6px 0; font-size: 13px; color: #1f2937; font-weight: bold; text-align: right;">$${totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              </tr>
+              <tr style="border-top: 1px solid #fed7aa;">
+                <td style="padding: 10px 0 4px; font-size: 13px; color: #9a3412;">Invoice total</td>
+                <td style="padding: 10px 0 4px; font-size: 13px; color: #1f2937; text-align: right;">$${invoiceTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              </tr>
+            </table>
+          </div>
+
+          ${isPartial ? `
+          <div style="background-color: #fefce8; border: 1px solid #fde047; border-radius: 8px; padding: 14px 20px; margin: 0 0 30px 0; text-align: left;">
+            <p style="margin: 0; font-size: 13px; color: #713f12;">
+              <strong>$${remaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} still outstanding</strong> — Payme will flag this if it goes overdue.
+            </p>
+          </div>` : ''}
+
+          <a href="${dashboardLink}" style="display: inline-block; padding: 14px 40px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; margin: 0 0 30px 0;">View in Dashboard →</a>
+
+          <p style="margin: 0; font-size: 13px; color: #9ca3af;">
+            ${isPartial ? `Invoice ${documentNumber} is now marked as Partially Paid.` : `Invoice ${documentNumber} has been automatically marked as Fully Paid.`}
+          </p>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+          <p style="margin: 0; font-size: 11px; color: #d1d5db;">© 2026 Nvoyce · We do the hard stuff. You get paid.</p>
+        </div>
+      </div>
+    `,
+  })
+
+  if (result.error) throw result.error
+  console.log(`Payment received notification sent to ${freelancerEmail}:`, result.data?.id)
+  return result
+}
+}

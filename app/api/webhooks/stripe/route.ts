@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { clerkClient } from '@clerk/nextjs/server'
-import { sendUpgradeConfirmationEmail } from '@/lib/email'
+import { sendUpgradeConfirmationEmail, sendPaymentConfirmationEmail, sendPaymentReceivedEmail } from '@/lib/email'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       // Fetch current document to compute new totals
       const { data: doc, error: fetchError } = await supabase
         .from('documents')
-        .select('price, amount_paid, status')
+        .select('price, amount_paid, status, client_email, client_name, business_name, document_number, user_id')
         .eq('id', documentId)
         .single()
 
@@ -60,6 +60,43 @@ export async function POST(req: NextRequest) {
           .eq('id', documentId)
 
         console.log(`Document ${documentId}: ${doc.status} → ${newStatus} ($${totalPaid} of $${doc.price})`)
+
+        // Send payment emails on ANY payment — partial or full
+        try {
+          // 1. Notify the client — payment receipt (always)
+          if (doc.client_email) {
+            await sendPaymentConfirmationEmail({
+              clientEmail: doc.client_email,
+              clientName: doc.client_name || 'there',
+              freelancerName: doc.business_name || 'your provider',
+              amount: amountPaidNow,
+              totalPaid,
+              invoiceTotal: doc.price,
+              documentNumber: doc.document_number || documentId,
+              isPartial: newStatus === 'partially_paid',
+            })
+          }
+
+          // 2. Notify the freelancer — payment received (always)
+          const clerk = await clerkClient()
+          const user = await clerk.users.getUser(doc.user_id)
+          const primary = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)
+          if (primary?.emailAddress) {
+            await sendPaymentReceivedEmail({
+              freelancerEmail: primary.emailAddress,
+              freelancerName: user.firstName || 'there',
+              clientName: doc.client_name || 'Your client',
+              amount: amountPaidNow,
+              totalPaid,
+              invoiceTotal: doc.price,
+              documentNumber: doc.document_number || documentId,
+              isPartial: newStatus === 'partially_paid',
+              dashboardLink: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${documentId}`,
+            })
+          }
+        } catch (emailErr) {
+          console.error('Payment email error (non-fatal):', emailErr)
+        }
       }
     }
 

@@ -815,7 +815,9 @@ function DashboardContent() {
           )}
           {/* Mobile top bar — only visible on small screens */}
           <div className="lg:hidden bg-purple-50 border-b border-purple-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-            <img src="/logo-icon.png" alt="Nvoyce" className="w-8 h-8 object-contain" />
+            <Link href="/dashboard" className="font-display font-bold text-xl text-[#0d1b2a] tracking-tight hover:opacity-80 transition-opacity">
+              Nvoyce
+            </Link>
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
               className="p-2 rounded-lg text-gray-600 hover:bg-purple-100 transition"

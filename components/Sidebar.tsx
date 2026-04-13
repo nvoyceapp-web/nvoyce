@@ -14,7 +14,7 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { key: 'dashboard', icon: '🏠', label: 'Dashboard', href: '/dashboard' },
+  { key: 'dashboard', icon: '📊', label: 'Dashboard', href: '/dashboard' },
   { key: 'create',    icon: '✨', label: 'Create',    href: null },
   { key: 'faq',       icon: '❓', label: 'FAQ',       href: '/dashboard/faq' },
   { key: 'settings',  icon: '⚙️', label: 'Settings',  href: '/dashboard/settings' },

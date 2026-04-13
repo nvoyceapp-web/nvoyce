@@ -20,12 +20,12 @@ export default function TopBar({ onHamburgerClick }: TopBarProps) {
           <line x1="3" y1="18" x2="21" y2="18" />
         </svg>
       </button>
-      <Link
-        href="/dashboard"
-        aria-label="Go to dashboard"
-        className="text-[#0d1b2a] font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
-      >
-        Nvoyce
+      <Link href="/dashboard" aria-label="Go to dashboard" className="hover:opacity-80 transition-opacity">
+        <img
+          src="/logo-wordmark.png"
+          alt="Nvoyce"
+          className="h-8 w-auto object-contain"
+        />
       </Link>
     </header>
   )

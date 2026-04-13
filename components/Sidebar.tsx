@@ -49,12 +49,17 @@ export default function Sidebar({ activePage }: SidebarProps) {
           </svg>
         </button>
 
-        {/* Wordmark — fades in when expanded */}
-        <div className={`transition-all duration-150 overflow-hidden ${isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>
+        {/* N icon when collapsed, full wordmark when expanded */}
+        <div className="relative h-7 flex items-center">
+          <img
+            src="/logo-icon.png"
+            alt="Nvoyce"
+            className={`h-7 w-auto object-contain absolute transition-all duration-150 ${isExpanded ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}
+          />
           <img
             src="/logo-wordmark.png"
             alt="Nvoyce"
-            className="h-7 w-auto object-contain"
+            className={`h-7 w-auto object-contain transition-all duration-150 ${isExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}
           />
         </div>
       </div>

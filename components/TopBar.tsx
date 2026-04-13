@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 interface TopBarProps {
   onHamburgerClick?: () => void
 }
@@ -18,7 +20,13 @@ export default function TopBar({ onHamburgerClick }: TopBarProps) {
           <line x1="3" y1="18" x2="21" y2="18" />
         </svg>
       </button>
-      <img src="/logo-wordmark.png" alt="Nvoyce" className="h-7 w-auto object-contain" />
+      <Link href="/dashboard" aria-label="Go to dashboard">
+        <img
+          src="/logo-wordmark.png"
+          alt="Nvoyce"
+          className="h-7 w-auto object-contain hover:opacity-80 transition-opacity cursor-pointer"
+        />
+      </Link>
     </header>
   )
 }

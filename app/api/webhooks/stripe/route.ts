@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import { clerkClient } from '@clerk/nextjs/server'
+import { sendUpgradeConfirmationEmail } from '@/lib/email'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -64,6 +66,8 @@ export async function POST(req: NextRequest) {
     // Check if this is a subscription upgrade (has userId in metadata)
     const userId = session.metadata?.userId
     if (userId && session.subscription) {
+      const plan = (session.metadata?.plan as 'pro' | 'business') || 'pro'
+
       await supabase
         .from('subscriptions')
         .upsert({
@@ -71,10 +75,26 @@ export async function POST(req: NextRequest) {
           stripe_subscription_id: session.subscription as string,
           stripe_customer_id: session.customer as string,
           status: 'active',
-          plan: 'pro',
+          plan,
         })
 
-      console.log(`User ${userId} upgraded to Pro`)
+      console.log(`User ${userId} upgraded to ${plan}`)
+
+      // Send upgrade confirmation email
+      try {
+        const clerk = await clerkClient()
+        const user = await clerk.users.getUser(userId)
+        const primary = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)
+        if (primary?.emailAddress) {
+          await sendUpgradeConfirmationEmail({
+            userEmail: primary.emailAddress,
+            userName: user.firstName || 'there',
+            plan,
+          })
+        }
+      } catch (err) {
+        console.error('Failed to send upgrade confirmation email:', err)
+      }
     }
   }
 

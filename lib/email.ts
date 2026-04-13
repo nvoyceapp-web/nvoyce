@@ -149,45 +149,55 @@ export async function sendWelcomeEmail({
     const result = await resend.emails.send({
       from: FROM_EMAIL,
       to: userEmail,
-      subject: 'Welcome to Nvoyce! 🎉',
+      subject: 'Welcome to Nvoyce — your 7-day Pro trial starts now',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-          <div style="text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);">
+          <div style="text-align: center; padding: 30px 20px; background-color: #0d1b2a;">
             <img src="${logoUrl}" alt="Nvoyce" style="max-width: 160px; height: auto;" />
-            <p style="margin: 12px 0 0 0; color: #ffffff; font-size: 13px; font-weight: 500;">We do the hard stuff. You get paid.</p>
+            <p style="margin: 12px 0 0 0; color: #9ca3af; font-size: 13px;">We do the hard stuff. You get paid.</p>
           </div>
+
           <div style="padding: 30px 20px;">
-            <p style="margin: 0 0 10px 0; font-size: 16px; color: #1f2937; font-weight: bold;">Welcome to Nvoyce, ${userName}! 🎉</p>
-            <p style="margin: 0 0 30px 0; font-size: 14px; color: #374151; line-height: 1.6;">You're all set. Start creating professional invoices and proposals in seconds.</p>
-            <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 0 0 30px 0;">
-              <h3 style="margin: 0 0 15px 0; font-size: 14px; font-weight: bold; color: #1f2937;">Here's what you can do:</h3>
-              <ul style="margin: 0; padding-left: 20px; color: #374151; font-size: 14px; line-height: 2;">
-                <li>✨ Generate professional invoices with AI (30 seconds)</li>
-                <li>💼 Create proposals and track acceptance</li>
-                <li>💰 Send invoices with built-in payment links</li>
-                <li>📊 Track payment status and get paid faster</li>
-                <li>🤖 Smart recommendations on overdue invoices</li>
+            <p style="margin: 0 0 8px 0; font-size: 16px; color: #1f2937; font-weight: bold;">Welcome, ${userName}!</p>
+            <p style="margin: 0 0 24px 0; font-size: 14px; color: #374151; line-height: 1.6;">
+              No one started freelancing to chase invoices. We built Nvoyce so you don't have to.
+            </p>
+
+            <!-- Trial banner -->
+            <div style="background-color: #0d1b2a; border-radius: 10px; padding: 20px 24px; margin: 0 0 24px 0; text-align: center;">
+              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: bold; color: #f97316; text-transform: uppercase; letter-spacing: 1px;">Your Pro Trial</p>
+              <p style="margin: 0 0 8px 0; font-size: 22px; font-weight: bold; color: #ffffff;">7 days of full Pro access</p>
+              <p style="margin: 0; font-size: 13px; color: #9ca3af;">No credit card needed. Ends in 7 days.</p>
+            </div>
+
+            <!-- What's included -->
+            <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin: 0 0 24px 0;">
+              <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: bold; color: #1f2937;">Everything included in your trial:</p>
+              <ul style="margin: 0; padding-left: 18px; color: #374151; font-size: 13px; line-height: 2.2;">
+                <li>⚡ AI invoices & proposals in 30 seconds</li>
+                <li>📬 Invoice tracking — sent, viewed, paid</li>
+                <li>💸 Built-in Stripe payment links</li>
+                <li>🔁 Automated follow-up email sequences</li>
+                <li>🤖 Payme — smart assistant for overdue invoices</li>
               </ul>
             </div>
-            <div style="text-align: center; margin: 0 0 30px 0;">
-              <a href="${appUrl}/dashboard" style="display: inline-block; padding: 14px 32px; background-color: #f97316; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">Get Started → Create Your First Invoice</a>
+
+            <div style="text-align: center; margin: 0 0 24px 0;">
+              <a href="${appUrl}/dashboard" style="display: inline-block; padding: 14px 36px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+                Create Your First Invoice →
+              </a>
             </div>
-            <div style="background-color: #f3e8ff; padding: 20px; border-radius: 8px; margin: 0 0 30px 0; border-left: 4px solid #7c3aed;">
-              <h4 style="margin: 0 0 10px 0; font-size: 13px; font-weight: bold; color: #7c3aed;">What's Next?</h4>
-              <ol style="margin: 0; padding-left: 20px; color: #374151; font-size: 13px; line-height: 1.8;">
-                <li>Complete your business profile</li>
-                <li>Create your first invoice</li>
-                <li>Share it with a client and get paid</li>
-              </ol>
+
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
+              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold; color: #1f2937;">What happens after 7 days?</p>
+              <p style="margin: 0; font-size: 13px; color: #6b7280; line-height: 1.6;">
+                You'll move to the Free plan (3 docs/month). We'll remind you before your trial ends so you're never caught off guard. Upgrade to Pro anytime from your <a href="${appUrl}/dashboard/settings" style="color: #f97316; text-decoration: none;">settings</a>.
+              </p>
             </div>
-            <p style="margin: 0 0 30px 0; font-size: 13px; color: #6b7280;">
-              Questions? Reply to this email or visit our help center. We're here to help you get paid faster.
-            </p>
           </div>
+
           <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
-            <img src="${appUrl}/logo-icon.png" alt="Nvoyce" style="width: 28px; height: 28px; object-fit: contain; margin: 0 auto 10px; display: block; opacity: 0.7;" />
-            <p style="margin: 0; font-size: 12px; color: #9ca3af;">© 2026 Nvoyce. All rights reserved.</p>
-            <p style="margin: 8px 0 0 0; font-size: 11px; color: #d1d5db;">We do the hard stuff. You get paid.</p>
+            <p style="margin: 0; font-size: 11px; color: #9ca3af;">© 2026 Nvoyce · We do the hard stuff. You get paid.</p>
           </div>
         </div>
       `,
@@ -557,5 +567,82 @@ export async function sendTrialExpiredEmail({
 
   if (result.error) throw result.error
   console.log(`Trial expired email sent to ${userEmail}:`, result.data?.id)
+  return result
+}
+
+export async function sendUpgradeConfirmationEmail({
+  userEmail,
+  userName,
+  plan,
+}: {
+  userEmail: string
+  userName: string
+  plan: 'pro' | 'business'
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.nvoyce.ai'
+  const logoUrl = `${appUrl}/logo.png`
+  const planName = plan === 'pro' ? 'Pro' : 'Business'
+  const planPrice = plan === 'pro' ? '$19.99' : '$39.99'
+
+  const proFeatures = [
+    '⚡ Unlimited invoices & proposals',
+    '📬 Invoice tracking — sent, viewed, paid',
+    '💸 Built-in Stripe payment links',
+    '🔁 Automated follow-up email sequences',
+    '🤖 Payme smart assistant',
+  ]
+  const businessExtras = ['👥 Multiple team members', '🎨 Custom branding', '🚀 Priority support']
+  const features = plan === 'business' ? [...proFeatures, ...businessExtras] : proFeatures
+
+  const result = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: userEmail,
+    subject: `You're on Nvoyce ${planName} — welcome to unlimited`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="text-align: center; padding: 30px 20px; background-color: #0d1b2a;">
+          <img src="${logoUrl}" alt="Nvoyce" style="max-width: 160px; height: auto;" />
+          <p style="margin: 12px 0 0 0; color: #9ca3af; font-size: 13px;">We do the hard stuff. You get paid.</p>
+        </div>
+
+        <div style="padding: 30px 20px;">
+          <p style="margin: 0 0 8px 0; font-size: 16px; color: #1f2937; font-weight: bold;">You're on ${planName}, ${userName}.</p>
+          <p style="margin: 0 0 24px 0; font-size: 14px; color: #374151; line-height: 1.6;">
+            No more chasing. No more limits. Here's everything you now have access to.
+          </p>
+
+          <div style="background-color: #0d1b2a; border-radius: 10px; padding: 20px 24px; margin: 0 0 24px 0; text-align: center;">
+            <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: bold; color: #f97316; text-transform: uppercase; letter-spacing: 1px;">Active Plan</p>
+            <p style="margin: 0 0 4px 0; font-size: 26px; font-weight: bold; color: #ffffff;">Nvoyce ${planName}</p>
+            <p style="margin: 0; font-size: 13px; color: #9ca3af;">${planPrice}/month · Cancel anytime</p>
+          </div>
+
+          <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin: 0 0 24px 0;">
+            <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: bold; color: #1f2937;">What's included:</p>
+            <ul style="margin: 0; padding-left: 18px; color: #374151; font-size: 13px; line-height: 2.2;">
+              ${features.map(f => `<li>${f}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div style="text-align: center; margin: 0 0 24px 0;">
+            <a href="${appUrl}/dashboard" style="display: inline-block; padding: 14px 36px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+              Go to Dashboard →
+            </a>
+          </div>
+
+          <p style="margin: 0; font-size: 12px; color: #9ca3af; text-align: center;">
+            Manage your plan anytime from <a href="${appUrl}/dashboard/settings" style="color: #f97316; text-decoration: none;">Settings</a>.
+          </p>
+        </div>
+
+        <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+          <p style="margin: 0; font-size: 11px; color: #9ca3af;">© 2026 Nvoyce · Stop chasing. Start getting paid.</p>
+        </div>
+      </div>
+    `,
+  })
+
+  if (result.error) throw result.error
+  console.log(`Upgrade confirmation sent to ${userEmail}:`, result.data?.id)
   return result
 }

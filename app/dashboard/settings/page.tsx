@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Sidebar, { SidebarHandle } from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
+import MobileNav from '@/components/MobileNav'
 import { useState, useEffect, useRef } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useAuth } from '@clerk/nextjs'
@@ -252,12 +253,15 @@ export default function SettingsPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      <div className="hidden lg:block">
+        <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      </div>
       <div className="flex flex-1 overflow-hidden">
         <Sidebar ref={sidebarRef} activePage="settings" />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
+          <MobileNav activePage="settings" />
           <div className="max-w-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="mb-12">

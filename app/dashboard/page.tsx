@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { getTopPaymeActions, PaymeAction } from '@/lib/payme-scoring'
 import Sidebar, { SidebarHandle } from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
+import MobileNav from '@/components/MobileNav'
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart } from 'recharts'
 
 interface Document {
@@ -78,7 +79,7 @@ function DashboardContent() {
   const [showArchived, setShowArchived] = useState(false)
   const [archiving, setArchiving] = useState(false)
   const [bulkActionNotice, setBulkActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null)
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
+
   const sidebarRef = useRef<SidebarHandle>(null)
 
   // Get date range for selected time period
@@ -813,62 +814,7 @@ function DashboardContent() {
               </a>
             </div>
           )}
-          {/* Mobile top bar — only visible on small screens */}
-          <div className="lg:hidden bg-purple-50 border-b border-purple-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-            <Link href="/dashboard" className="font-display font-bold text-xl text-[#0d1b2a] tracking-tight hover:opacity-80 transition-opacity">
-              Nvoyce
-            </Link>
-            <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 rounded-lg text-gray-600 hover:bg-purple-100 transition"
-              aria-label="Toggle menu"
-            >
-              {showMobileMenu ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
-            </button>
-          </div>
-          {/* Mobile menu dropdown */}
-          {showMobileMenu && (
-            <div className="lg:hidden bg-purple-50 border-b border-purple-200 px-4 py-3 space-y-1 z-30">
-              <button
-                onClick={() => { setShowCreateDropdown(!showCreateDropdown) }}
-                className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition font-medium"
-              >
-                Create
-              </button>
-              {showCreateDropdown && (
-                <div className="ml-4 space-y-1 border-l-2 border-purple-200 pl-3">
-                  <Link href="/dashboard/new?type=invoice" onClick={() => { setShowMobileMenu(false); setShowCreateDropdown(false) }}
-                    className="block px-2 py-1.5 text-sm text-gray-600 hover:text-gray-900">
-                    Invoice
-                  </Link>
-                  <Link href="/dashboard/new?type=proposal" onClick={() => { setShowMobileMenu(false); setShowCreateDropdown(false) }}
-                    className="block px-2 py-1.5 text-sm text-gray-600 hover:text-gray-900">
-                    Proposal
-                  </Link>
-                </div>
-              )}
-              <Link href="/dashboard/faq" onClick={() => setShowMobileMenu(false)}
-                className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition">
-                FAQ
-              </Link>
-              <Link href="/dashboard/settings" onClick={() => setShowMobileMenu(false)}
-                className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition">
-                Settings
-              </Link>
-              <Link href="/about" onClick={() => setShowMobileMenu(false)}
-                className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition">
-                About Nvoyce
-              </Link>
-            </div>
-          )}
+          <MobileNav activePage="dashboard" />
           <div className="px-4 lg:px-10 py-8">
             <div className="flex items-center justify-between mb-8">
               <h1 className="text-2xl font-bold font-display text-gray-900">Dashboard</h1>

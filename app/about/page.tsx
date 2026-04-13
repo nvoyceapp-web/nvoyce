@@ -3,18 +3,22 @@
 import Link from 'next/link'
 import Sidebar, { SidebarHandle } from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
+import MobileNav from '@/components/MobileNav'
 import { useRef } from 'react'
 
 export default function AboutPage() {
   const sidebarRef = useRef<SidebarHandle>(null)
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-purple-50">
-      <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      <div className="hidden lg:block">
+        <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      </div>
       <div className="flex flex-1 overflow-hidden">
         <Sidebar ref={sidebarRef} activePage="about" />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
+          <MobileNav activePage="about" />
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         {/* Hero Section */}
         <div className="text-center mb-20">

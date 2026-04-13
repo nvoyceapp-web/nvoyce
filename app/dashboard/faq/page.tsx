@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useRef } from 'react'
 import Sidebar, { SidebarHandle } from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
+import MobileNav from '@/components/MobileNav'
 
 interface FAQ {
   id: string
@@ -176,12 +177,15 @@ export default function FAQPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      <div className="hidden lg:block">
+        <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      </div>
       <div className="flex flex-1 overflow-hidden">
         <Sidebar ref={sidebarRef} activePage="faq" />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
+          <MobileNav activePage="faq" />
           <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="mb-10">

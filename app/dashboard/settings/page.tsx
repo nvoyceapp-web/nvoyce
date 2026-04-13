@@ -140,6 +140,7 @@ export default function SettingsPage() {
   }
   // Subscription state
   const [currentPlan, setCurrentPlan] = useState<'free' | 'pro' | 'business'>('free')
+  const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro' | 'business'>('free')
   const [subStatus, setSubStatus] = useState<string>('active')
   const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
@@ -155,6 +156,7 @@ export default function SettingsPage() {
         .single()
       if (data) {
         setCurrentPlan(data.plan as 'free' | 'pro' | 'business')
+        setSelectedPlan(data.plan as 'free' | 'pro' | 'business')
         setSubStatus(data.status)
       }
     }
@@ -417,58 +419,63 @@ export default function SettingsPage() {
                 {(['free', 'pro', 'business'] as const).map((planKey) => {
                   const plan = PLANS[planKey]
                   const isCurrentPlan = currentPlan === planKey
+                  const isSelected = selectedPlan === planKey
                   const isPastDue = isCurrentPlan && subStatus === 'past_due'
 
                   return (
                     <div
                       key={planKey}
-                      className={`rounded-xl border-2 p-5 flex flex-col gap-3 transition ${
-                        isCurrentPlan
-                          ? 'border-[#0d1b2a] bg-[#0d1b2a] text-white'
-                          : 'border-gray-200 bg-white text-gray-900 hover:border-gray-300'
+                      onClick={() => setSelectedPlan(planKey)}
+                      className={`rounded-xl border-2 p-5 flex flex-col gap-3 transition cursor-pointer ${
+                        isSelected
+                          ? 'border-[#0d1b2a] bg-[#0d1b2a] text-white shadow-lg'
+                          : 'border-gray-200 bg-white text-gray-900 hover:border-gray-400'
                       }`}
                     >
                       <div>
-                        <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${isCurrentPlan ? 'text-orange-400' : 'text-gray-400'}`}>{plan.name}</p>
+                        <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${isSelected ? 'text-orange-400' : 'text-gray-400'}`}>
+                          {plan.name}{isCurrentPlan && !isSelected ? ' (current)' : ''}
+                        </p>
                         <p className="text-2xl font-bold font-display">
                           {plan.price === 0 ? 'Free' : `$${plan.price}`}
-                          {plan.price > 0 && <span className={`text-sm font-normal ml-1 ${isCurrentPlan ? 'text-gray-300' : 'text-gray-500'}`}>/mo</span>}
+                          {plan.price > 0 && <span className={`text-sm font-normal ml-1 ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>/mo</span>}
                         </p>
                       </div>
                       <ul className="space-y-1 flex-1">
                         {plan.features.map((f) => (
-                          <li key={f} className={`text-xs flex items-start gap-1.5 ${isCurrentPlan ? 'text-gray-300' : 'text-gray-600'}`}>
+                          <li key={f} className={`text-xs flex items-start gap-1.5 ${isSelected ? 'text-gray-300' : 'text-gray-600'}`}>
                             <span className="text-orange-400 mt-0.5">✓</span> {f}
                           </li>
                         ))}
                       </ul>
-                      {isCurrentPlan ? (
-                        <div className="mt-2">
-                          {planKey !== 'free' && (
-                            <button
-                              onClick={handleManageBilling}
-                              disabled={portalLoading}
-                              className="w-full text-xs text-center py-2 rounded-lg border border-white/30 text-white hover:bg-white/10 transition"
-                            >
-                              {portalLoading ? 'Loading...' : 'Manage Billing'}
-                            </button>
-                          )}
-                          {isPastDue && (
-                            <p className="text-xs text-orange-400 mt-2 text-center">⚠️ Payment past due</p>
-                          )}
-                          {!isPastDue && planKey === 'free' && (
-                            <p className="text-xs text-gray-400 text-center mt-1">3 docs/month</p>
-                          )}
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => planKey !== 'free' && handleUpgrade(planKey)}
-                          disabled={!!upgradingPlan || planKey === 'free'}
-                          className="mt-2 w-full py-2 rounded-lg text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white transition disabled:opacity-50"
-                        >
-                          {upgradingPlan === planKey ? 'Redirecting...' : `Upgrade to ${plan.name}`}
-                        </button>
-                      )}
+                      <div className="mt-2">
+                        {isCurrentPlan && planKey !== 'free' && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleManageBilling() }}
+                            disabled={portalLoading}
+                            className={`w-full text-xs text-center py-2 rounded-lg border transition ${isSelected ? 'border-white/30 text-white hover:bg-white/10' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                          >
+                            {portalLoading ? 'Loading...' : 'Manage Billing'}
+                          </button>
+                        )}
+                        {isPastDue && <p className="text-xs text-orange-400 mt-2 text-center">⚠️ Payment past due</p>}
+                        {isCurrentPlan && planKey === 'free' && (
+                          <p className={`text-xs text-center mt-1 ${isSelected ? 'text-gray-400' : 'text-gray-400'}`}>3 docs/month</p>
+                        )}
+                        {!isCurrentPlan && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); planKey !== 'free' && handleUpgrade(planKey) }}
+                            disabled={!!upgradingPlan || planKey === 'free'}
+                            className={`w-full py-2 rounded-lg text-xs font-semibold transition disabled:opacity-50 ${
+                              isSelected
+                                ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                                : 'bg-orange-500 hover:bg-orange-600 text-white'
+                            }`}
+                          >
+                            {upgradingPlan === planKey ? 'Redirecting...' : `Upgrade to ${plan.name}`}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )
                 })}

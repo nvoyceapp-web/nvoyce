@@ -1036,7 +1036,7 @@ function DashboardContent() {
             {stats.outstanding > 0 && (
               <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
                 <div className="flex items-start justify-between">
-                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex-1 mr-4">
                     <div className="text-sm text-gray-500 mb-1">You're owed</div>
                     <div className="text-4xl font-bold text-gray-900 mb-2">${stats.outstanding.toLocaleString()}</div>
                     <div className="text-sm text-gray-500">

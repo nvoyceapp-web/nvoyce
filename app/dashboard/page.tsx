@@ -65,7 +65,7 @@ function DashboardContent() {
   const [showPendingProposals, setShowPendingProposals] = useState(false)
   const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set())
   const [dismissedRecommendations, setDismissedRecommendations] = useState<Set<string>>(new Set())
-  const [expandPayme, setExpandPayme] = useState(true)
+  const [expandPayme, setExpandPayme] = useState(false)
   const [showCreateDropdown, setShowCreateDropdown] = useState(false)
   const createDropdownTimer = useRef<NodeJS.Timeout | null>(null)
   const [documentTab, setDocumentTab] = useState<'invoices' | 'proposals'>('invoices')

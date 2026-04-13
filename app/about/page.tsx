@@ -8,7 +8,7 @@ import { useRef } from 'react'
 export default function AboutPage() {
   const sidebarRef = useRef<SidebarHandle>(null)
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-purple-50">
+    <div className="h-screen flex flex-col bg-white">
       <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar ref={sidebarRef} activePage="about" />
@@ -40,21 +40,21 @@ export default function AboutPage() {
         <section className="mb-20">
           <h3 className="text-3xl font-bold text-gray-900 mb-12">Our Core Values</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg border border-purple-100 p-6">
+            <div className="bg-white rounded-lg border border-gray-100 p-6">
               <div className="text-4xl mb-4">⚡</div>
               <h4 className="text-lg font-semibold text-gray-900 mb-3">Speed</h4>
               <p className="text-gray-600">
                 Create an invoice in seconds, not hours. Get paid faster with automated reminders and intelligent prioritization.
               </p>
             </div>
-            <div className="bg-white rounded-lg border border-purple-100 p-6">
+            <div className="bg-white rounded-lg border border-gray-100 p-6">
               <div className="text-4xl mb-4">🎯</div>
               <h4 className="text-lg font-semibold text-gray-900 mb-3">Simplicity</h4>
               <p className="text-gray-600">
                 Intuitive tools that work the way you think. No complicated workflows or unnecessary features.
               </p>
             </div>
-            <div className="bg-white rounded-lg border border-purple-100 p-6">
+            <div className="bg-white rounded-lg border border-gray-100 p-6">
               <div className="text-4xl mb-4">💪</div>
               <h4 className="text-lg font-semibold text-gray-900 mb-3">Empowerment</h4>
               <p className="text-gray-600">
@@ -67,7 +67,7 @@ export default function AboutPage() {
         {/* Who We Serve */}
         <section className="mb-20">
           <h3 className="text-3xl font-bold text-gray-900 mb-8">Who We Serve</h3>
-          <div className="bg-purple-50 rounded-lg border border-purple-200 p-8">
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-8">
             <p className="text-lg text-gray-700 leading-relaxed">
               <strong>Freelancers & Gig Workers</strong> who manage their own invoices and need to track payment quickly. Whether you're a designer, writer, developer, consultant, or service provider—Nvoyce helps you get paid faster.
             </p>
@@ -80,7 +80,7 @@ export default function AboutPage() {
         {/* Brand Story — The Logo */}
         <section className="mb-20">
           <h3 className="text-3xl font-bold text-gray-900 mb-8">The Story Behind the Mark</h3>
-          <div className="bg-gradient-to-r from-purple-700 to-purple-600 rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
+          <div className="bg-gradient-to-r from-[#0d1b2a] to-[#1a2f45] rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
             <div className="flex-shrink-0">
               <img
                 src="/logo-icon.png"
@@ -89,13 +89,13 @@ export default function AboutPage() {
               />
             </div>
             <div className="text-white">
-              <p className="text-lg font-semibold text-purple-100 mb-3 tracking-wide uppercase text-sm">
+              <p className="text-sm font-semibold text-orange-400 mb-3 tracking-wide uppercase">
                 Hidden in plain sight
               </p>
               <p className="text-xl font-bold mb-4 leading-snug text-white">
-                The orange dots inside the N spell <span className="text-orange-300">"VOICE"</span> in Braille.
+                The orange dots inside the N spell <span className="text-orange-400">"VOICE"</span> in Braille.
               </p>
-              <p className="text-purple-100 leading-relaxed">
+              <p className="text-blue-200 leading-relaxed">
                 Nvoyce is a fusion of <em>invoice</em> and <em>voice</em> — because every invoice is a freelancer's voice: a declaration of their work, their worth, and their right to be paid. The Braille lettering is a nod to universal access, a reminder that financial tools should work for everyone, and a tiny secret for those who look closely.
               </p>
             </div>
@@ -138,19 +138,19 @@ export default function AboutPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-white rounded-lg border border-purple-200 p-12 text-center">
+        <section className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
           <h3 className="text-3xl font-bold text-gray-900 mb-4">Ready to get paid faster?</h3>
           <p className="text-lg text-gray-600 mb-8">Join freelancers who are already using Nvoyce to manage their business better.</p>
           <Link
             href="/dashboard"
-            className="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition text-lg font-semibold inline-block"
+            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition text-lg font-semibold inline-block"
           >
             Start Using Nvoyce →
           </Link>
         </section>
 
           {/* Footer */}
-          <div className="border-t border-purple-100 mt-20 py-8 text-center flex flex-col items-center gap-3">
+          <div className="border-t border-gray-100 mt-20 py-8 text-center flex flex-col items-center gap-3">
             <img src="/logo-icon.png" alt="Nvoyce" className="w-7 h-7 object-contain opacity-50" />
             <p className="text-gray-500 text-sm">© 2026 Nvoyce. Built for freelancers and gig workers.</p>
             <a

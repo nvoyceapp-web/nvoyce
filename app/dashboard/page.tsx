@@ -57,6 +57,7 @@ function DashboardContent() {
   const [filterClient, setFilterClient] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [datePreset, setDatePreset] = useState('all')
   const [sortBy, setSortBy] = useState<'client' | 'amount' | 'date' | 'status' | 'days'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [chartView, setChartView] = useState<'week' | 'month'>('week')
@@ -102,6 +103,28 @@ function DashboardContent() {
   }
 
   // Filter and sort documents
+  const applyDatePreset = (preset: string) => {
+    setDatePreset(preset)
+    const now = new Date()
+    const fmt = (d: Date) => d.toISOString().split('T')[0]
+    if (preset === 'today') {
+      setDateFrom(fmt(now)); setDateTo(fmt(now))
+    } else if (preset === 'this_week') {
+      const start = new Date(now); start.setDate(now.getDate() - now.getDay())
+      setDateFrom(fmt(start)); setDateTo(fmt(now))
+    } else if (preset === 'this_month') {
+      setDateFrom(fmt(new Date(now.getFullYear(), now.getMonth(), 1))); setDateTo(fmt(now))
+    } else if (preset === 'last_30') {
+      setDateFrom(fmt(new Date(now.getTime() - 30 * 864e5))); setDateTo(fmt(now))
+    } else if (preset === 'last_90') {
+      setDateFrom(fmt(new Date(now.getTime() - 90 * 864e5))); setDateTo(fmt(now))
+    } else if (preset === 'this_year') {
+      setDateFrom(fmt(new Date(now.getFullYear(), 0, 1))); setDateTo(fmt(now))
+    } else if (preset === 'all' || preset === 'custom') {
+      if (preset === 'all') { setDateFrom(''); setDateTo('') }
+    }
+  }
+
   const filteredDocuments = stats.documents
     .filter((doc) => {
       const q = searchQuery.toLowerCase()
@@ -1316,51 +1339,62 @@ function DashboardContent() {
                   </div>
 
                   {/* Filters */}
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <input
                       type="text"
                       placeholder="Search..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black flex-1 min-w-32"
                     />
                     <select
                       value={filterClient}
                       onChange={(e) => setFilterClient(e.target.value)}
-                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black flex-1 min-w-32 bg-white"
                     >
                       <option value="">All clients</option>
                       {uniqueClients.map((client) => (
-                        <option key={client} value={client}>
-                          {client}
-                        </option>
+                        <option key={client} value={client}>{client}</option>
                       ))}
                     </select>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs text-gray-400 font-medium px-1">From</label>
-                      <input
-                        type="date"
-                        value={dateFrom}
-                        onChange={(e) => setDateFrom(e.target.value)}
-                        className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs text-gray-400 font-medium px-1">To</label>
-                      <input
-                        type="date"
-                        value={dateTo}
-                        onChange={(e) => setDateTo(e.target.value)}
-                        className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
-                      />
-                    </div>
+                    <select
+                      value={datePreset}
+                      onChange={(e) => applyDatePreset(e.target.value)}
+                      className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black flex-1 min-w-36 bg-white"
+                    >
+                      <option value="all">All time</option>
+                      <option value="today">Today</option>
+                      <option value="this_week">This week</option>
+                      <option value="this_month">This month</option>
+                      <option value="last_30">Last 30 days</option>
+                      <option value="last_90">Last 90 days</option>
+                      <option value="this_year">This year</option>
+                      <option value="custom">Custom range</option>
+                    </select>
+                    {/* Custom range pickers — only visible when custom is selected */}
+                    {datePreset === 'custom' && (
+                      <>
+                        <input
+                          type="date"
+                          value={dateFrom}
+                          onChange={(e) => setDateFrom(e.target.value)}
+                          className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                        />
+                        <input
+                          type="date"
+                          value={dateTo}
+                          onChange={(e) => setDateTo(e.target.value)}
+                          className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                        />
+                      </>
+                    )}
                   </div>
 
                   {/* Clear filters */}
                   {(searchQuery || filterClient || dateFrom || dateTo) && (
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => { setSearchQuery(''); setFilterClient(''); setDateFrom(''); setDateTo('') }}
+                        onClick={() => { setSearchQuery(''); setFilterClient(''); setDateFrom(''); setDateTo(''); setDatePreset('all') }}
                         className="text-xs text-orange-600 hover:text-orange-700 font-semibold flex items-center gap-1"
                       >
                         ✕ Clear filters
@@ -1799,7 +1833,7 @@ function DashboardContent() {
                               <div className="text-gray-400 text-xs">Try adjusting your search or date range</div>
                               {(searchQuery || filterClient || dateFrom || dateTo) && (
                                 <button
-                                  onClick={() => { setSearchQuery(''); setFilterClient(''); setDateFrom(''); setDateTo('') }}
+                                  onClick={() => { setSearchQuery(''); setFilterClient(''); setDateFrom(''); setDateTo(''); setDatePreset('all') }}
                                   className="mt-1 text-xs text-orange-600 hover:text-orange-700 font-semibold border border-orange-200 px-3 py-1.5 rounded-lg hover:bg-orange-50 transition"
                                 >
                                   ✕ Clear filters

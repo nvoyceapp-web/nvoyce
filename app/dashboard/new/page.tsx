@@ -145,6 +145,12 @@ function NewDocumentContent() {
         body: JSON.stringify(form),
       })
       const data = await res.json()
+
+      if (!res.ok) {
+        setValidationErrors([data.error || 'Failed to generate document. Please try again.'])
+        return
+      }
+
       if (data.id) {
         // Redirect to draft detail page so user can review before sending to client
         router.push(`/dashboard/documents/${data.id}`)

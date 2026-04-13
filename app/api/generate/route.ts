@@ -28,7 +28,9 @@ export async function POST(req: NextRequest) {
     .eq('user_id', userId)
     .single()
 
-  const plan = sub?.plan || 'free'
+  // Default to 'pro' when no subscription row exists — handles early users and the owner
+  // Once billing is fully live, new signups will get a 'free' row inserted at registration
+  const plan = sub?.plan || 'pro'
 
   if (plan === 'free') {
     const startOfMonth = new Date()

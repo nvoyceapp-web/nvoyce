@@ -10,9 +10,9 @@ const supabase = createClient(
 )
 
 // This endpoint listens for events from Stripe and updates invoice status
-// Register this URL in: Stripe Dashboard → Webhooks → Add endpoint
-// URL: https://nvoyce.ai/api/webhooks/stripe
-// Events: checkout.session.completed, customer.subscription.deleted
+// Registered at: https://app.nvoyce.ai/api/webhooks/stripe
+// Events: checkout.session.completed, customer.subscription.deleted,
+//         customer.subscription.updated, invoice.payment_failed
 export async function POST(req: NextRequest) {
   const body = await req.text() // Must use raw body for signature verification
   const sig = req.headers.get('stripe-signature')!
@@ -87,6 +87,35 @@ export async function POST(req: NextRequest) {
       .eq('stripe_subscription_id', subscription.id)
 
     console.log(`Subscription ${subscription.id} cancelled`)
+  }
+
+  // Handle subscription updated (plan change / renewal)
+  if (event.type === 'customer.subscription.updated') {
+    const subscription = event.data.object as Stripe.Subscription
+    const plan = subscription.items.data[0]?.price?.nickname?.toLowerCase() || 'pro'
+    await supabase
+      .from('subscriptions')
+      .update({
+        status: subscription.status,
+        plan,
+      })
+      .eq('stripe_subscription_id', subscription.id)
+
+    console.log(`Subscription ${subscription.id} updated → ${subscription.status} (${plan})`)
+  }
+
+  // Handle subscription payment failure
+  if (event.type === 'invoice.payment_failed') {
+    const invoice = event.data.object as Stripe.Invoice
+    const subscriptionId = invoice.subscription as string
+    if (subscriptionId) {
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'past_due' })
+        .eq('stripe_subscription_id', subscriptionId)
+
+      console.log(`Subscription ${subscriptionId} payment failed → past_due`)
+    }
   }
 
   return NextResponse.json({ received: true })

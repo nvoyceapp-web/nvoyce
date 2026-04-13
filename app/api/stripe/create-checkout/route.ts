@@ -16,17 +16,28 @@ export async function POST(req: NextRequest) {
       : null
 
   if (!priceId) {
-    return NextResponse.json({ error: 'Invalid plan or price not configured' }, { status: 400 })
+    console.error(`Missing price ID for plan "${plan}". STRIPE_PRO_PRICE_ID=${process.env.STRIPE_PRO_PRICE_ID}, STRIPE_BUSINESS_PRICE_ID=${process.env.STRIPE_BUSINESS_PRICE_ID}`)
+    return NextResponse.json({ error: `Price not configured for plan: ${plan}` }, { status: 400 })
   }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'subscription',
-    payment_method_types: ['card'],
-    line_items: [{ price: priceId, quantity: 1 }],
-    metadata: { userId },
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?upgraded=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?cancelled=true`,
-  })
+  if (!process.env.NEXT_PUBLIC_APP_URL) {
+    console.error('NEXT_PUBLIC_APP_URL is not set')
+    return NextResponse.json({ error: 'App URL not configured' }, { status: 500 })
+  }
 
-  return NextResponse.json({ url: session.url })
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      line_items: [{ price: priceId, quantity: 1 }],
+      metadata: { userId },
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?upgraded=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?cancelled=true`,
+    })
+
+    return NextResponse.json({ url: session.url })
+  } catch (err: any) {
+    console.error('Stripe checkout error:', err?.message, err?.type, err?.code)
+    return NextResponse.json({ error: err?.message || 'Stripe error' }, { status: 500 })
+  }
 }

@@ -184,8 +184,8 @@ export default function SettingsPage() {
       const { url, error } = await res.json()
       if (error) throw new Error(error)
       window.location.href = url
-    } catch (err) {
-      setSubMessage({ type: 'error', text: 'Failed to start checkout. Try again.' })
+    } catch (err: any) {
+      setSubMessage({ type: 'error', text: err?.message || 'Failed to start checkout. Try again.' })
       setUpgradingPlan(null)
     }
   }

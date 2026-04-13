@@ -916,13 +916,13 @@ function DashboardContent() {
 
             {/* Urgency Summary Card - Navy Blue with Orange Accents — always first */}
             {stats.outstanding > 0 && (
-              <div className="bg-gradient-to-r from-blue-950 to-blue-900 text-white rounded-xl p-6 mb-6 border border-blue-800">
+              <div className="bg-gray-100 text-gray-900 rounded-xl p-6 mb-6 border border-gray-200">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-sm text-blue-200 mb-1">You're owed</div>
+                    <div className="text-sm text-gray-500 mb-1">You're owed</div>
                     <div className="text-4xl font-bold mb-2">${stats.outstanding.toLocaleString()}</div>
-                    <div className="text-sm text-blue-300">
-                      {stats.overdue > 0 && <span className="text-orange-400 font-semibold">🚨 {stats.overdue} overdue • </span>}
+                    <div className="text-sm text-gray-500">
+                      {stats.overdue > 0 && <span className="text-orange-500 font-semibold">🚨 {stats.overdue} overdue • </span>}
                       {stats.documents.filter((d) => d.status !== 'fully_paid' && d.doc_type === 'invoice').length} invoices pending
                     </div>
                   </div>
@@ -935,13 +935,13 @@ function DashboardContent() {
                       })
                       const daysOld = Math.floor((new Date().getTime() - new Date(oldest.created_at).getTime()) / (1000 * 60 * 60 * 24))
                       return (
-                        <div className="bg-white/10 rounded-lg p-3 border border-orange-500/30">
-                          <div className="text-sm text-blue-200 mb-1 flex items-center gap-1">
+                        <div className="bg-white rounded-lg p-3 border border-gray-200">
+                          <div className="text-sm text-gray-400 mb-1 flex items-center gap-1">
                             ⏰ Oldest unpaid
                           </div>
-                          <div className="text-3xl font-bold text-orange-300">{daysOld} days</div>
-                          <div className="text-xs text-blue-200 mt-2 font-medium">{oldest.client_name}</div>
-                          <div className="text-xs text-blue-300 mt-1">${oldest.price.toLocaleString()} outstanding</div>
+                          <div className="text-3xl font-bold text-orange-500">{daysOld} days</div>
+                          <div className="text-xs text-gray-600 mt-2 font-medium">{oldest.client_name}</div>
+                          <div className="text-xs text-gray-400 mt-1">${oldest.price.toLocaleString()} outstanding</div>
                         </div>
                       )
                     })()}

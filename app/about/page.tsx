@@ -43,21 +43,35 @@ export default function AboutPage() {
           <h3 className="text-3xl font-bold font-display text-gray-900 mb-12">Our Core Values</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg border border-gray-100 p-6">
-              <div className="text-4xl mb-4">⚡</div>
+              <div className="mb-4">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+              </div>
               <h4 className="text-lg font-semibold text-gray-900 mb-3">Speed</h4>
               <p className="text-gray-600">
                 Create an invoice in seconds, not hours. Get paid faster with automated reminders and intelligent prioritization.
               </p>
             </div>
             <div className="bg-white rounded-lg border border-gray-100 p-6">
-              <div className="text-4xl mb-4">🎯</div>
+              <div className="mb-4">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <circle cx="12" cy="12" r="6"/>
+                  <circle cx="12" cy="12" r="2"/>
+                </svg>
+              </div>
               <h4 className="text-lg font-semibold text-gray-900 mb-3">Simplicity</h4>
               <p className="text-gray-600">
                 Intuitive tools that work the way you think. No complicated workflows or unnecessary features.
               </p>
             </div>
             <div className="bg-white rounded-lg border border-gray-100 p-6">
-              <div className="text-4xl mb-4">💪🏽</div>
+              <div className="mb-4">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
               <h4 className="text-lg font-semibold text-gray-900 mb-3">Empowerment</h4>
               <p className="text-gray-600">
                 We're built for freelancers, by people who understand your challenges. Your success is our success.

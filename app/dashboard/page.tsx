@@ -835,31 +835,31 @@ function DashboardContent() {
                 onClick={() => { setShowCreateDropdown(!showCreateDropdown) }}
                 className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition font-medium"
               >
-                ✨ Create
+                Create
               </button>
               {showCreateDropdown && (
                 <div className="ml-4 space-y-1 border-l-2 border-purple-200 pl-3">
                   <Link href="/dashboard/new?type=invoice" onClick={() => { setShowMobileMenu(false); setShowCreateDropdown(false) }}
                     className="block px-2 py-1.5 text-sm text-gray-600 hover:text-gray-900">
-                    📄 Invoice
+                    Invoice
                   </Link>
                   <Link href="/dashboard/new?type=proposal" onClick={() => { setShowMobileMenu(false); setShowCreateDropdown(false) }}
                     className="block px-2 py-1.5 text-sm text-gray-600 hover:text-gray-900">
-                    💼 Proposal
+                    Proposal
                   </Link>
                 </div>
               )}
               <Link href="/dashboard/faq" onClick={() => setShowMobileMenu(false)}
                 className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition">
-                ❓ FAQ
+                FAQ
               </Link>
               <Link href="/dashboard/settings" onClick={() => setShowMobileMenu(false)}
                 className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition">
-                ⚙️ Settings
+                Settings
               </Link>
               <Link href="/about" onClick={() => setShowMobileMenu(false)}
                 className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-purple-100 transition">
-                ℹ️ About Nvoyce
+                About Nvoyce
               </Link>
             </div>
           )}
@@ -884,14 +884,30 @@ function DashboardContent() {
                       onClick={() => setShowCreateDropdown(false)}
                       className="block px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 first:rounded-t-lg border-b border-gray-100"
                     >
-                      📄 New Invoice
+                      <span className="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                          <polyline points="14 2 14 8 20 8"/>
+                          <line x1="16" y1="13" x2="8" y2="13"/>
+                          <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                        New Invoice
+                      </span>
                     </Link>
                     <Link
                       href="/dashboard/new?type=proposal"
                       onClick={() => setShowCreateDropdown(false)}
                       className="block px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 last:rounded-b-lg"
                     >
-                      💼 New Proposal
+                      <span className="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                          <line x1="12" y1="12" x2="12" y2="16"/>
+                          <line x1="10" y1="14" x2="14" y2="14"/>
+                        </svg>
+                        New Proposal
+                      </span>
                     </Link>
                   </div>
                 )}

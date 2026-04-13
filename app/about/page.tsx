@@ -23,7 +23,7 @@ export default function AboutPage() {
             <span className="bg-gradient-to-r from-[#3b2a4a] to-[#d4622a] bg-clip-text text-transparent">You get paid</span><span className="text-orange-500">.</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Nvoyce is built for freelancers and gig workers who deserve better tools to manage their business and get paid faster.
+            Send a proposal in 30 seconds. Get paid without the back-and-forth.
           </p>
         </div>
 

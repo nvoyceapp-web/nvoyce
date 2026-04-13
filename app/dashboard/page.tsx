@@ -786,7 +786,9 @@ function DashboardContent() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      <div className="hidden lg:block">
+        <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      </div>
       <div className="flex flex-1 overflow-hidden">
         <Sidebar ref={sidebarRef} activePage="dashboard" />
 

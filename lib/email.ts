@@ -558,5 +558,4 @@ export async function sendTrialExpiredEmail({
   if (result.error) throw result.error
   console.log(`Trial expired email sent to ${userEmail}:`, result.data?.id)
   return result
-  }
 }

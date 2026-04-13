@@ -42,32 +42,5 @@ export async function createPaymentLink({
   return paymentLink.url
 }
 
-// Pricing plans
-export const PLANS = {
-  free: {
-    name: 'Free',
-    price: 0,
-    invoicesPerMonth: 3,
-    features: ['3 invoices/proposals per month', 'PDF export', 'Stripe payment links'],
-  },
-  pro: {
-    name: 'Pro',
-    price: 19.99,
-    stripePriceId: process.env.STRIPE_PRO_PRICE_ID,
-    invoicesPerMonth: Infinity,
-    features: [
-      'Unlimited invoices & proposals',
-      'Invoice tracking (sent/viewed/paid)',
-      'Follow-up email sequences',
-      'Multiple document templates',
-      'Client payment portal',
-    ],
-  },
-  business: {
-    name: 'Business',
-    price: 39.99,
-    stripePriceId: process.env.STRIPE_BUSINESS_PRICE_ID,
-    invoicesPerMonth: Infinity,
-    features: ['Everything in Pro', 'Multiple team members', 'Priority support', 'Custom branding'],
-  },
-}
+// Re-export PLANS from plans.ts for server-side use
+export { PLANS } from '@/lib/plans'

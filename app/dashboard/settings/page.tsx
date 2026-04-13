@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useAuth } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
-import { PLANS } from '@/lib/stripe'
+import { PLANS } from '@/lib/plans'
 
 const TIMEZONES = [
   { value: 'EST', label: 'Eastern Time (ET)', offset: '-5' },

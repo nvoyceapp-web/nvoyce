@@ -29,7 +29,7 @@ export default function Sidebar({ activePage }: SidebarProps) {
   return (
     <aside
       className={`hidden lg:flex lg:flex-col flex-shrink-0 bg-purple-50 border-r border-purple-200 py-4 transition-all duration-200 ease-in-out overflow-hidden ${
-        isExpanded ? 'w-60' : 'w-16'
+        isExpanded ? 'w-60' : 'w-36'
       }`}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={handleMouseLeave}
@@ -49,19 +49,12 @@ export default function Sidebar({ activePage }: SidebarProps) {
           </svg>
         </button>
 
-        {/* N icon when collapsed, full wordmark when expanded */}
-        <div className="relative h-7 flex items-center">
-          <img
-            src="/logo-icon.png"
-            alt="Nvoyce"
-            className={`h-7 w-auto object-contain absolute transition-all duration-150 ${isExpanded ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}
-          />
-          <img
-            src="/logo-wordmark.png"
-            alt="Nvoyce"
-            className={`h-7 w-auto object-contain transition-all duration-150 ${isExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'}`}
-          />
-        </div>
+        {/* Wordmark — always visible */}
+        <img
+          src="/logo-wordmark.png"
+          alt="Nvoyce"
+          className="h-7 w-auto object-contain flex-shrink-0"
+        />
       </div>
 
       {/* Nav items */}

@@ -79,7 +79,7 @@ export default function FAQPage() {
           id: 'copy-payment-link',
           question: 'How do I share the payment link with my client directly?',
           answer:
-            'Every invoice has a Stripe payment link generated when you send it. To grab that link quickly, open the ⋯ Actions dropdown on the invoice row and click "🔗 Copy Payment Link".\n\nThis copies the Stripe checkout URL to your clipboard so you can paste and send it via text, WhatsApp, or any other channel — handy when a client says they didn\'t get the email or you want to follow up fast.\n\nThe Copy Payment Link option only appears for invoices that have a Stripe link attached and are not in Draft status.',
+            'Every invoice has a Stripe payment link generated when you send it. To share it quickly, open the ⋯ Actions dropdown on the invoice row:\n\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to your clipboard so you can paste it via text, WhatsApp, or any other channel. Handy when a client says they didn\'t get the email or you want to follow up fast.\n\n• 📱 Show QR Code — opens a QR code modal for the payment link. Your client can scan it with their phone camera to go straight to checkout. You can also download the QR code as a PNG to include in a printed invoice, PDF, or anywhere else.\n\nBoth options only appear for invoices that have a Stripe link attached and are not in Draft status.',
         },
         {
           id: 'send-reminder',
@@ -97,7 +97,7 @@ export default function FAQPage() {
           id: 'payme',
           question: 'What is the Payme assistant?',
           answer:
-            'Payme is your smart payment priority engine. It scans all your invoices and proposals, scores them by urgency (overdue days, amount, proposal staleness), and surfaces the top actions you should take right now.\n\nOn your dashboard, Payme appears as a collapsed purple strip near the top showing "N actions waiting". Click it to expand and see each recommended action with a Send Reminder or Review button.\n\nDismissing a recommendation hides it for the current session — it will reappear on your next visit if the document is still pending.',
+            'Payme is your smart payment priority engine. It scans all your invoices and proposals, scores them by urgency (overdue days, amount, proposal staleness), and surfaces the top actions you should take right now.\n\nOn your dashboard, Payme appears as a navy collapsed bar above your stats section showing "N actions waiting". Click it to expand and see each recommended action with a Send Reminder or Review button.\n\nDismissing a recommendation hides it for the current session — it will reappear on your next visit if the document is still pending.',
         },
         {
           id: 'charts',
@@ -115,7 +115,7 @@ export default function FAQPage() {
           id: 'search-filter',
           question: 'How do I search and filter my documents?',
           answer:
-            'The search bar above the table searches across all document fields — client name, document number (e.g. INV-2026-001), status, document type, client email, business name, and amount. Just start typing and the table filters instantly.\n\nYou can also filter by:\n• Client — dropdown to show only documents for one client\n• From / To date — filter by the date the document was created\n\nWhen any filter is active, a "✕ Clear filters" link appears below the filter row. Click it to reset everything at once. If no documents match your filters, the empty state shows a "Clear filters" button to help you recover quickly.',
+            'The search bar above the table searches across all document fields — client name, document number (e.g. INV-2026-001), status, document type, client email, business name, and amount. Just start typing and the table filters instantly.\n\nYou can also filter by:\n• Client — dropdown to show only documents for one client\n• Date Range — a preset dropdown with quick options: Today, This Week, This Month, Last 30 Days, Last 90 Days, Year to Date (YTD), and Custom. Selecting Custom reveals From / To date pickers so you can define a specific range.\n\nWhen any filter is active, a "✕ Clear filters" link appears below the filter row. Click it to reset everything at once. If no documents match your filters, the empty state shows a "Clear filters" button to help you recover quickly.',
         },
       ],
     },
@@ -127,7 +127,7 @@ export default function FAQPage() {
           id: 'actions-dropdown',
           question: 'What does the "⋯ Actions" dropdown do?',
           answer:
-            'The ⋯ Actions button appears in the Action column for every document. It opens a menu of available actions:\n\nFor invoices:\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to clipboard (only shown if a link exists and status isn\'t draft)\n• ✓ Mark Paid — manually mark the invoice as fully paid\n• 📧 Send Reminder — send a follow-up email (appears for overdue invoices)\n• 👁️ View Details — opens the full document detail modal\n• 🗂 Archive — move the invoice to your archive (only available once fully paid)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFor proposals:\n• 🔗 Copy Link — copies the public proposal URL\n• 📧 Send Follow-up — sends a follow-up email (for stale proposals)\n• 👁️ View Details — opens the full detail modal\n• 🗂 Archive — move to archive (only available once accepted)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)',
+            'The ⋯ Actions button appears in the Action column for every document. It opens a menu of available actions:\n\nFor invoices:\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to clipboard (only shown if a link exists and status isn\'t draft)\n• 📱 Show QR Code — opens a scannable QR code for the payment link; downloadable as a PNG (only shown if a link exists)\n• ✓ Mark Paid — manually mark the invoice as fully paid\n• 📧 Send Reminder — send a follow-up email (appears for overdue invoices)\n• 👁️ View Details — opens the full document detail modal\n• 🗂 Archive — move the invoice to your archive (only available once fully paid)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFor proposals:\n• 🔗 Copy Link — copies the public proposal URL\n• 📧 Send Follow-up — sends a follow-up email (for stale proposals)\n• 👁️ View Details — opens the full detail modal\n• 🗂 Archive — move to archive (only available once accepted)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)',
         },
         {
           id: 'bulk-actions',

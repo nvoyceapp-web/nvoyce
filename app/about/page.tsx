@@ -142,7 +142,7 @@ export default function AboutPage() {
         {/* CTA Section */}
         <section className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
           <h3 className="text-3xl font-bold font-display text-gray-900 mb-4">Stop chasing. Start getting paid.</h3>
-          <p className="text-lg text-gray-600 mb-8">Join freelancers who are already using Nvoyce to manage their business better.</p>
+          <p className="text-lg text-gray-600 mb-8">Because no one started freelancing to chase invoices.</p>
           <Link
             href="/dashboard"
             className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition text-lg font-semibold inline-block"

@@ -28,13 +28,13 @@ export default function Sidebar({ activePage }: SidebarProps) {
 
   return (
     <aside
-      className="hidden lg:flex lg:flex-col flex-shrink-0 bg-purple-50 border-r border-purple-200 py-4 w-52"
-      onMouseEnter={() => setIsExpanded(true)}
+      className="hidden lg:flex lg:flex-col flex-shrink-0 bg-purple-50 border-r border-purple-200 py-4"
       onMouseLeave={handleMouseLeave}
     >
-      {/* Header — static, always fully visible */}
-      <div className="flex items-center px-3 mb-6 gap-3">
+      {/* ── Static header — never collapses ── */}
+      <div className="flex items-center gap-3 px-3 mb-6 w-52">
         <button
+          onClick={() => setIsExpanded(true)}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-purple-100 transition"
           aria-label="Open menu"
         >
@@ -44,15 +44,16 @@ export default function Sidebar({ activePage }: SidebarProps) {
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <img
-          src="/logo-wordmark.png"
-          alt="Nvoyce"
-          className="h-7 w-auto object-contain"
-        />
+        <img src="/logo-wordmark.png" alt="Nvoyce" className="h-7 w-auto object-contain" />
       </div>
 
-      {/* Nav items — icons always visible, labels fade in on hover */}
-      <nav className="flex flex-col gap-0.5 flex-1 px-2">
+      {/* ── Collapsible nav — opens on hover or hamburger click ── */}
+      <nav
+        className={`flex flex-col gap-0.5 flex-1 overflow-hidden transition-all duration-200 ease-in-out ${
+          isExpanded ? 'w-52 px-2' : 'w-14 px-2'
+        }`}
+        onMouseEnter={() => setIsExpanded(true)}
+      >
         {navItems.map((item) => {
           const isActive = activePage === item.key
 
@@ -60,7 +61,7 @@ export default function Sidebar({ activePage }: SidebarProps) {
             return (
               <div key="create">
                 <button
-                  onClick={() => isExpanded && setShowCreate(!showCreate)}
+                  onClick={() => setShowCreate(!showCreate)}
                   className={`flex items-center gap-3 w-full px-2 py-2 rounded-lg text-sm transition text-left ${
                     isActive
                       ? 'bg-purple-200 text-purple-900 font-medium'
@@ -68,7 +69,7 @@ export default function Sidebar({ activePage }: SidebarProps) {
                   }`}
                 >
                   <span className="flex-shrink-0 w-6 text-center text-base">{item.icon}</span>
-                  <span className={`whitespace-nowrap transition-all duration-200 overflow-hidden ${
+                  <span className={`whitespace-nowrap transition-all duration-150 overflow-hidden ${
                     isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0'
                   }`}>
                     {item.label}
@@ -80,19 +81,11 @@ export default function Sidebar({ activePage }: SidebarProps) {
 
                 {isExpanded && showCreate && (
                   <div className="ml-4 pl-3 border-l-2 border-purple-200 mt-0.5 space-y-0.5">
-                    <Link
-                      href="/dashboard/new?type=invoice"
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-purple-100 transition"
-                    >
-                      <span>📄</span>
-                      <span>Invoice</span>
+                    <Link href="/dashboard/new?type=invoice" className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-purple-100 transition">
+                      <span>📄</span><span>Invoice</span>
                     </Link>
-                    <Link
-                      href="/dashboard/new?type=proposal"
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-purple-100 transition"
-                    >
-                      <span>💼</span>
-                      <span>Proposal</span>
+                    <Link href="/dashboard/new?type=proposal" className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-purple-100 transition">
+                      <span>💼</span><span>Proposal</span>
                     </Link>
                   </div>
                 )}
@@ -111,7 +104,7 @@ export default function Sidebar({ activePage }: SidebarProps) {
               }`}
             >
               <span className="flex-shrink-0 w-6 text-center text-base">{item.icon}</span>
-              <span className={`whitespace-nowrap transition-all duration-200 overflow-hidden ${
+              <span className={`whitespace-nowrap transition-all duration-150 overflow-hidden ${
                 isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0'
               }`}>
                 {item.label}

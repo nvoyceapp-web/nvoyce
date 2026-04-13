@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase, type Document, type GeneratedDocument } from '@/lib/supabase'
+import QRModal from '@/components/QRModal'
 
 // Editable text field — shows plain text when sent, input when draft
 function EditableText({
@@ -59,6 +60,7 @@ export default function DocumentPage() {
   const [editingContent, setEditingContent] = useState<Record<string, any> | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [userLogo, setUserLogo] = useState<string | null>(null)
+  const [qrModal, setQrModal] = useState(false)
 
   useEffect(() => {
     async function fetchDoc() {
@@ -327,9 +329,22 @@ export default function DocumentPage() {
             <span className="text-sm text-green-600 font-semibold">✓ Fully Paid</span>
           )}
           {!isDraft && isInvoice && doc.stripe_payment_link && effectiveStatus !== 'fully_paid' && (
-            <button onClick={copyLink} className="text-sm bg-black text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition">
-              {copied ? '✓ Copied!' : 'Copy payment link'}
-            </button>
+            <>
+              <button onClick={copyLink} className="text-sm bg-black text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition">
+                {copied ? '✓ Copied!' : 'Copy payment link'}
+              </button>
+              <button
+                onClick={() => setQrModal(true)}
+                className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition flex items-center gap-1.5"
+                title="Show QR Code"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
+                </svg>
+                <span className="hidden sm:inline">QR Code</span>
+              </button>
+            </>
           )}
           {!isDraft && isInvoice && !doc.stripe_payment_link && effectiveStatus !== 'fully_paid' && (
             <button
@@ -751,6 +766,15 @@ export default function DocumentPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* QR Code Modal */}
+      {qrModal && doc?.stripe_payment_link && (
+        <QRModal
+          url={doc.stripe_payment_link}
+          label={`${doc.client_name} — Invoice`}
+          onClose={() => setQrModal(false)}
+        />
       )}
     </div>
   )

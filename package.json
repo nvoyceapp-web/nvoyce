@@ -19,7 +19,8 @@
     "resend": "^4.2.0",
     "stripe": "^17.7.0",
     "svix": "^1.90.0",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "react-qr-code": "^2.0.15"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -9,6 +9,7 @@ import { getTopPaymeActions, PaymeAction } from '@/lib/payme-scoring'
 import Sidebar, { SidebarHandle } from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
 import MobileNav from '@/components/MobileNav'
+import QRModal from '@/components/QRModal'
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart } from 'recharts'
 
 interface Document {
@@ -72,6 +73,7 @@ function DashboardContent() {
   const [successMessage, setSuccessMessage] = useState<{ docId: string; invoiceId: string; message: string } | null>(null)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const actionDropdownTimer = useRef<NodeJS.Timeout | null>(null)
+  const [qrModal, setQrModal] = useState<{ url: string; label: string } | null>(null)
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
   const [assigningNumbers, setAssigningNumbers] = useState(false)
   const [assignmentMessage, setAssignmentMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -1663,16 +1665,34 @@ function DashboardContent() {
                                   {openDropdown === doc.id && (
                                     <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-40">
                                       {doc.stripe_payment_link && doc.status !== 'draft' && (
-                                        <button
-                                          onClick={() => {
-                                            navigator.clipboard.writeText(doc.stripe_payment_link!)
-                                            alert('Payment link copied!')
-                                            setOpenDropdown(null)
-                                          }}
-                                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
-                                        >
-                                          🔗 Copy Payment Link
-                                        </button>
+                                        <>
+                                          <button
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(doc.stripe_payment_link!)
+                                              alert('Payment link copied!')
+                                              setOpenDropdown(null)
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
+                                          >
+                                            🔗 Copy Payment Link
+                                          </button>
+                                          <button
+                                            onClick={() => {
+                                              setQrModal({ url: doc.stripe_payment_link!, label: `${doc.client_name} — Invoice` })
+                                              setOpenDropdown(null)
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                          >
+                                            <span className="flex items-center gap-2">
+                                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                                                <rect x="3" y="14" width="7" height="7"/>
+                                                <rect x="14" y="14" width="3" height="3"/>
+                                              </svg>
+                                              Show QR Code
+                                            </span>
+                                          </button>
+                                        </>
                                       )}
                                       {doc.status !== 'fully_paid' && (
                                         <button
@@ -1906,6 +1926,15 @@ function DashboardContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* QR Code Modal */}
+      {qrModal && (
+        <QRModal
+          url={qrModal.url}
+          label={qrModal.label}
+          onClose={() => setQrModal(null)}
+        />
       )}
     </div>
   )

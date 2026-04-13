@@ -6,7 +6,7 @@ interface TopBarProps {
 
 export default function TopBar({ onHamburgerClick }: TopBarProps) {
   return (
-    <header className="w-full h-14 bg-white border-b border-gray-200 flex items-center px-4 gap-4 flex-shrink-0 z-50">
+    <header className="w-full h-14 bg-gray-200 flex items-center px-4 gap-4 flex-shrink-0 z-50">
       <button
         onClick={onHamburgerClick}
         className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition"

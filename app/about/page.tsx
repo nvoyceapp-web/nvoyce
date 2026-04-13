@@ -8,7 +8,7 @@ import { useRef } from 'react'
 export default function AboutPage() {
   const sidebarRef = useRef<SidebarHandle>(null)
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-purple-50">
       <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar ref={sidebarRef} activePage="about" />

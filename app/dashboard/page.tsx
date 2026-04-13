@@ -1368,7 +1368,7 @@ function DashboardContent() {
                       <option value="this_month">This month</option>
                       <option value="last_30">Last 30 days</option>
                       <option value="last_90">Last 90 days</option>
-                      <option value="this_year">This year</option>
+                      <option value="this_year">Year to date (YTD)</option>
                       <option value="custom">Custom range</option>
                     </select>
                     {/* Custom range pickers — only visible when custom is selected */}

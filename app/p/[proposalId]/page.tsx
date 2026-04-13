@@ -232,10 +232,10 @@ export default function PublicProposalPage() {
   const isExpired = daysRemaining === 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 py-8 sm:py-12 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <div className="mb-6">
             <Logo size="medium" />
           </div>
@@ -244,9 +244,9 @@ export default function PublicProposalPage() {
         </div>
 
         {/* Proposal Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-purple-100 p-8 mb-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-purple-100 p-5 sm:p-8 mb-8">
           {/* From/To Section */}
-          <div className="grid grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-8 mb-8 pb-8 border-b border-gray-100">
             <div>
               <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">From</h3>
               <div className="text-lg font-semibold text-gray-900">{proposal.business_name}</div>
@@ -270,7 +270,7 @@ export default function PublicProposalPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">Amount</label>
                 <div className="text-2xl font-bold text-purple-600">${proposal.price.toLocaleString()}</div>
@@ -346,28 +346,28 @@ export default function PublicProposalPage() {
             </div>
           ) : (
             <>
-              <div className="flex gap-4 justify-center mb-6">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-6">
                 <button
                   onClick={handleAccept}
                   disabled={accepting}
-                  className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
+                  className={`w-full sm:w-auto px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
                     accepting && lastAction === 'accept'
                       ? 'bg-green-400 cursor-not-allowed opacity-75'
                       : 'bg-green-600 hover:bg-green-700 cursor-pointer'
                   }`}
                 >
-                  {accepting && lastAction === 'accept' ? '⏳ Processing...' : '✓ Accept'}
+                  {accepting && lastAction === 'accept' ? 'Processing...' : '✓ Accept Proposal'}
                 </button>
                 <button
                   onClick={handleDecline}
                   disabled={accepting}
-                  className={`px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
+                  className={`w-full sm:w-auto px-8 py-3 rounded-lg font-semibold text-white text-lg transition ${
                     accepting && lastAction === 'decline'
                       ? 'bg-red-400 cursor-not-allowed opacity-75'
                       : 'bg-red-600 hover:bg-red-700 cursor-pointer'
                   }`}
                 >
-                  {accepting && lastAction === 'decline' ? '⏳ Processing...' : '✗ Decline'}
+                  {accepting && lastAction === 'decline' ? 'Processing...' : '✗ Decline'}
                 </button>
               </div>
 

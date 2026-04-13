@@ -866,7 +866,7 @@ function DashboardContent() {
           <div className="px-4 lg:px-10 py-8">
             <div className="flex items-center justify-between mb-8">
               <h1 className="text-2xl font-bold font-display text-gray-900">Dashboard</h1>
-              <div className="relative">
+              <div className="relative" onMouseLeave={() => setShowCreateDropdown(false)}>
                 <button
                   onClick={() => setShowCreateDropdown(!showCreateDropdown)}
                   className="flex items-center gap-2 text-sm text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition font-semibold"

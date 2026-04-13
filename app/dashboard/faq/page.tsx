@@ -185,10 +185,66 @@ export default function FAQPage() {
           <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="mb-10">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Frequently Asked Questions</h1>
-              <p className="text-gray-500">
-                Everything you need to know about using Nvoyce — statuses, payments, and your dashboard.
-              </p>
+              <div className="flex flex-col sm:flex-row items-center gap-8 bg-gradient-to-br from-purple-50 to-white rounded-2xl p-8 mb-8 border border-purple-100">
+                {/* Illustration */}
+                <div className="flex-shrink-0">
+                  <svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Background circle */}
+                    <circle cx="80" cy="80" r="75" fill="#f3f0ff" />
+
+                    {/* Tablet body */}
+                    <rect x="42" y="38" width="70" height="90" rx="8" fill="#1e1b4b" />
+                    <rect x="46" y="44" width="62" height="76" rx="5" fill="#ede9fe" />
+
+                    {/* Tablet screen lines — document content */}
+                    <rect x="52" y="52" width="38" height="4" rx="2" fill="#7c3aed" opacity="0.7"/>
+                    <rect x="52" y="60" width="50" height="3" rx="1.5" fill="#a78bfa" opacity="0.5"/>
+                    <rect x="52" y="66" width="44" height="3" rx="1.5" fill="#a78bfa" opacity="0.5"/>
+                    <rect x="52" y="72" width="48" height="3" rx="1.5" fill="#a78bfa" opacity="0.5"/>
+                    <rect x="52" y="82" width="38" height="3" rx="1.5" fill="#a78bfa" opacity="0.3"/>
+                    <rect x="52" y="88" width="42" height="3" rx="1.5" fill="#a78bfa" opacity="0.3"/>
+
+                    {/* Home button */}
+                    <circle cx="77" cy="125" r="4" fill="#4c1d95" opacity="0.5"/>
+
+                    {/* Person — body */}
+                    <ellipse cx="95" cy="130" rx="18" ry="10" fill="#7c3aed" opacity="0.15"/>
+                    <rect x="83" y="108" width="24" height="26" rx="6" fill="#7c3aed" opacity="0.8"/>
+
+                    {/* Person — head */}
+                    <circle cx="95" cy="98" r="12" fill="#fcd9b1"/>
+                    {/* Hair */}
+                    <path d="M83 95 Q85 83 95 82 Q105 83 107 95 Q103 88 95 87 Q87 88 83 95Z" fill="#92400e"/>
+
+                    {/* Person — eyes */}
+                    <circle cx="91" cy="97" r="1.5" fill="#1e1b4b"/>
+                    <circle cx="99" cy="97" r="1.5" fill="#1e1b4b"/>
+
+                    {/* Person — smile */}
+                    <path d="M91 102 Q95 105 99 102" stroke="#e07b54" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+
+                    {/* Arms holding tablet */}
+                    <path d="M83 115 Q72 118 68 108" stroke="#7c3aed" strokeWidth="6" strokeLinecap="round" opacity="0.8"/>
+                    <path d="M107 115 Q118 118 112 105" stroke="#7c3aed" strokeWidth="6" strokeLinecap="round" opacity="0.8"/>
+
+                    {/* Question mark bubble */}
+                    <circle cx="118" cy="58" r="16" fill="#f97316"/>
+                    <text x="118" y="64" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="serif">?</text>
+
+                    {/* Small dots — thinking */}
+                    <circle cx="104" cy="48" r="3" fill="#f97316" opacity="0.5"/>
+                    <circle cx="110" cy="44" r="2" fill="#f97316" opacity="0.3"/>
+                  </svg>
+                </div>
+
+                {/* Text */}
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">Frequently Asked Questions</h1>
+                  <p className="text-gray-500">
+                    Everything you need to know about using Nvoyce — statuses, payments, and your dashboard.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* FAQ Groups */}

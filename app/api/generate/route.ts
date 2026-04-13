@@ -21,6 +21,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // Enforce Free tier limit: 3 docs per month
+  const { data: sub } = await supabase
+    .from('subscriptions')
+    .select('plan')
+    .eq('user_id', userId)
+    .single()
+
+  const plan = sub?.plan || 'free'
+
+  if (plan === 'free') {
+    const startOfMonth = new Date()
+    startOfMonth.setDate(1)
+    startOfMonth.setHours(0, 0, 0, 0)
+
+    const { count } = await supabase
+      .from('documents')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .neq('status', 'draft')
+      .gte('created_at', startOfMonth.toISOString())
+
+    if ((count ?? 0) >= 3) {
+      return NextResponse.json(
+        { error: 'Free plan limit reached. You\'ve used 3 documents this month. Upgrade to Pro for unlimited.', limitReached: true },
+        { status: 403 }
+      )
+    }
+  }
+
   // Compute today's date server-side so Claude always gets the real date
   const today = new Date()
   const todayFormatted = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })

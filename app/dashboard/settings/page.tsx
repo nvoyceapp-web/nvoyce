@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useAuth } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
+import { PLANS } from '@/lib/stripe'
 
 const TIMEZONES = [
   { value: 'EST', label: 'Eastern Time (ET)', offset: '-5' },
@@ -137,6 +138,69 @@ export default function SettingsPage() {
     setBusinessName(nameInput)
     setEditingName(false)
   }
+  // Subscription state
+  const [currentPlan, setCurrentPlan] = useState<'free' | 'pro' | 'business'>('free')
+  const [subStatus, setSubStatus] = useState<string>('active')
+  const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [subMessage, setSubMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  useEffect(() => {
+    if (!userId) return
+    async function fetchSubscription() {
+      const { data } = await supabase
+        .from('subscriptions')
+        .select('plan, status')
+        .eq('user_id', userId)
+        .single()
+      if (data) {
+        setCurrentPlan(data.plan as 'free' | 'pro' | 'business')
+        setSubStatus(data.status)
+      }
+    }
+    fetchSubscription()
+
+    // Show success/cancel messages from Stripe redirect
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('upgraded') === 'true') {
+      setSubMessage({ type: 'success', text: '🎉 You\'re now on the ' + currentPlan + ' plan!' })
+      window.history.replaceState({}, '', '/dashboard/settings')
+    } else if (params.get('cancelled') === 'true') {
+      setSubMessage({ type: 'error', text: 'Upgrade cancelled — no changes made.' })
+      window.history.replaceState({}, '', '/dashboard/settings')
+    }
+  }, [userId])
+
+  async function handleUpgrade(plan: 'pro' | 'business') {
+    setUpgradingPlan(plan)
+    try {
+      const res = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      })
+      const { url, error } = await res.json()
+      if (error) throw new Error(error)
+      window.location.href = url
+    } catch (err) {
+      setSubMessage({ type: 'error', text: 'Failed to start checkout. Try again.' })
+      setUpgradingPlan(null)
+    }
+  }
+
+  async function handleManageBilling() {
+    setPortalLoading(true)
+    try {
+      const res = await fetch('/api/stripe/create-portal', { method: 'POST' })
+      const { url, error } = await res.json()
+      if (error) throw new Error(error)
+      window.location.href = url
+    } catch (err) {
+      setSubMessage({ type: 'error', text: 'Could not open billing portal. Try again.' })
+      setPortalLoading(false)
+    }
+  }
+
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [paymeAlerts, setPaymeAlerts] = useState(true)
   const [overdueReminders, setOverdueReminders] = useState(true)
@@ -335,6 +399,79 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Plan & Billing */}
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">Plan & Billing</h2>
+              <p className="text-sm text-gray-500 mb-6">You are currently on the <span className="font-semibold text-[#0d1b2a] capitalize">{currentPlan}</span> plan.</p>
+
+              {subMessage && (
+                <div className={`mb-6 p-3 rounded-lg text-sm ${subMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  {subMessage.text}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                {(['free', 'pro', 'business'] as const).map((planKey) => {
+                  const plan = PLANS[planKey]
+                  const isCurrentPlan = currentPlan === planKey
+                  const isPastDue = isCurrentPlan && subStatus === 'past_due'
+
+                  return (
+                    <div
+                      key={planKey}
+                      className={`rounded-xl border-2 p-5 flex flex-col gap-3 transition ${
+                        isCurrentPlan
+                          ? 'border-[#0d1b2a] bg-[#0d1b2a] text-white'
+                          : 'border-gray-200 bg-white text-gray-900 hover:border-gray-300'
+                      }`}
+                    >
+                      <div>
+                        <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${isCurrentPlan ? 'text-orange-400' : 'text-gray-400'}`}>{plan.name}</p>
+                        <p className="text-2xl font-bold font-display">
+                          {plan.price === 0 ? 'Free' : `$${plan.price}`}
+                          {plan.price > 0 && <span className={`text-sm font-normal ml-1 ${isCurrentPlan ? 'text-gray-300' : 'text-gray-500'}`}>/mo</span>}
+                        </p>
+                      </div>
+                      <ul className="space-y-1 flex-1">
+                        {plan.features.map((f) => (
+                          <li key={f} className={`text-xs flex items-start gap-1.5 ${isCurrentPlan ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <span className="text-orange-400 mt-0.5">✓</span> {f}
+                          </li>
+                        ))}
+                      </ul>
+                      {isCurrentPlan ? (
+                        <div className="mt-2">
+                          {planKey !== 'free' && (
+                            <button
+                              onClick={handleManageBilling}
+                              disabled={portalLoading}
+                              className="w-full text-xs text-center py-2 rounded-lg border border-white/30 text-white hover:bg-white/10 transition"
+                            >
+                              {portalLoading ? 'Loading...' : 'Manage Billing'}
+                            </button>
+                          )}
+                          {isPastDue && (
+                            <p className="text-xs text-orange-400 mt-2 text-center">⚠️ Payment past due</p>
+                          )}
+                          {!isPastDue && planKey === 'free' && (
+                            <p className="text-xs text-gray-400 text-center mt-1">3 docs/month</p>
+                          )}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => planKey !== 'free' && handleUpgrade(planKey)}
+                          disabled={!!upgradingPlan || planKey === 'free'}
+                          className="mt-2 w-full py-2 rounded-lg text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white transition disabled:opacity-50"
+                        >
+                          {upgradingPlan === planKey ? 'Redirecting...' : `Upgrade to ${plan.name}`}
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
 

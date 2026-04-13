@@ -153,6 +153,14 @@ export default function AboutPage() {
           <div className="border-t border-purple-100 mt-20 py-8 text-center flex flex-col items-center gap-3">
             <img src="/logo-icon.png" alt="Nvoyce" className="w-7 h-7 object-contain opacity-50" />
             <p className="text-gray-500 text-sm">© 2026 Nvoyce. Built for freelancers and gig workers.</p>
+            <a
+              href="https://nvoyceai.lovable.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-purple-600 hover:text-purple-800 transition font-medium"
+            >
+              Visit nvoyce.ai →
+            </a>
           </div>
           </div>
         </main>

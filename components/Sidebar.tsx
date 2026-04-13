@@ -28,17 +28,13 @@ export default function Sidebar({ activePage }: SidebarProps) {
 
   return (
     <aside
-      className={`hidden lg:flex lg:flex-col flex-shrink-0 bg-purple-50 border-r border-purple-200 py-4 transition-all duration-200 ease-in-out overflow-hidden ${
-        isExpanded ? 'w-60' : 'w-36'
-      }`}
+      className="hidden lg:flex lg:flex-col flex-shrink-0 bg-purple-50 border-r border-purple-200 py-4 w-52"
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Header — hamburger + logo */}
-      <div className="flex items-center px-3 mb-6 gap-3 h-10">
-        {/* Hamburger — always visible */}
+      {/* Header — static, always fully visible */}
+      <div className="flex items-center px-3 mb-6 gap-3">
         <button
-          onClick={() => setIsExpanded(true)}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-purple-100 transition"
           aria-label="Open menu"
         >
@@ -48,16 +44,14 @@ export default function Sidebar({ activePage }: SidebarProps) {
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-
-        {/* Wordmark — always visible */}
         <img
           src="/logo-wordmark.png"
           alt="Nvoyce"
-          className="h-7 w-auto object-contain flex-shrink-0"
+          className="h-7 w-auto object-contain"
         />
       </div>
 
-      {/* Nav items */}
+      {/* Nav items — icons always visible, labels fade in on hover */}
       <nav className="flex flex-col gap-0.5 flex-1 px-2">
         {navItems.map((item) => {
           const isActive = activePage === item.key
@@ -74,7 +68,9 @@ export default function Sidebar({ activePage }: SidebarProps) {
                   }`}
                 >
                   <span className="flex-shrink-0 w-6 text-center text-base">{item.icon}</span>
-                  <span className={`whitespace-nowrap transition-all duration-150 overflow-hidden ${isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0'}`}>
+                  <span className={`whitespace-nowrap transition-all duration-200 overflow-hidden ${
+                    isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0'
+                  }`}>
                     {item.label}
                   </span>
                   {isExpanded && (
@@ -82,7 +78,6 @@ export default function Sidebar({ activePage }: SidebarProps) {
                   )}
                 </button>
 
-                {/* Create sub-items */}
                 {isExpanded && showCreate && (
                   <div className="ml-4 pl-3 border-l-2 border-purple-200 mt-0.5 space-y-0.5">
                     <Link
@@ -116,7 +111,9 @@ export default function Sidebar({ activePage }: SidebarProps) {
               }`}
             >
               <span className="flex-shrink-0 w-6 text-center text-base">{item.icon}</span>
-              <span className={`whitespace-nowrap transition-all duration-150 overflow-hidden ${isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0'}`}>
+              <span className={`whitespace-nowrap transition-all duration-200 overflow-hidden ${
+                isExpanded ? 'opacity-100 max-w-xs' : 'opacity-0 max-w-0'
+              }`}>
                 {item.label}
               </span>
             </Link>

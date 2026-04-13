@@ -19,7 +19,9 @@ export default function AboutPage() {
         {/* Hero Section */}
         <div className="text-center mb-20">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">We do the hard stuff.</h1>
-          <h2 className="text-5xl font-bold mb-8 pb-1 bg-gradient-to-r from-[#3b2a4a] to-[#d4622a] bg-clip-text text-transparent">You get paid.</h2>
+          <h2 className="text-5xl font-bold mb-8 pb-1">
+            <span className="bg-gradient-to-r from-[#3b2a4a] to-[#d4622a] bg-clip-text text-transparent">You get paid</span><span className="text-orange-500">.</span>
+          </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Nvoyce is built for freelancers and gig workers who deserve better tools to manage their business and get paid faster.
           </p>

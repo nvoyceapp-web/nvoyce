@@ -80,7 +80,7 @@ export default function AboutPage() {
         {/* Brand Story — The Logo */}
         <section className="mb-20">
           <h3 className="text-3xl font-bold text-gray-900 mb-8">The Story Behind the Mark</h3>
-          <div className="bg-gradient-to-r from-[#0d1b2a] to-[#1a2f45] rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
+          <div className="bg-gradient-to-r from-orange-500 via-[#1a2f45] to-[#0d1b2a] rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
             <div className="flex-shrink-0">
               <img
                 src="/logo-icon.png"

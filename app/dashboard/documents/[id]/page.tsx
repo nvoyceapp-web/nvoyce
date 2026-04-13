@@ -281,12 +281,12 @@ export default function DocumentPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top bar */}
-      <div className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="bg-white border-b border-gray-100 px-4 sm:px-8 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 print:hidden">
+        <div className="flex items-center gap-3 flex-wrap">
           <Link href="/dashboard" className="text-sm text-gray-400 hover:text-gray-700">
             ← Dashboard
           </Link>
-          <span className="text-gray-200">|</span>
+          <span className="text-gray-200 hidden sm:inline">|</span>
           <span className="text-sm font-medium text-gray-900">
             {doc.document_number || content.documentNumber || 'Draft'}
           </span>
@@ -296,30 +296,30 @@ export default function DocumentPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           {isDraft && (
             <>
               {hasUnsavedChanges && (
                 <button
                   onClick={saveChanges}
                   disabled={saving}
-                  className="text-sm border border-orange-300 text-orange-600 px-4 py-2 rounded-lg hover:bg-orange-50 transition disabled:opacity-50"
+                  className="text-sm border border-orange-300 text-orange-600 px-3 py-1.5 rounded-lg hover:bg-orange-50 transition disabled:opacity-50"
                 >
-                  {saving ? 'Saving...' : '💾 Save changes'}
+                  {saving ? 'Saving...' : 'Save'}
                 </button>
               )}
               <Link
                 href={`/dashboard/new?prefill=${doc.id}`}
-                className="text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
+                className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
               >
-                ← Re-generate
+                Re-generate
               </Link>
               <button
                 onClick={sendToClient}
                 disabled={sending}
-                className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50 font-semibold"
+                className="text-sm bg-black text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition disabled:opacity-50 font-semibold"
               >
-                {sending ? 'Sending...' : '📤 Send to Client'}
+                {sending ? 'Sending...' : 'Send to Client'}
               </button>
             </>
           )}
@@ -327,94 +327,91 @@ export default function DocumentPage() {
             <span className="text-sm text-green-600 font-semibold">✓ Fully Paid</span>
           )}
           {!isDraft && isInvoice && doc.stripe_payment_link && effectiveStatus !== 'fully_paid' && (
-            <>
-              <span className="text-xs text-gray-400 max-w-xs truncate hidden md:block">
-                {doc.stripe_payment_link}
-              </span>
-              <button onClick={copyLink} className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition">
-                {copied ? '✓ Copied!' : 'Copy payment link'}
-              </button>
-            </>
+            <button onClick={copyLink} className="text-sm bg-black text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition">
+              {copied ? '✓ Copied!' : 'Copy payment link'}
+            </button>
           )}
           {!isDraft && isInvoice && !doc.stripe_payment_link && effectiveStatus !== 'fully_paid' && (
             <button
               onClick={generatePaymentLink}
               disabled={generatingLink}
-              className="text-sm bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+              className="text-sm bg-black text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
             >
-              {generatingLink ? 'Creating link...' : '⚡ Generate payment link'}
+              {generatingLink ? 'Creating...' : 'Generate payment link'}
             </button>
           )}
-          <button onClick={() => window.print()} className="text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
-            Print / Save PDF
+          <button onClick={() => window.print()} className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition hidden sm:block">
+            Print / PDF
           </button>
         </div>
       </div>
 
       {/* AI disclosure banner — drafts only */}
       {isDraft && (
-        <div className="bg-orange-50 border-b border-orange-100 px-8 py-3 flex items-center justify-between print:hidden">
-          <div className="flex items-center gap-2 text-orange-700 text-sm">
-            <span>✨</span>
-            <span>AI-generated draft — review and edit before sending to your client. Click any field to make changes.</span>
+        <div className="bg-orange-50 border-b border-orange-100 px-4 sm:px-8 py-3 flex items-start sm:items-center justify-between gap-2 print:hidden">
+          <div className="flex items-start sm:items-center gap-2 text-orange-700 text-sm">
+            <span className="mt-0.5 sm:mt-0">✨</span>
+            <span>AI-generated draft — review and edit before sending. Click any field to make changes.</span>
           </div>
-          <span className="text-xs text-orange-400 font-medium">NOT sent yet</span>
+          <span className="text-xs text-orange-400 font-medium shrink-0">NOT sent yet</span>
         </div>
       )}
 
       {/* Sent status banners */}
       {isInvoice && effectiveStatus === 'sent' && (
-        <div className="bg-blue-50 border-b border-blue-100 px-8 py-3 flex items-center justify-between print:hidden">
+        <div className="bg-blue-50 border-b border-blue-100 px-4 sm:px-8 py-3 flex items-center justify-between gap-2 print:hidden">
           <div className="flex items-center gap-2 text-blue-700 text-sm">
             <span>📬</span>
             <span>Invoice sent — awaiting payment</span>
           </div>
           {doc.stripe_payment_link && (
-            <button onClick={copyLink} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">
-              {copied ? '✓ Copied!' : 'Copy payment link'}
+            <button onClick={copyLink} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition shrink-0">
+              {copied ? '✓ Copied!' : 'Copy link'}
             </button>
           )}
         </div>
       )}
       {isInvoice && effectiveStatus === 'overdue' && (
-        <div className="bg-red-50 border-b border-red-100 px-8 py-3 flex items-center justify-between print:hidden">
+        <div className="bg-red-50 border-b border-red-100 px-4 sm:px-8 py-3 flex items-center justify-between gap-2 print:hidden">
           <div className="flex items-center gap-2 text-red-700 text-sm">
             <span>⚠️</span>
-            <span>This invoice is overdue — ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding</span>
+            <span className="hidden sm:inline">This invoice is overdue — ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding</span>
+            <span className="sm:hidden">Overdue — ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding</span>
           </div>
           {doc.stripe_payment_link && (
-            <button onClick={copyLink} className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition">
-              {copied ? '✓ Copied!' : 'Copy payment link'}
+            <button onClick={copyLink} className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition shrink-0">
+              {copied ? '✓ Copied!' : 'Copy link'}
             </button>
           )}
         </div>
       )}
       {isInvoice && effectiveStatus === 'partially_paid' && (
-        <div className="bg-yellow-50 border-b border-yellow-100 px-8 py-3 flex items-center justify-between print:hidden">
+        <div className="bg-yellow-50 border-b border-yellow-100 px-4 sm:px-8 py-3 flex items-center justify-between gap-2 print:hidden">
           <div className="flex items-center gap-2 text-yellow-700 text-sm">
             <span>💛</span>
-            <span>
+            <span className="hidden sm:inline">
               Partial payment received — ${paidAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received,{' '}
               ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} outstanding
             </span>
+            <span className="sm:hidden">${paidAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} of ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} paid</span>
           </div>
           {doc.stripe_payment_link && (
-            <button onClick={copyLink} className="text-xs bg-yellow-600 text-white px-3 py-1.5 rounded-lg hover:bg-yellow-700 transition">
-              {copied ? '✓ Copied!' : 'Copy payment link'}
+            <button onClick={copyLink} className="text-xs bg-yellow-600 text-white px-3 py-1.5 rounded-lg hover:bg-yellow-700 transition shrink-0">
+              {copied ? '✓ Copied!' : 'Copy link'}
             </button>
           )}
         </div>
       )}
       {isInvoice && effectiveStatus === 'fully_paid' && (
-        <div className="bg-green-50 border-b border-green-100 px-8 py-3 flex items-center gap-2 text-green-700 text-sm print:hidden">
+        <div className="bg-green-50 border-b border-green-100 px-4 sm:px-8 py-3 flex items-center gap-2 text-green-700 text-sm print:hidden">
           <span>✅</span>
           <span>Payment complete — ${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received in full</span>
         </div>
       )}
 
       {/* Document */}
-      <div className="max-w-3xl mx-auto px-4 py-12 print:py-0 print:px-0">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 print:shadow-none print:border-none print:rounded-none">
+      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 sm:py-12 print:py-0 print:px-0">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-12 print:shadow-none print:border-none print:rounded-none">
 
           {/* Logo Section */}
           <div className="text-center mb-12 pb-8 border-b border-gray-100">
@@ -426,8 +423,8 @@ export default function DocumentPage() {
           </div>
 
           {/* Header */}
-          <div className="flex items-start justify-between mb-10">
-            <div className="flex-1 mr-8">
+          <div className="flex items-start justify-between mb-8 sm:mb-10">
+            <div className="flex-1 mr-4 sm:mr-8">
               <EditableText
                 value={content.from.name}
                 onChange={(v) => updateField('from.name', v)}
@@ -452,7 +449,7 @@ export default function DocumentPage() {
           </div>
 
           {/* Date row */}
-          <div className="flex gap-12 mb-10 text-sm">
+          <div className="flex flex-wrap gap-6 sm:gap-12 mb-8 sm:mb-10 text-sm">
             <div>
               <div className="text-gray-400 mb-0.5">Date</div>
               <div className="font-medium text-gray-900">{content.date}</div>
@@ -486,7 +483,7 @@ export default function DocumentPage() {
           </div>
 
           {/* Bill to */}
-          <div className="flex gap-16 mb-10">
+          <div className="flex flex-wrap gap-8 sm:gap-16 mb-8 sm:mb-10">
             <div className="text-sm">
               <div className="text-gray-400 mb-1 uppercase text-xs font-semibold tracking-wide">From</div>
               <div className="font-semibold text-gray-900">{content.from.name}</div>
@@ -534,7 +531,8 @@ export default function DocumentPage() {
           </div>
 
           {/* Line items */}
-          <div className="mb-8">
+          <div className="mb-8 overflow-x-auto -mx-1 px-1">
+            <div className="min-w-[420px]">
             <div className="grid grid-cols-12 text-xs font-semibold text-gray-400 uppercase tracking-wide pb-2 border-b border-gray-100">
               <div className="col-span-6">Description</div>
               <div className="col-span-2 text-right">Qty</div>
@@ -602,6 +600,7 @@ export default function DocumentPage() {
                   <span>${(content.total || 0).toLocaleString()}</span>
                 </div>
               </div>
+            </div>
             </div>
           </div>
 

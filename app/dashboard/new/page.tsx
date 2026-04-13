@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 type DocType = 'invoice' | 'proposal'
@@ -157,8 +158,19 @@ function NewDocumentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-purple-100 w-full max-w-xl p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50">
+      {/* Mobile top bar */}
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <Link href="/dashboard" className="font-display font-bold text-xl text-[#0d1b2a] tracking-tight">
+          Nvoyce
+        </Link>
+        <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">
+          ← Back
+        </Link>
+      </div>
+      {/* Desktop centering wrapper */}
+      <div className="flex items-center justify-center py-6 sm:py-12 px-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-purple-100 w-full max-w-xl p-5 sm:p-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -195,7 +207,23 @@ function NewDocumentContent() {
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="text-lg mb-1">{type === 'invoice' ? '🧾' : '📋'}</div>
+                    <div className="mb-2">
+                      {type === 'invoice' ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                          <polyline points="14 2 14 8 20 8"/>
+                          <line x1="16" y1="13" x2="8" y2="13"/>
+                          <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                          <line x1="12" y1="12" x2="12" y2="16"/>
+                          <line x1="10" y1="14" x2="14" y2="14"/>
+                        </svg>
+                      )}
+                    </div>
                     <div className="font-medium capitalize">{type}</div>
                     <div className={`text-xs mt-0.5 ${form.docType === type ? 'text-gray-300' : 'text-gray-400'}`}>
                       {type === 'invoice' ? 'Request payment for work done' : 'Pitch a project to a client'}
@@ -416,6 +444,7 @@ function NewDocumentContent() {
             </button>
           )}
         </div>
+      </div>
       </div>
     </div>
   )

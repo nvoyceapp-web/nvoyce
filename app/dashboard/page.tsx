@@ -40,6 +40,7 @@ interface Stats {
 function DashboardContent() {
   const { userId } = useAuth()
   const searchParams = useSearchParams()
+  const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
   const [stats, setStats] = useState<Stats>({
     totalSent: 0,
     outstanding: 0,
@@ -675,6 +676,24 @@ function DashboardContent() {
   }, [searchParams, userId])
 
   useEffect(() => {
+    if (!userId) return
+    async function fetchTrial() {
+      const { data } = await supabase
+        .from('subscriptions')
+        .select('plan, status, current_period_end, stripe_subscription_id')
+        .eq('user_id', userId)
+        .single()
+      if (data?.plan === 'pro' && !data?.stripe_subscription_id && data?.current_period_end) {
+        const daysLeft = Math.ceil(
+          (new Date(data.current_period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        )
+        setTrialDaysLeft(daysLeft > 0 ? daysLeft : 0)
+      }
+    }
+    fetchTrial()
+  }, [userId])
+
+  useEffect(() => {
     async function fetchStats() {
       try {
         const { data, error } = await supabase
@@ -770,6 +789,26 @@ function DashboardContent() {
         <Sidebar ref={sidebarRef} activePage="dashboard" />
 
         <main className="flex-1 overflow-auto w-full">
+          {/* Trial countdown banner */}
+          {trialDaysLeft !== null && trialDaysLeft > 0 && (
+            <div className="bg-gradient-to-r from-[#0d1b2a] to-[#1a2f45] text-white px-4 py-2.5 flex items-center justify-between text-sm">
+              <span>
+                🎉 You're on a <span className="font-semibold">7-day Pro trial</span> —{' '}
+                <span className="text-orange-400 font-semibold">{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} left</span>
+              </span>
+              <a href="/dashboard/settings" className="text-orange-400 font-semibold hover:text-orange-300 transition">
+                Upgrade to keep Pro →
+              </a>
+            </div>
+          )}
+          {trialDaysLeft === 0 && (
+            <div className="bg-orange-500 text-white px-4 py-2.5 flex items-center justify-between text-sm">
+              <span className="font-semibold">Your Pro trial has ended — you're now on the Free plan (3 docs/month)</span>
+              <a href="/dashboard/settings" className="underline font-semibold hover:text-orange-100 transition">
+                Upgrade now →
+              </a>
+            </div>
+          )}
           {/* Mobile top bar — only visible on small screens */}
           <div className="lg:hidden bg-purple-50 border-b border-purple-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
             <img src="/logo-icon.png" alt="Nvoyce" className="w-8 h-8 object-contain" />

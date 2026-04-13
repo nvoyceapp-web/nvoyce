@@ -2,6 +2,12 @@ import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { sendWelcomeEmail } from '@/lib/email'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(req: Request) {
   const headersList = await headers()
@@ -41,6 +47,22 @@ export async function POST(req: Request) {
       return new Response('OK', { status: 200 })
     }
 
+    // Start 7-day Pro trial
+    const trialEnd = new Date()
+    trialEnd.setDate(trialEnd.getDate() + 7)
+
+    try {
+      await supabase.from('subscriptions').upsert({
+        user_id: id,
+        plan: 'pro',
+        status: 'active',
+        current_period_end: trialEnd.toISOString(),
+      })
+      console.log(`✅ 7-day Pro trial started for ${id} — expires ${trialEnd.toISOString()}`)
+    } catch (error) {
+      console.error('❌ Failed to create trial subscription:', error)
+    }
+
     try {
       await sendWelcomeEmail({
         userEmail: primaryEmail.email_address,
@@ -49,7 +71,6 @@ export async function POST(req: Request) {
       console.log(`✅ Welcome email sent to ${primaryEmail.email_address}`)
     } catch (error) {
       console.error('❌ Welcome email failed:', error)
-      // Don't fail the webhook response; log and continue
     }
   }
 

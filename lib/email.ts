@@ -646,3 +646,78 @@ export async function sendUpgradeConfirmationEmail({
   console.log(`Upgrade confirmation sent to ${userEmail}:`, result.data?.id)
   return result
 }
+
+export async function sendLaunchAnnouncementEmail({
+  userEmail,
+  userName,
+}: {
+  userEmail: string
+  userName: string
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.nvoyce.ai'
+  const logoUrl = `${appUrl}/logo.png`
+  const phUrl = 'https://www.producthunt.com'
+
+  const result = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: userEmail,
+    subject: "Nvoyce just launched on Product Hunt 🚀",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="text-align: center; padding: 30px 20px; background-color: #0d1b2a;">
+          <img src="${logoUrl}" alt="Nvoyce" style="max-width: 160px; height: auto;" />
+          <p style="margin: 12px 0 0 0; color: #9ca3af; font-size: 13px;">We do the hard stuff. You get paid.</p>
+        </div>
+
+        <div style="padding: 30px 20px;">
+          <p style="margin: 0 0 8px 0; font-size: 16px; color: #1f2937; font-weight: bold;">Hey ${userName} — we're live. 🚀</p>
+          <p style="margin: 0 0 24px 0; font-size: 14px; color: #374151; line-height: 1.6;">
+            Nvoyce just launched publicly on Product Hunt today. You're one of the first people to use it — and that means a lot.
+          </p>
+
+          <div style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 20px 24px; margin: 0 0 24px 0; text-align: center;">
+            <p style="margin: 0 0 8px 0; font-size: 13px; color: #92400e; font-weight: bold;">One small ask 🙏</p>
+            <p style="margin: 0 0 16px 0; font-size: 13px; color: #b45309; line-height: 1.6;">
+              If Nvoyce has saved you time or helped you get paid faster, an upvote on Product Hunt goes a long way. It takes 10 seconds and helps more freelancers find the tool.
+            </p>
+            <a href="${phUrl}" style="display: inline-block; padding: 12px 28px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">
+              ▲ Upvote Nvoyce on Product Hunt
+            </a>
+          </div>
+
+          <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin: 0 0 24px 0;">
+            <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: bold; color: #1f2937;">What's new since you signed up:</p>
+            <ul style="margin: 0; padding-left: 18px; color: #374151; font-size: 13px; line-height: 2.2;">
+              <li>📊 Full dashboard with revenue charts and metrics</li>
+              <li>🏷️ Subscription plans — Free, Pro ($19.99), Business ($39.99)</li>
+              <li>🔔 Automated trial and payment reminder emails</li>
+              <li>🎨 Cleaner UI with Space Grotesk typography</li>
+              <li>⚡ Faster invoice generation and smarter Payme assistant</li>
+            </ul>
+          </div>
+
+          <div style="text-align: center; margin: 0 0 24px 0;">
+            <a href="${appUrl}/dashboard" style="display: inline-block; padding: 14px 36px; background-color: #0d1b2a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+              Go to Your Dashboard →
+            </a>
+          </div>
+
+          <p style="margin: 0; font-size: 13px; color: #6b7280; line-height: 1.6;">
+            Thank you for being here early. Reply to this email anytime — I read every message.
+          </p>
+        </div>
+
+        <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+          <p style="margin: 0; font-size: 11px; color: #9ca3af;">© 2026 Nvoyce · Stop chasing. Start getting paid.</p>
+          <p style="margin: 6px 0 0 0; font-size: 11px; color: #d1d5db;">
+            <a href="${appUrl}/dashboard/settings" style="color: #9ca3af; text-decoration: none;">Manage preferences</a>
+          </p>
+        </div>
+      </div>
+    `,
+  })
+
+  if (result.error) throw result.error
+  console.log(`Launch announcement sent to ${userEmail}:`, result.data?.id)
+  return result
+}

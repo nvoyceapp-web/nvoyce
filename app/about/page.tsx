@@ -97,7 +97,7 @@ export default function AboutPage() {
               <p className="text-xl font-bold mb-4 leading-snug text-white">
                 The orange dots inside the N spell <span className="text-orange-400">"VOICE"</span> in Braille.
               </p>
-              <p className="text-blue-200 leading-relaxed">
+              <p className="text-gray-300 leading-relaxed">
                 Nvoyce is a fusion of <em>invoice</em> and <em>voice</em> — because every invoice is a freelancer's voice: a declaration of their work, their worth, and their right to be paid. The Braille lettering is a nod to universal access, a reminder that financial tools should work for everyone, and a tiny secret for those who look closely.
               </p>
             </div>
@@ -108,29 +108,37 @@ export default function AboutPage() {
         <section className="mb-20">
           <h3 className="text-3xl font-bold font-display text-gray-900 mb-12">What Makes Nvoyce Different</h3>
           <div className="space-y-6">
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 text-2xl">📄</div>
+            <div className="flex gap-5 items-start">
+              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
               <div>
                 <h4 className="text-lg font-semibold text-gray-900">Instant Invoicing</h4>
-                <p className="text-gray-600">Generate professional invoices and proposals in seconds, not hours.</p>
+                <p className="text-gray-600">Generate professional invoices and proposals with AI in seconds, not hours.</p>
               </div>
             </div>
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 text-2xl">💰</div>
+            <div className="flex gap-5 items-start">
+              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
               <div>
                 <h4 className="text-lg font-semibold text-gray-900">Smart Payment Assistant (Payme)</h4>
                 <p className="text-gray-600">Get intelligent reminders about overdue invoices so you never lose track of money owed to you.</p>
               </div>
             </div>
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 text-2xl">📊</div>
+            <div className="flex gap-5 items-start">
+              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              </div>
               <div>
                 <h4 className="text-lg font-semibold text-gray-900">Real-Time Insights</h4>
                 <p className="text-gray-600">Track payment patterns, outstanding invoices, and cash flow at a glance.</p>
               </div>
             </div>
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 text-2xl">🔗</div>
+            <div className="flex gap-5 items-start">
+              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </div>
               <div>
                 <h4 className="text-lg font-semibold text-gray-900">Shareable Proposals</h4>
                 <p className="text-gray-600">Send clients a link to review and accept proposals. No sign-up required.</p>
@@ -147,19 +155,19 @@ export default function AboutPage() {
             href="/dashboard"
             className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition text-lg font-semibold inline-block"
           >
-            Start Using Nvoyce →
+            Start Your Free Trial →
           </Link>
         </section>
 
           {/* Footer */}
           <div className="border-t border-gray-100 mt-20 py-8 text-center flex flex-col items-center gap-3">
             <img src="/logo-icon.png" alt="Nvoyce" className="w-7 h-7 object-contain opacity-50" />
-            <p className="text-gray-500 text-sm">© 2026 Nvoyce. Built for freelancers and gig workers.</p>
+            <p className="text-gray-500 text-sm">© 2026 Nvoyce. Stop chasing. Start getting paid.</p>
             <a
-              href="https://nvoyceai.lovable.app"
+              href="https://nvoyce.ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-purple-600 hover:text-purple-800 transition font-medium"
+              className="text-sm text-orange-500 hover:text-orange-600 transition font-medium"
             >
               Visit nvoyce.ai →
             </a>

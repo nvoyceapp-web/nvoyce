@@ -1280,7 +1280,7 @@ function DashboardContent() {
                 })()}
                 <div className="p-6 border-b border-gray-100 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Invoices & Proposals</h2>
+                    <h2 className="text-xl font-bold font-display text-gray-900">Invoices & Proposals</h2>
                     <button
                       onClick={exportToExcel}
                       className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition"

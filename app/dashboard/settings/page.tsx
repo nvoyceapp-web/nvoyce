@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import Sidebar from '@/components/Sidebar'
-import { useState, useEffect } from 'react'
+import Sidebar, { SidebarHandle } from '@/components/Sidebar'
+import TopBar from '@/components/TopBar'
+import { useState, useEffect, useRef } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useAuth } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
@@ -29,6 +30,7 @@ export default function SettingsPage() {
   const [editingName, setEditingName] = useState(false)
   const [nameInput, setNameInput] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
+  const sidebarRef = useRef<SidebarHandle>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
@@ -183,10 +185,10 @@ export default function SettingsPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex h-screen flex-col lg:flex-row">
-        {/* Sidebar */}
-        <Sidebar activePage="settings" />
+    <div className="h-screen flex flex-col bg-gray-50">
+      <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar ref={sidebarRef} activePage="settings" />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">

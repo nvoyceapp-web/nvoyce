@@ -1,12 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, useRef } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getTopPaymeActions, PaymeAction } from '@/lib/payme-scoring'
-import Sidebar from '@/components/Sidebar'
+import Sidebar, { SidebarHandle } from '@/components/Sidebar'
+import TopBar from '@/components/TopBar'
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart } from 'recharts'
 
 interface Document {
@@ -75,6 +76,7 @@ function DashboardContent() {
   const [archiving, setArchiving] = useState(false)
   const [bulkActionNotice, setBulkActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const sidebarRef = useRef<SidebarHandle>(null)
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -762,9 +764,10 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex h-screen flex-col lg:flex-row">
-        <Sidebar activePage="dashboard" />
+    <div className="h-screen flex flex-col bg-gray-50">
+      <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar ref={sidebarRef} activePage="dashboard" />
 
         <main className="flex-1 overflow-auto w-full">
           {/* Mobile top bar — only visible on small screens */}

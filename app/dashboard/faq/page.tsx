@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import Sidebar from '@/components/Sidebar'
+import { useState, useRef } from 'react'
+import Sidebar, { SidebarHandle } from '@/components/Sidebar'
+import TopBar from '@/components/TopBar'
 
 interface FAQ {
   id: string
@@ -18,6 +19,7 @@ interface FAQGroup {
 
 export default function FAQPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const sidebarRef = useRef<SidebarHandle>(null)
 
   const faqGroups: FAQGroup[] = [
     {
@@ -173,10 +175,10 @@ export default function FAQPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex h-screen flex-col lg:flex-row">
-        {/* Sidebar */}
-        <Sidebar activePage="faq" />
+    <div className="h-screen flex flex-col bg-gray-50">
+      <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar ref={sidebarRef} activePage="faq" />
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">

@@ -1,9 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useImperativeHandle, forwardRef } from 'react'
 import Link from 'next/link'
 
 export type ActivePage = 'dashboard' | 'faq' | 'settings' | 'about'
+
+export interface SidebarHandle {
+  open: () => void
+}
 
 interface SidebarProps {
   activePage?: ActivePage
@@ -17,9 +21,13 @@ const navItems = [
   { key: 'about',     icon: 'ℹ️', label: 'About',     href: '/about' },
 ]
 
-export default function Sidebar({ activePage }: SidebarProps) {
+const Sidebar = forwardRef<SidebarHandle, SidebarProps>(function Sidebar({ activePage }, ref) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
+
+  useImperativeHandle(ref, () => ({
+    open: () => setIsExpanded(true),
+  }))
 
   function handleMouseLeave() {
     setIsExpanded(false)
@@ -28,45 +36,20 @@ export default function Sidebar({ activePage }: SidebarProps) {
 
   return (
     <aside
-      className="hidden lg:flex lg:flex-col flex-shrink-0 bg-purple-50 border-r border-purple-200 py-4"
+      className={`hidden lg:flex lg:flex-col flex-shrink-0 bg-white border-r border-gray-200 py-3 transition-all duration-200 ease-in-out overflow-hidden ${
+        isExpanded ? 'w-52' : 'w-14'
+      }`}
+      onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={handleMouseLeave}
     >
-      {/* ── Static header — never collapses ── */}
-      <div className="flex items-center gap-3 px-3 mb-6 w-52">
-        <button
-          onClick={() => setIsExpanded(true)}
-          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-purple-100 transition"
-          aria-label="Open menu"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
-        <img src="/logo-wordmark.png" alt="Nvoyce" className="h-7 w-auto object-contain" />
-      </div>
-
-      {/* ── Collapsible nav — opens on hover or hamburger click ── */}
-      <nav
-        className={`flex flex-col gap-0.5 flex-1 overflow-hidden transition-all duration-200 ease-in-out ${
-          isExpanded ? 'w-52 px-2' : 'w-14 px-2'
-        }`}
-        onMouseEnter={() => setIsExpanded(true)}
-      >
+      <nav className="flex flex-col gap-0.5 flex-1 px-2">
         {navItems.map((item) => {
-          const isActive = activePage === item.key
-
           if (item.key === 'create') {
             return (
               <div key="create">
                 <button
                   onClick={() => setShowCreate(!showCreate)}
-                  className={`flex items-center gap-3 w-full px-2 py-2 rounded-lg text-sm transition text-left ${
-                    isActive
-                      ? 'bg-purple-200 text-purple-900 font-medium'
-                      : 'text-gray-600 hover:bg-purple-100'
-                  }`}
+                  className="flex items-center gap-3 w-full px-2 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition text-left"
                 >
                   <span className="flex-shrink-0 w-6 text-center text-base">{item.icon}</span>
                   <span className={`whitespace-nowrap transition-all duration-150 overflow-hidden ${
@@ -80,11 +63,11 @@ export default function Sidebar({ activePage }: SidebarProps) {
                 </button>
 
                 {isExpanded && showCreate && (
-                  <div className="ml-4 pl-3 border-l-2 border-purple-200 mt-0.5 space-y-0.5">
-                    <Link href="/dashboard/new?type=invoice" className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-purple-100 transition">
+                  <div className="ml-4 pl-3 border-l-2 border-gray-200 mt-0.5 space-y-0.5">
+                    <Link href="/dashboard/new?type=invoice" className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition">
                       <span>📄</span><span>Invoice</span>
                     </Link>
-                    <Link href="/dashboard/new?type=proposal" className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-purple-100 transition">
+                    <Link href="/dashboard/new?type=proposal" className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition">
                       <span>💼</span><span>Proposal</span>
                     </Link>
                   </div>
@@ -97,11 +80,7 @@ export default function Sidebar({ activePage }: SidebarProps) {
             <Link
               key={item.key}
               href={item.href!}
-              className={`flex items-center gap-3 px-2 py-2 rounded-lg text-sm transition ${
-                isActive
-                  ? 'bg-purple-200 text-purple-900 font-medium'
-                  : 'text-gray-600 hover:bg-purple-100'
-              }`}
+              className="flex items-center gap-3 px-2 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition"
             >
               <span className="flex-shrink-0 w-6 text-center text-base">{item.icon}</span>
               <span className={`whitespace-nowrap transition-all duration-150 overflow-hidden ${
@@ -115,4 +94,6 @@ export default function Sidebar({ activePage }: SidebarProps) {
       </nav>
     </aside>
   )
-}
+})
+
+export default Sidebar

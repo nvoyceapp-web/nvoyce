@@ -24,7 +24,7 @@ export default function TopBar({ onHamburgerClick }: TopBarProps) {
         <img
           src="/logo-wordmark.png"
           alt="Nvoyce"
-          className="h-8 w-auto object-contain"
+          className="h-11 w-auto object-contain"
         />
       </Link>
     </header>

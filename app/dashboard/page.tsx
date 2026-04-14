@@ -83,7 +83,23 @@ function DashboardContent() {
   const [archiving, setArchiving] = useState(false)
   const [bulkActionNotice, setBulkActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null)
 
+  // Payment notification state
+  const [paymentToasts, setPaymentToasts] = useState<Array<{ toastId: string; clientName: string; amount: number; isPartial: boolean }>>([])
+  const [newPaymentCount, setNewPaymentCount] = useState(0)
+  const prevStatusMapRef = useRef<Map<string, string>>(new Map())
+  const isFirstFetchRef = useRef(true)
+  const [pollTrigger, setPollTrigger] = useState(0)
+
   const sidebarRef = useRef<SidebarHandle>(null)
+
+  const dismissToast = (toastId: string) => {
+    setPaymentToasts(prev => {
+      const remaining = prev.filter(t => t.toastId !== toastId)
+      // If no toasts left after dismissal, clear the green dot too
+      if (remaining.length === 0) setNewPaymentCount(0)
+      return remaining
+    })
+  }
 
   // Get date range for selected time period
   const getDateRange = () => {
@@ -765,6 +781,39 @@ function DashboardContent() {
             return daysOld > 30
           }).length
 
+          // Detect new payments since last fetch
+          if (!isFirstFetchRef.current) {
+            const newToasts: typeof paymentToasts = []
+            data.forEach(doc => {
+              const prevStatus = prevStatusMapRef.current.get(doc.id)
+              const isNewPayment =
+                (doc.status === 'fully_paid' || doc.status === 'partially_paid') &&
+                prevStatus !== undefined &&
+                prevStatus !== doc.status
+              if (isNewPayment) {
+                newToasts.push({
+                  toastId: `${doc.id}-${Date.now()}`,
+                  clientName: doc.client_name,
+                  amount: doc.amount_paid || doc.price,
+                  isPartial: doc.status === 'partially_paid',
+                })
+              }
+            })
+            if (newToasts.length > 0) {
+              setPaymentToasts(prev => [...prev, ...newToasts])
+              setNewPaymentCount(prev => prev + newToasts.length)
+              // Auto-dismiss each toast after 6 seconds
+              newToasts.forEach(t => {
+                setTimeout(() => dismissToast(t.toastId), 6000)
+              })
+            }
+          }
+          // Update status snapshot
+          const newMap = new Map<string, string>()
+          data.forEach(doc => newMap.set(doc.id, doc.status))
+          prevStatusMapRef.current = newMap
+          isFirstFetchRef.current = false
+
           setStats({ totalSent, outstanding, collected, pendingProposals, avgDaysToPayment, overdue, documents: data })
         }
       } catch (error) {
@@ -775,7 +824,14 @@ function DashboardContent() {
     }
 
     if (userId) fetchStats()
-  }, [userId, showArchived])
+  }, [userId, showArchived, pollTrigger])
+
+  // Poll every 15 seconds for new payments
+  useEffect(() => {
+    if (!userId) return
+    const interval = setInterval(() => setPollTrigger(t => t + 1), 15000)
+    return () => clearInterval(interval)
+  }, [userId])
 
   const canArchive = (doc: Document) => {
     if (doc.is_archived) return true // can always unarchive
@@ -1034,7 +1090,18 @@ function DashboardContent() {
 
             {/* Urgency Summary Card - Neutral, matching Overview card style */}
             {stats.outstanding > 0 && (
-              <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+              <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6 relative"
+                onClick={() => setNewPaymentCount(0)}
+              >
+                {newPaymentCount > 0 && (
+                  <div className="absolute -top-2 -right-2 flex items-center gap-1.5 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md cursor-pointer z-10">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                    </span>
+                    {newPaymentCount} new
+                  </div>
+                )}
                 <div className="flex items-start justify-between">
                   <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex-1 mr-4">
                     <div className="text-sm text-gray-500 mb-1">You're owed</div>
@@ -1983,6 +2050,48 @@ function DashboardContent() {
           onClose={() => setQrModal(null)}
         />
       )}
+
+      {/* Payment Toast Stack */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none">
+        {paymentToasts.map(toast => (
+          <div
+            key={toast.toastId}
+            className="pointer-events-auto flex items-center gap-4 bg-white border border-gray-200 shadow-xl rounded-2xl px-5 py-4 min-w-[300px] max-w-sm animate-fade-in"
+            style={{ animation: 'slideInRight 0.3s ease-out' }}
+          >
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${toast.isPartial ? 'bg-yellow-100' : 'bg-green-100'}`}>
+              <span className="text-lg">{toast.isPartial ? '💛' : '💰'}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-gray-900 text-sm">
+                {toast.isPartial ? 'Partial payment received' : 'Payment received!'}
+              </p>
+              <p className="text-gray-500 text-xs truncate">
+                ${toast.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} from {toast.clientName}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${toast.isPartial ? 'bg-yellow-400' : 'bg-green-400'}`} />
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${toast.isPartial ? 'bg-yellow-500' : 'bg-green-500'}`} />
+              </span>
+              <button
+                onClick={() => dismissToast(toast.toastId)}
+                className="text-gray-300 hover:text-gray-500 text-xl leading-none ml-1"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes slideInRight {
+          from { transform: translateX(120%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
     </div>
   )
 }

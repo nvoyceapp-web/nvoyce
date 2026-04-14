@@ -301,20 +301,18 @@ export default function DocumentPage() {
         <div className="flex items-center gap-2 flex-wrap">
           {isDraft && (
             <>
-              {hasUnsavedChanges && (
-                <button
-                  onClick={saveChanges}
-                  disabled={saving}
-                  className="text-sm border border-orange-300 text-orange-600 px-3 py-1.5 rounded-lg hover:bg-orange-50 transition disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save'}
-                </button>
-              )}
+              <button
+                onClick={saveChanges}
+                disabled={saving}
+                className="text-sm border border-orange-300 text-orange-600 px-3 py-1.5 rounded-lg hover:bg-orange-50 transition disabled:opacity-50"
+              >
+                {saving ? 'Saving...' : 'Save Draft'}
+              </button>
               <Link
                 href={`/dashboard/new?prefill=${doc.id}`}
                 className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
               >
-                Re-generate
+                ← Back to Edit
               </Link>
               <button
                 onClick={sendToClient}

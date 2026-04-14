@@ -27,7 +27,6 @@ function NewDocumentContent() {
   const prefillId = searchParams.get('prefill')
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [sendingDirectly, setSendingDirectly] = useState(false)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [form, setForm] = useState<FormData>({
     docType: (typeParam && ['invoice', 'proposal'].includes(typeParam) ? typeParam : 'invoice') as DocType,
@@ -160,61 +159,6 @@ function NewDocumentContent() {
       setValidationErrors(['Failed to generate document. Please try again.'])
     } finally {
       setLoading(false)
-    }
-  }
-
-  // Generate + send immediately — user never sees a draft in the table
-  const handleGenerateAndSend = async () => {
-    const allErrors: string[] = []
-    if (!form.businessName.trim()) allErrors.push('Business name is required')
-    if (!form.clientName.trim()) allErrors.push('Client name is required')
-    if (!form.clientEmail.trim()) allErrors.push('Client email is required')
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.clientEmail)) allErrors.push('Please enter a valid email address')
-    if (!form.serviceDescription.trim()) allErrors.push('Service description is required')
-    if (!form.price.trim()) allErrors.push('Price is required')
-    else if (isNaN(parseFloat(form.price.replace(/,/g, '')))) allErrors.push('Price must be a valid number')
-    if (form.docType === 'proposal' && !form.timeline.trim()) allErrors.push('Timeline is required for proposals')
-    if (allErrors.length > 0) { setValidationErrors(allErrors); return }
-
-    setLoading(true)
-    setSendingDirectly(true)
-    try {
-      // Step 1 — generate (saves as draft)
-      const genRes = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      const genData = await genRes.json()
-      if (!genRes.ok) {
-        setValidationErrors([genData.error || 'Failed to generate document. Please try again.'])
-        return
-      }
-
-      // Step 2 — send immediately (draft → sent, number + email assigned)
-      const sendEndpoint = form.docType === 'invoice' ? '/api/invoices/send' : '/api/proposals/send'
-      const idKey = form.docType === 'invoice' ? 'invoiceId' : 'proposalId'
-      const sendRes = await fetch(sendEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [idKey]: genData.id }),
-      })
-
-      if (!sendRes.ok) {
-        // Generated but send failed — drop them on the detail page to retry
-        router.push(`/dashboard/documents/${genData.id}`)
-        return
-      }
-
-      // Redirect to dashboard with success notification (never land on the already-sent detail page)
-      const paramKey = form.docType === 'invoice' ? 'invoiceCreated' : 'proposalCreated'
-      router.push(`/dashboard?${paramKey}=${genData.id}`)
-    } catch (err) {
-      console.error(err)
-      setValidationErrors(['Failed to generate and send. Please try again.'])
-    } finally {
-      setLoading(false)
-      setSendingDirectly(false)
     }
   }
 
@@ -496,22 +440,13 @@ function NewDocumentContent() {
               Continue →
             </button>
           ) : (
-            <div className="flex flex-col gap-2 w-full sm:w-auto sm:flex-row sm:items-center">
-              <button
-                onClick={handleGenerateAndSend}
-                disabled={loading}
-                className="bg-orange-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-orange-700 transition disabled:opacity-50 font-semibold"
-              >
-                {loading && sendingDirectly ? 'Sending...' : `📤 Send to Client`}
-              </button>
-              <button
-                onClick={handleGenerate}
-                disabled={loading}
-                className="border border-gray-300 text-gray-700 text-sm px-6 py-2.5 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
-              >
-                {loading && !sendingDirectly ? 'Saving...' : '💾 Save as Draft'}
-              </button>
-            </div>
+            <button
+              onClick={handleGenerate}
+              disabled={loading}
+              className="bg-orange-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-orange-700 transition disabled:opacity-50 font-semibold"
+            >
+              {loading ? 'Generating...' : 'Generate Draft →'}
+            </button>
           )}
         </div>
       </div>

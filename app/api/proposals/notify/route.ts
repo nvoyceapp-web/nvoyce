@@ -1,49 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { clerkClient } from '@clerk/nextjs/server'
+import { supabaseServer } from '@/lib/supabase-server'
+import { sendProposalAcceptedEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   try {
-    const { proposalId, action, clientName, clientEmail, amount } = await req.json()
+    const { proposalId, action } = await req.json()
 
-    if (!proposalId || !action || !clientName) {
+    if (!proposalId || !action) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const isAccepted = action === 'accepted'
-    const subject = isAccepted
-      ? `Proposal Accepted! - ${clientName} accepted your proposal for $${amount.toLocaleString()}`
-      : `Proposal Declined - ${clientName} declined your proposal for $${amount.toLocaleString()}`
+    // Only send freelancer notification for accepted proposals
+    // (declined is informational — no email for now)
+    if (action !== 'accepted') {
+      return NextResponse.json({ success: true, message: 'No notification needed for declined proposals' })
+    }
 
-    const emailBody = isAccepted
-      ? `
-<h2>Great news! Proposal Accepted</h2>
-<p><strong>${clientName}</strong> has accepted your proposal for <strong>$${amount.toLocaleString()}</strong></p>
-<p>An invoice has been automatically generated and is waiting in your Nvoyce dashboard.</p>
-<p><a href="https://app.nvoyce.ai/dashboard">View your dashboard →</a></p>
-      `
-      : `
-<h2>Proposal Declined</h2>
-<p><strong>${clientName}</strong> has declined your proposal for <strong>$${amount.toLocaleString()}</strong></p>
-<p>You may want to reach out to discuss next steps or alternative options.</p>
-<p><a href="https://app.nvoyce.ai/dashboard">View your dashboard →</a></p>
-      `
+    // Fetch the proposal to get user_id, client info, amount, document_number
+    const { data: proposal, error: fetchError } = await supabaseServer
+      .from('documents')
+      .select('user_id, client_name, price, document_number')
+      .eq('id', proposalId)
+      .single()
 
-    // Send email notification to the freelancer's email (would need freelancer email from proposal data)
-    // For now, we'll just log this - in production, fetch the freelancer's email from the proposal
-    console.log(`Sending ${action} notification for proposal ${proposalId}`)
+    if (fetchError || !proposal) {
+      console.error('Failed to fetch proposal for notification:', fetchError)
+      return NextResponse.json({ success: true, message: 'Proposal not found — notification skipped' })
+    }
 
-    return NextResponse.json({
-      success: true,
-      message: `Notification sent to freelancer for ${action} proposal`,
+    // Get freelancer's email from Clerk
+    const clerk = await clerkClient()
+    const user = await clerk.users.getUser(proposal.user_id)
+    const primary = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)
+
+    if (!primary?.emailAddress) {
+      console.error('No primary email found for user:', proposal.user_id)
+      return NextResponse.json({ success: true, message: 'Freelancer email not found — notification skipped' })
+    }
+
+    await sendProposalAcceptedEmail({
+      freelancerEmail: primary.emailAddress,
+      freelancerName: user.firstName || 'there',
+      clientName: proposal.client_name || 'Your client',
+      amount: proposal.price,
+      proposalNumber: proposal.document_number || proposalId,
+      dashboardLink: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${proposalId}`,
+      userId: proposal.user_id,
     })
+
+    return NextResponse.json({ success: true, message: 'Proposal accepted notification sent' })
   } catch (error) {
-    console.error('Error sending notification:', error)
-    // Don't fail the main flow if notification fails
-    return NextResponse.json({
-      success: true,
-      message: 'Proposal updated (notification delivery pending)',
-    })
+    console.error('Error sending proposal notification:', error)
+    // Non-blocking — don't fail the proposal acceptance flow
+    return NextResponse.json({ success: true, message: 'Notification delivery failed (non-fatal)' })
   }
 }

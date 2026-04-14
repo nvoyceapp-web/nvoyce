@@ -908,3 +908,89 @@ export async function sendPaymentReceivedEmail({
   console.log(`Payment received notification sent to ${freelancerEmail}:`, result.data?.id)
   return result
 }
+
+export async function sendProposalAcceptedEmail({
+  freelancerEmail,
+  freelancerName,
+  clientName,
+  amount,
+  proposalNumber,
+  dashboardLink,
+  userId,
+}: {
+  freelancerEmail: string
+  freelancerName: string
+  clientName: string
+  amount: number
+  proposalNumber: string
+  dashboardLink: string
+  userId?: string
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.nvoyce.ai'
+  let logoUrl = `${appUrl}/logo.png`
+
+  if (userId) {
+    try {
+      const userLogo = await getUserLogo(userId)
+      if (userLogo) logoUrl = userLogo
+    } catch (_) {}
+  }
+
+  const result = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: freelancerEmail,
+    subject: `🎉 Proposal accepted — $${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${clientName}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="text-align: center; padding: 30px 20px; background-color: #ffffff; border-bottom: 1px solid #e5e7eb;">
+          <img src="${logoUrl}" alt="Nvoyce" style="max-width: 280px; height: auto; display: block; margin: 0 auto;" />
+        </div>
+        <div style="padding: 40px 30px; text-align: center;">
+          <p style="margin: 0 0 8px 0; font-size: 40px;">🎉</p>
+          <h1 style="margin: 0 0 10px 0; font-size: 24px; font-weight: bold; color: #1f2937;">
+            Proposal accepted, ${freelancerName}!
+          </h1>
+          <p style="margin: 0 0 30px 0; font-size: 15px; color: #6b7280;">
+            <strong>${clientName}</strong> accepted proposal <strong>${proposalNumber}</strong> for <strong>$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>.
+          </p>
+
+          <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 24px; margin: 0 0 24px 0; text-align: left;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 6px 0; font-size: 13px; color: #166534;">Client</td>
+                <td style="padding: 6px 0; font-size: 15px; color: #1f2937; font-weight: bold; text-align: right;">${clientName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; font-size: 13px; color: #166534;">Proposal</td>
+                <td style="padding: 6px 0; font-size: 13px; color: #1f2937; font-weight: bold; text-align: right;">${proposalNumber}</td>
+              </tr>
+              <tr style="border-top: 1px solid #bbf7d0;">
+                <td style="padding: 10px 0 4px; font-size: 13px; color: #166534;">Amount</td>
+                <td style="padding: 10px 0 4px; font-size: 20px; color: #16a34a; font-weight: bold; text-align: right;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 20px; margin: 0 0 30px 0; text-align: left;">
+            <p style="margin: 0; font-size: 13px; color: #1e40af;">
+              ✅ An invoice has been automatically generated and sent to ${clientName}.
+            </p>
+          </div>
+
+          <a href="${dashboardLink}" style="display: inline-block; padding: 14px 40px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; margin: 0 0 30px 0;">View Proposal in Dashboard →</a>
+
+          <p style="margin: 0; font-size: 13px; color: #9ca3af;">
+            Proposal ${proposalNumber} is now marked as Accepted.
+          </p>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+          <p style="margin: 0; font-size: 11px; color: #d1d5db;">© 2026 Nvoyce · We do the hard stuff. You get paid.</p>
+        </div>
+      </div>
+    `,
+  })
+
+  if (result.error) throw result.error
+  console.log(`Proposal accepted notification sent to ${freelancerEmail}:`, result.data?.id)
+  return result
+}

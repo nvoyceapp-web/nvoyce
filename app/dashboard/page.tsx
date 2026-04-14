@@ -83,8 +83,8 @@ function DashboardContent() {
   const [archiving, setArchiving] = useState(false)
   const [bulkActionNotice, setBulkActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null)
 
-  // Payment notification state
-  const [paymentToasts, setPaymentToasts] = useState<Array<{ toastId: string; clientName: string; amount: number; isPartial: boolean }>>([])
+  // Payment + proposal notification state
+  const [paymentToasts, setPaymentToasts] = useState<Array<{ toastId: string; clientName: string; amount: number; isPartial: boolean; type: 'payment' | 'proposal_accepted' }>>([])
   const [newPaymentCount, setNewPaymentCount] = useState(0)
   const prevStatusMapRef = useRef<Map<string, string>>(new Map())
   const isFirstFetchRef = useRef(true)
@@ -781,7 +781,7 @@ function DashboardContent() {
             return daysOld > 30
           }).length
 
-          // Detect new payments since last fetch
+          // Detect new payments + proposal acceptances since last fetch
           if (!isFirstFetchRef.current) {
             const newToasts: typeof paymentToasts = []
             data.forEach(doc => {
@@ -790,12 +790,27 @@ function DashboardContent() {
                 (doc.status === 'fully_paid' || doc.status === 'partially_paid') &&
                 prevStatus !== undefined &&
                 prevStatus !== doc.status
+              const isNewAcceptance =
+                doc.doc_type === 'proposal' &&
+                doc.status === 'accepted' &&
+                prevStatus !== undefined &&
+                prevStatus !== 'accepted'
               if (isNewPayment) {
                 newToasts.push({
                   toastId: `${doc.id}-${Date.now()}`,
                   clientName: doc.client_name,
                   amount: doc.amount_paid || doc.price,
                   isPartial: doc.status === 'partially_paid',
+                  type: 'payment',
+                })
+              }
+              if (isNewAcceptance) {
+                newToasts.push({
+                  toastId: `${doc.id}-accepted-${Date.now()}`,
+                  clientName: doc.client_name,
+                  amount: doc.price,
+                  isPartial: false,
+                  type: 'proposal_accepted',
                 })
               }
             })
@@ -2053,37 +2068,44 @@ function DashboardContent() {
 
       {/* Payment Toast Stack */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none">
-        {paymentToasts.map(toast => (
-          <div
-            key={toast.toastId}
-            className="pointer-events-auto flex items-center gap-4 bg-white border border-gray-200 shadow-xl rounded-2xl px-5 py-4 min-w-[300px] max-w-sm animate-fade-in"
-            style={{ animation: 'slideInRight 0.3s ease-out' }}
-          >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${toast.isPartial ? 'bg-yellow-100' : 'bg-green-100'}`}>
-              <span className="text-lg">{toast.isPartial ? '💛' : '💰'}</span>
+        {paymentToasts.map(toast => {
+          const isProposal = toast.type === 'proposal_accepted'
+          const dotColor = isProposal ? 'bg-purple-400' : toast.isPartial ? 'bg-yellow-400' : 'bg-green-400'
+          const dotSolid = isProposal ? 'bg-purple-500' : toast.isPartial ? 'bg-yellow-500' : 'bg-green-500'
+          const iconBg = isProposal ? 'bg-purple-100' : toast.isPartial ? 'bg-yellow-100' : 'bg-green-100'
+          const icon = isProposal ? '🎉' : toast.isPartial ? '💛' : '💰'
+          const title = isProposal ? 'Proposal accepted!' : toast.isPartial ? 'Partial payment received' : 'Payment received!'
+          const subtitle = isProposal
+            ? `${toast.clientName} accepted for $${toast.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+            : `$${toast.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${toast.clientName}`
+          return (
+            <div
+              key={toast.toastId}
+              className="pointer-events-auto flex items-center gap-4 bg-white border border-gray-200 shadow-xl rounded-2xl px-5 py-4 min-w-[300px] max-w-sm animate-fade-in"
+              style={{ animation: 'slideInRight 0.3s ease-out' }}
+            >
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                <span className="text-lg">{icon}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900 text-sm">{title}</p>
+                <p className="text-gray-500 text-xs truncate">{subtitle}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dotColor}`} />
+                  <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${dotSolid}`} />
+                </span>
+                <button
+                  onClick={() => dismissToast(toast.toastId)}
+                  className="text-gray-300 hover:text-gray-500 text-xl leading-none ml-1"
+                >
+                  ×
+                </button>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-900 text-sm">
-                {toast.isPartial ? 'Partial payment received' : 'Payment received!'}
-              </p>
-              <p className="text-gray-500 text-xs truncate">
-                ${toast.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} from {toast.clientName}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${toast.isPartial ? 'bg-yellow-400' : 'bg-green-400'}`} />
-                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${toast.isPartial ? 'bg-yellow-500' : 'bg-green-500'}`} />
-              </span>
-              <button
-                onClick={() => dismissToast(toast.toastId)}
-                className="text-gray-300 hover:text-gray-500 text-xl leading-none ml-1"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <style>{`

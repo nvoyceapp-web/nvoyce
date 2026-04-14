@@ -206,7 +206,9 @@ function NewDocumentContent() {
         return
       }
 
-      router.push(`/dashboard/documents/${genData.id}`)
+      // Redirect to dashboard with success notification (never land on the already-sent detail page)
+      const paramKey = form.docType === 'invoice' ? 'invoiceCreated' : 'proposalCreated'
+      router.push(`/dashboard?${paramKey}=${genData.id}`)
     } catch (err) {
       console.error(err)
       setValidationErrors(['Failed to generate and send. Please try again.'])

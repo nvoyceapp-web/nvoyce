@@ -159,7 +159,16 @@ export default function AboutPage() {
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-gray-900">Shareable Proposals</h4>
-                <p className="text-gray-600">Send clients a link to review and accept proposals. No sign-up required.</p>
+                <p className="text-gray-600">Send clients a link to review and accept proposals. No sign-up required. Once accepted, an invoice is auto-generated and sent to the client instantly.</p>
+              </div>
+            </div>
+            <div className="flex gap-5 items-start">
+              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Real-Time Notifications</h4>
+                <p className="text-gray-600">Get instant email alerts and live dashboard toasts the moment a client pays or accepts a proposal — partial payments included. No refresh needed.</p>
               </div>
             </div>
           </div>

@@ -37,7 +37,7 @@ export default function FAQPage() {
           id: 'proposal-statuses',
           question: 'What are the different proposal statuses?',
           answer:
-            '📝 Draft — Proposal generated and saved. Review and edit it before sending — no document number yet.\n\n📤 Sent — You clicked "Send to Client" and the proposal was emailed. Client can now accept or decline.\n\n👁️ Received — Client has opened the proposal link.\n\n✓ Accepted — Client accepted the proposal. An invoice is automatically generated from the proposal details.\n\n✗ Declined — Client declined. You can create a revised proposal if needed.',
+            '📝 Draft — Proposal generated and saved. Review and edit it before sending — no document number yet.\n\n📤 Sent — You clicked "Send to Client" and the proposal was emailed. Client can now accept or decline.\n\n👁️ Received — Client has opened the proposal link.\n\n✓ Accepted — Client accepted the proposal. An invoice is automatically generated and sent to the client. You\'ll receive a 🎉 email notification and a real-time dashboard toast.\n\n✗ Declined — Client declined. You can create a revised proposal if needed.',
         },
         {
           id: 'days-outstanding',
@@ -67,19 +67,25 @@ export default function FAQPage() {
           id: 'proposal-acceptance',
           question: 'How do clients accept proposals?',
           answer:
-            'After generating a proposal, you land on a review page. Review the content (all fields are editable — click any field to edit), then click ✉ Send to Client.\n\nYour client gets an email with a link to the proposal. They can click Accept or Decline directly from the email — no Nvoyce account required. Once accepted, an invoice is automatically generated and saved to your dashboard.',
+            'Fill out the 3-step wizard and click "Generate Draft →" on step 3. This saves an editable draft and takes you to a review page.\n\nFrom the draft review page you have three options:\n• ← Back to Edit — returns you to step 3 with all your data pre-filled (the old draft is automatically replaced)\n• Save Draft — keeps it in draft status for later\n• Send to Client — assigns a document number, emails the proposal, and takes you back to your dashboard with a success confirmation\n\nYour client gets an email with a link to the proposal. They can click Accept or Decline directly — no Nvoyce account required. Once accepted, an invoice is automatically generated and sent to the client, and you receive a 🎉 email + real-time dashboard notification.',
         },
         {
           id: 'mark-paid',
           question: 'How do I mark an invoice as paid?',
           answer:
-            'Open the ⋯ Actions dropdown on any invoice row and click "✓ Mark Paid". This updates the invoice status to Fully Paid in real time — no page reload needed.\n\nThis is useful when a client pays you via bank transfer, cash, check, or any method outside of Stripe. If your client pays via the Stripe payment link in their email, the invoice will update automatically (once Stripe webhooks are live).',
+            'If your client pays via the Stripe payment link in their email, the invoice updates automatically — no action needed on your end. You\'ll also receive a payment email and a real-time dashboard notification.\n\nFor payments made outside of Stripe (bank transfer, cash, check, etc.), open the ⋯ Actions dropdown on any invoice row and click "✓ Mark Paid". This updates the invoice status to Fully Paid in real time — no page reload needed.',
         },
         {
           id: 'copy-payment-link',
           question: 'How do I share the payment link with my client directly?',
           answer:
             'Every invoice has a Stripe payment link generated when you send it. To share it quickly, open the ⋯ Actions dropdown on the invoice row:\n\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to your clipboard so you can paste it via text, WhatsApp, or any other channel. Handy when a client says they didn\'t get the email or you want to follow up fast.\n\n• 📱 Show QR Code — opens a QR code modal for the payment link. Your client can scan it with their phone camera to go straight to checkout. You can also download the QR code as a PNG to include in a printed invoice, PDF, or anywhere else.\n\nBoth options only appear for invoices that have a Stripe link attached and are not in Draft status.',
+        },
+        {
+          id: 'notifications',
+          question: 'Will I be notified when a client pays or accepts a proposal?',
+          answer:
+            'Yes — two ways, both happen automatically:\n\n📧 Email notifications:\n• When a client makes any payment (partial or full), you receive a "You got paid" email with the amount, client name, and invoice number. Your client simultaneously receives a payment receipt.\n• When a client accepts a proposal, you receive a "Proposal accepted" email with a link to the auto-generated invoice.\n\n🔔 Real-time dashboard toasts:\nIf you\'re on the dashboard when the event happens, a slide-in notification appears bottom-right — green 💰 for payments, purple 🎉 for proposal acceptances. A badge counter also appears on your "You\'re Owed" card.\n\nThe badge clears once you dismiss the toast (or it auto-dismisses after 6 seconds). No manual refresh needed — the dashboard polls every 15 seconds.',
         },
         {
           id: 'send-reminder',
@@ -127,7 +133,7 @@ export default function FAQPage() {
           id: 'actions-dropdown',
           question: 'What does the "⋯ Actions" dropdown do?',
           answer:
-            'The ⋯ Actions button appears in the Action column for every document. It opens a menu of available actions:\n\nFor invoices:\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to clipboard (only shown if a link exists and status isn\'t draft)\n• 📱 Show QR Code — opens a scannable QR code for the payment link; downloadable as a PNG (only shown if a link exists)\n• ✓ Mark Paid — manually mark the invoice as fully paid\n• 📧 Send Reminder — send a follow-up email (appears for overdue invoices)\n• 👁️ View Details — opens the full document detail modal\n• 🗂 Archive — move the invoice to your archive (only available once fully paid)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFor proposals:\n• 🔗 Copy Link — copies the public proposal URL\n• 📧 Send Follow-up — sends a follow-up email (for stale proposals)\n• 👁️ View Details — opens the full detail modal\n• 🗂 Archive — move to archive (only available once accepted)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)',
+            'The ⋯ Actions button appears in the Action column for every document. It opens a menu of available actions:\n\nFor invoices:\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to clipboard (only shown if a link exists and status isn\'t draft)\n• 📱 Show QR Code — opens a scannable QR code for the payment link; downloadable as a PNG (only shown if a link exists)\n• ✓ Mark Paid — manually mark the invoice as fully paid\n• 📧 Send Reminder — send a follow-up email (appears for overdue invoices)\n• 👁️ View Details — opens the full document detail page\n• 🗂 Archive — move the invoice to your archive (only available once fully paid)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFor proposals:\n• 🔗 Copy Link — copies the public proposal URL\n• 📧 Send Follow-up — sends a follow-up email (for stale proposals)\n• 👁️ View Details — opens the full detail page\n• 🗂 Archive — move to archive (only available once accepted)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFrom the draft detail page itself, you\'ll also see: "Save Draft", "← Back to Edit" (returns to the creation wizard with all data pre-filled), and "Send to Client".',
         },
         {
           id: 'bulk-actions',

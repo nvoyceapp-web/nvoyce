@@ -52,7 +52,7 @@ function NewDocumentContent() {
         .single()
       if (data?.form_data) {
         setForm({
-          docType: 'proposal',
+          docType: (data.doc_type as DocType) || 'invoice',
           clientName: data.form_data.clientName || data.client_name || '',
           clientEmail: data.form_data.clientEmail || data.client_email || '',
           businessName: data.form_data.businessName || data.business_name || '',

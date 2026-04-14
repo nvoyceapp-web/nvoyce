@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase-server'
 import Anthropic from '@anthropic-ai/sdk'
+import { assignDocumentNumber } from '@/lib/document-numbers'
+import { createPaymentLink } from '@/lib/stripe'
+import { sendInvoiceEmail } from '@/lib/email'
 
 const client = new Anthropic()
 
@@ -155,6 +158,48 @@ Generate ONLY valid JSON, no additional text.`
       return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 })
     }
 
+    // Assign document number (INV-YYYY-NNN)
+    let documentNumber = ''
+    try {
+      documentNumber = await assignDocumentNumber(proposal.user_id, 'invoice', invoice.id)
+    } catch (numErr) {
+      console.error('Document number assignment failed (non-fatal):', numErr)
+    }
+
+    // Create Stripe payment link
+    let paymentLink = ''
+    try {
+      paymentLink = await createPaymentLink({
+        documentId: invoice.id,
+        amount: proposal.price,
+        description: `Invoice from ${proposal.business_name}`,
+        clientEmail: proposal.client_email,
+      })
+      await supabaseServer
+        .from('documents')
+        .update({ stripe_payment_link: paymentLink })
+        .eq('id', invoice.id)
+    } catch (stripeErr) {
+      console.error('Payment link creation failed (non-fatal):', stripeErr)
+    }
+
+    // Send invoice email to client
+    try {
+      await sendInvoiceEmail({
+        clientEmail: proposal.client_email,
+        clientName: proposal.client_name,
+        invoiceLink: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${invoice.id}`,
+        paymentLink,
+        businessName: proposal.business_name,
+        amount: proposal.price,
+        invoiceNumber: documentNumber,
+        dueDate: invoiceData.due_date,
+        userId: proposal.user_id,
+      })
+    } catch (emailErr) {
+      console.error('Invoice email failed (non-fatal):', emailErr)
+    }
+
     // Update proposal status to "accepted"
     const { error: updateError } = await supabaseServer
       .from('documents')
@@ -163,13 +208,13 @@ Generate ONLY valid JSON, no additional text.`
 
     if (updateError) {
       console.error('Failed to update proposal status:', updateError)
-      // Don't fail the response - invoice was created successfully
     }
 
     return NextResponse.json({
       success: true,
       invoiceId: invoice.id,
-      message: `Invoice auto-generated from proposal for ${proposal.client_name}`,
+      documentNumber,
+      message: `Invoice ${documentNumber} auto-generated from proposal for ${proposal.client_name}`,
     })
   } catch (error) {
     console.error('Error generating invoice from proposal:', error)

@@ -650,21 +650,6 @@ export default function DocumentPage() {
             </div>
           )}
 
-          {/* Payment link banner (sent invoices) */}
-          {isInvoice && doc.stripe_payment_link && effectiveStatus !== 'fully_paid' && (
-            <div className="bg-black text-white rounded-xl p-6 text-center mb-8 print:hidden">
-              <p className="text-sm text-gray-300 mb-3">Pay securely online</p>
-              <a
-                href={doc.stripe_payment_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white text-black text-sm font-semibold px-6 py-2.5 rounded-lg hover:bg-gray-100 transition inline-block"
-              >
-                Pay ${outstandingAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} now →
-              </a>
-            </div>
-          )}
-
           {isInvoice && effectiveStatus === 'fully_paid' && (
             <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-center mb-8">
               <p className="text-green-700 font-semibold">✓ Payment received in full</p>

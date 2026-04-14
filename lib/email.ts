@@ -821,6 +821,7 @@ export async function sendPaymentReceivedEmail({
   documentNumber,
   isPartial = false,
   dashboardLink,
+  userId,
 }: {
   freelancerEmail: string
   freelancerName: string
@@ -831,9 +832,19 @@ export async function sendPaymentReceivedEmail({
   documentNumber: string
   isPartial?: boolean
   dashboardLink: string
+  userId?: string
 }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.nvoyce.ai'
-  const logoUrl = `${appUrl}/logo.png`
+  let logoUrl = `${appUrl}/logo.png`
+
+  // Use freelancer's custom logo if uploaded in settings
+  if (userId) {
+    try {
+      const userLogo = await getUserLogo(userId)
+      if (userLogo) logoUrl = userLogo
+    } catch (_) {}
+  }
+
   const remaining = invoiceTotal - totalPaid
 
   const result = await resend.emails.send({
@@ -844,8 +855,8 @@ export async function sendPaymentReceivedEmail({
       : `💰 You got paid — $${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${clientName}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <div style="text-align: center; padding: 30px 20px; background-color: #0d1b2a;">
-          <img src="${logoUrl}" alt="Nvoyce" style="max-width: 140px; height: auto;" />
+        <div style="text-align: center; padding: 30px 20px; background-color: #ffffff; border-bottom: 1px solid #e5e7eb;">
+          <img src="${logoUrl}" alt="Nvoyce" style="max-width: 280px; height: auto; display: block; margin: 0 auto;" />
         </div>
         <div style="padding: 40px 30px; text-align: center;">
           <p style="margin: 0 0 8px 0; font-size: 40px;">${isPartial ? '💛' : '💰'}</p>

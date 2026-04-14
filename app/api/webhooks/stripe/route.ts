@@ -92,6 +92,7 @@ export async function POST(req: NextRequest) {
               documentNumber: doc.document_number || documentId,
               isPartial: newStatus === 'partially_paid',
               dashboardLink: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/documents/${documentId}`,
+              userId: doc.user_id,
             })
           }
         } catch (emailErr) {

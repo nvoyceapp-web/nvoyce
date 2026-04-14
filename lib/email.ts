@@ -897,4 +897,3 @@ export async function sendPaymentReceivedEmail({
   console.log(`Payment received notification sent to ${freelancerEmail}:`, result.data?.id)
   return result
 }
-}

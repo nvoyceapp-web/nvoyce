@@ -25,6 +25,8 @@ function NewDocumentContent() {
   const searchParams = useSearchParams()
   const typeParam = searchParams.get('type') as DocType | null
   const prefillId = searchParams.get('prefill')
+  // Track the draft ID that came from "← Back to Edit" so we can replace it on regenerate
+  const [replaceDraftId, setReplaceDraftId] = useState<string | null>(null)
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
@@ -63,6 +65,8 @@ function NewDocumentContent() {
           notes: data.form_data.notes || '',
           expirationDays: data.form_data.expirationDays || '7',
         })
+        // Remember the draft we came from — it will be deleted when a new draft is generated
+        if (data.status === 'draft') setReplaceDraftId(data.id)
         setStep(3)
       }
     }
@@ -142,7 +146,7 @@ function NewDocumentContent() {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, replaceDraftId }),
       })
       const data = await res.json()
 

@@ -67,7 +67,19 @@ export async function POST(req: NextRequest) {
     timeline,
     paymentTerms,
     notes,
+    replaceDraftId,
   } = body
+
+  // If the user is regenerating from an existing draft (via "← Back to Edit"),
+  // delete that draft first so we never accumulate orphaned duplicates.
+  if (replaceDraftId) {
+    await supabase
+      .from('documents')
+      .delete()
+      .eq('id', replaceDraftId)
+      .eq('user_id', userId)   // safety: only delete own drafts
+      .eq('status', 'draft')   // never delete a sent/paid document
+  }
 
   // 2. Build the Claude prompt
   // This is where the AI magic happens — we give Claude structured instructions

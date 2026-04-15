@@ -715,33 +715,42 @@ export default function DocumentPage() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1">Amount Paid</label>
-                  <input
-                    type="number"
-                    value={amountPaid}
-                    onChange={(e) => setAmountPaid(Math.max(0, Number(e.target.value)))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
-                  />
+
+              {doc.stripe_payment_link ? (
+                <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-50 rounded-lg px-4 py-3">
+                  <span>⚡</span>
+                  <span>Payments via Stripe are tracked automatically — no action needed.</span>
                 </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1">Payment Notes (optional)</label>
-                  <textarea
-                    value={paymentNotes}
-                    onChange={(e) => setPaymentNotes(e.target.value)}
-                    rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
-                  />
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Record Off-Platform Payment (cash, Zelle, bank transfer)</p>
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 block mb-1">Amount Paid</label>
+                    <input
+                      type="number"
+                      value={amountPaid}
+                      onChange={(e) => setAmountPaid(Math.max(0, Number(e.target.value)))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 block mb-1">Payment Notes (optional)</label>
+                    <textarea
+                      value={paymentNotes}
+                      onChange={(e) => setPaymentNotes(e.target.value)}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black text-sm"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSavePayment}
+                    disabled={savingPayment}
+                    className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm disabled:opacity-50"
+                  >
+                    {savingPayment ? 'Saving...' : paymentSaved ? '✓ Saved!' : '✓ Save Payment'}
+                  </button>
                 </div>
-                <button
-                  onClick={handleSavePayment}
-                  disabled={savingPayment}
-                  className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm disabled:opacity-50"
-                >
-                  {savingPayment ? 'Saving...' : paymentSaved ? '✓ Saved!' : '✓ Save Payment'}
-                </button>
-              </div>
+              )}
             </div>
           )}
 

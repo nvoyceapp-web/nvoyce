@@ -926,3 +926,166 @@ export async function sendProposalAcceptedEmail({
   console.log(`Proposal accepted notification sent to ${freelancerEmail}:`, result.data?.id)
   return result
 }
+
+// ─────────────────────────────────────────
+// Automated Reminder Emails
+// ─────────────────────────────────────────
+
+export async function sendInvoiceOverdueReminderEmail({
+  clientEmail,
+  clientName,
+  freelancerName,
+  businessName,
+  amount,
+  invoiceNumber,
+  daysOverdue,
+  paymentLink,
+  logoUrl,
+}: {
+  clientEmail: string
+  clientName: string
+  freelancerName: string
+  businessName: string
+  amount: number
+  invoiceNumber: string
+  daysOverdue: number
+  paymentLink?: string
+  logoUrl?: string
+}) {
+  const logo = logoUrl || `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`
+  const urgencyColor = daysOverdue >= 30 ? '#dc2626' : '#d97706'
+  const urgencyLabel = daysOverdue >= 30 ? '🔴 30-Day Overdue Notice' : '🟡 Friendly Payment Reminder'
+
+  const result = await resend.emails.send({
+    from: process.env.FROM_EMAIL || 'invoices@nvoyce.ai',
+    to: clientEmail,
+    subject: `${daysOverdue >= 30 ? 'Final Notice' : 'Reminder'}: Invoice ${invoiceNumber} is ${daysOverdue} days overdue`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #ffffff; padding: 32px; text-align: center; border-bottom: 1px solid #f3f4f6;">
+          <img src="${logo}" alt="${businessName}" style="max-width: 280px; max-height: 80px; object-fit: contain;" />
+        </div>
+        <div style="padding: 40px 32px; background-color: #ffffff;">
+          <div style="background-color: ${daysOverdue >= 30 ? '#fef2f2' : '#fffbeb'}; border-left: 4px solid ${urgencyColor}; padding: 12px 16px; border-radius: 4px; margin-bottom: 24px;">
+            <p style="margin: 0; font-size: 14px; font-weight: bold; color: ${urgencyColor};">${urgencyLabel}</p>
+          </div>
+
+          <p style="margin: 0 0 16px 0; font-size: 15px; color: #374151;">Hi ${clientName},</p>
+          <p style="margin: 0 0 24px 0; font-size: 15px; color: #374151; line-height: 1.6;">
+            This is a reminder that invoice <strong>${invoiceNumber}</strong> from <strong>${businessName}</strong> is <strong>${daysOverdue} days overdue</strong>.
+            We'd appreciate your prompt attention to settle the outstanding balance.
+          </p>
+
+          <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 28px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 13px; color: #6b7280;">Invoice</span>
+              <span style="font-size: 13px; font-weight: bold; color: #111827;">${invoiceNumber}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 13px; color: #6b7280;">Amount Due</span>
+              <span style="font-size: 18px; font-weight: bold; color: ${urgencyColor};">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 13px; color: #6b7280;">Days Overdue</span>
+              <span style="font-size: 13px; font-weight: bold; color: ${urgencyColor};">${daysOverdue} days</span>
+            </div>
+          </div>
+
+          ${paymentLink ? `<div style="text-align: center; margin-bottom: 28px;">
+            <a href="${paymentLink}" style="display: inline-block; padding: 14px 40px; background-color: ${urgencyColor}; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 15px;">Pay Now →</a>
+          </div>` : ''}
+
+          <p style="margin: 0 0 8px 0; font-size: 13px; color: #6b7280;">
+            If you have already sent payment, please disregard this message. If you have any questions, please reply to this email or contact ${freelancerName} directly.
+          </p>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+          <p style="margin: 0; font-size: 11px; color: #d1d5db;">© 2026 Nvoyce · We do the hard stuff. You get paid.</p>
+        </div>
+      </div>
+    `,
+  })
+
+  if (result.error) throw result.error
+  console.log(`Overdue reminder (${daysOverdue}d) sent to ${clientEmail}:`, result.data?.id)
+  return result
+}
+
+export async function sendProposalExpiringEmail({
+  clientEmail,
+  clientName,
+  freelancerName,
+  businessName,
+  amount,
+  proposalNumber,
+  daysRemaining,
+  proposalLink,
+  logoUrl,
+}: {
+  clientEmail: string
+  clientName: string
+  freelancerName: string
+  businessName: string
+  amount: number
+  proposalNumber: string
+  daysRemaining: number
+  proposalLink: string
+  logoUrl?: string
+}) {
+  const logo = logoUrl || `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`
+  const urgencyText = daysRemaining === 1 ? 'expires tomorrow' : `expires in ${daysRemaining} days`
+
+  const result = await resend.emails.send({
+    from: process.env.FROM_EMAIL || 'invoices@nvoyce.ai',
+    to: clientEmail,
+    subject: `Your proposal from ${businessName} ${urgencyText}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #ffffff; padding: 32px; text-align: center; border-bottom: 1px solid #f3f4f6;">
+          <img src="${logo}" alt="${businessName}" style="max-width: 280px; max-height: 80px; object-fit: contain;" />
+        </div>
+        <div style="padding: 40px 32px; background-color: #ffffff;">
+          <div style="background-color: #fffbeb; border-left: 4px solid #d97706; padding: 12px 16px; border-radius: 4px; margin-bottom: 24px;">
+            <p style="margin: 0; font-size: 14px; font-weight: bold; color: #d97706;">⏰ Your proposal ${urgencyText}</p>
+          </div>
+
+          <p style="margin: 0 0 16px 0; font-size: 15px; color: #374151;">Hi ${clientName},</p>
+          <p style="margin: 0 0 24px 0; font-size: 15px; color: #374151; line-height: 1.6;">
+            Just a heads-up — proposal <strong>${proposalNumber}</strong> from <strong>${businessName}</strong> is about to expire.
+            If you'd like to move forward, please review and accept it before it closes.
+          </p>
+
+          <div style="background-color: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 28px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 13px; color: #6b7280;">Proposal</span>
+              <span style="font-size: 13px; font-weight: bold; color: #111827;">${proposalNumber}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 13px; color: #6b7280;">Value</span>
+              <span style="font-size: 18px; font-weight: bold; color: #7c3aed;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 13px; color: #6b7280;">Time Remaining</span>
+              <span style="font-size: 13px; font-weight: bold; color: #d97706;">${daysRemaining} day${daysRemaining === 1 ? '' : 's'}</span>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 28px;">
+            <a href="${proposalLink}" style="display: inline-block; padding: 14px 40px; background-color: #7c3aed; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 15px;">View & Accept Proposal →</a>
+          </div>
+
+          <p style="margin: 0; font-size: 13px; color: #6b7280;">
+            If you have questions or need more time, please reach out to ${freelancerName} directly.
+          </p>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
+          <p style="margin: 0; font-size: 11px; color: #d1d5db;">© 2026 Nvoyce · We do the hard stuff. You get paid.</p>
+        </div>
+      </div>
+    `,
+  })
+
+  if (result.error) throw result.error
+  console.log(`Proposal expiry reminder sent to ${clientEmail}:`, result.data?.id)
+  return result
+}

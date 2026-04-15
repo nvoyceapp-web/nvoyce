@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import {
-  sendInvoiceOverdueReminderEmail,
-  sendProposalExpiringEmail,
-  getUserLogo,
-} from '@/lib/email'
+import { sendInvoiceOverdueReminderEmail, sendProposalExpiringEmail } from '@/lib/email'
+
+async function getUserLogo(userId: string): Promise<string | undefined> {
+  const db = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data } = await db
+    .from('user_settings')
+    .select('logo_url')
+    .eq('user_id', userId)
+    .single()
+  return data?.logo_url || undefined
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

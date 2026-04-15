@@ -57,6 +57,8 @@ export default function DocumentPage() {
   const [saving, setSaving] = useState(false)
   const [amountPaid, setAmountPaid] = useState<number>(0)
   const [paymentNotes, setPaymentNotes] = useState<string>('')
+  const [savingPayment, setSavingPayment] = useState(false)
+  const [paymentSaved, setPaymentSaved] = useState(false)
   const [editingContent, setEditingContent] = useState<Record<string, any> | null>(null)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [userLogo, setUserLogo] = useState<string | null>(null)
@@ -251,6 +253,29 @@ export default function DocumentPage() {
     accepted: 'bg-green-50 text-green-700',
     declined: 'bg-red-50 text-red-600',
     expired: 'bg-gray-100 text-gray-500',
+  }
+
+  const handleSavePayment = async () => {
+    if (!doc) return
+    setSavingPayment(true)
+    try {
+      const total = doc.generated_content?.total || doc.price || 0
+      const newStatus = amountPaid >= total ? 'fully_paid' : amountPaid > 0 ? 'partially_paid' : doc.status
+      const res = await fetch('/api/documents/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: doc.id, status: newStatus, amount_paid: amountPaid }),
+      })
+      if (res.ok) {
+        setDoc(prev => prev ? { ...prev, status: newStatus as Document['status'], amount_paid: amountPaid } : prev)
+        setPaymentSaved(true)
+        setTimeout(() => setPaymentSaved(false), 3000)
+      }
+    } catch (err) {
+      console.error('Save payment error:', err)
+    } finally {
+      setSavingPayment(false)
+    }
   }
 
   if (loading) {
@@ -710,10 +735,11 @@ export default function DocumentPage() {
                   />
                 </div>
                 <button
-                  onClick={() => alert(`Payment of $${amountPaid.toLocaleString()} recorded`)}
-                  className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm"
+                  onClick={handleSavePayment}
+                  disabled={savingPayment}
+                  className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm disabled:opacity-50"
                 >
-                  ✓ Save Payment
+                  {savingPayment ? 'Saving...' : paymentSaved ? '✓ Saved!' : '✓ Save Payment'}
                 </button>
               </div>
             </div>

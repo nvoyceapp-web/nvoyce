@@ -10,7 +10,7 @@ const ALLOWED_STATUSES = ['draft', 'sent', 'partially_paid', 'fully_paid']
 
 export async function POST(req: NextRequest) {
   try {
-    const { documentId, status } = await req.json()
+    const { documentId, status, amount_paid } = await req.json()
 
     if (!documentId || !status) {
       return NextResponse.json({ error: 'documentId and status are required' }, { status: 400 })
@@ -35,16 +35,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Proposals cannot be marked as paid' }, { status: 400 })
     }
 
+    const updatePayload: Record<string, unknown> = { status }
+    if (amount_paid !== undefined && amount_paid !== null) {
+      updatePayload.amount_paid = amount_paid
+    }
+
     const { error: updateError } = await supabase
       .from('documents')
-      .update({ status })
+      .update(updatePayload)
       .eq('id', documentId)
 
     if (updateError) {
       return NextResponse.json({ error: 'Failed to update document status' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, status })
+    return NextResponse.json({ success: true, status, amount_paid })
   } catch (error) {
     console.error('Status update error:', error)
     return NextResponse.json({ error: 'Failed to process request' }, { status: 500 })

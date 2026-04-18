@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev'
+const SUPPORT_EMAIL = 'support@nvoyce.ai'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,6 +62,7 @@ export async function sendInvoiceEmail({
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,
+      reply_to: SUPPORT_EMAIL,
       to: clientEmail,
       subject: `Invoice from ${businessName}`,
       html: `
@@ -148,6 +150,7 @@ export async function sendWelcomeEmail({
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,
+      reply_to: SUPPORT_EMAIL,
       to: userEmail,
       subject: 'Welcome to Nvoyce — your 7-day Pro trial starts now',
       html: `
@@ -249,6 +252,7 @@ export async function sendProposalSentEmail({
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,
+      reply_to: SUPPORT_EMAIL,
       to: clientEmail,
       subject: `Proposal from ${businessName}`,
       html: `
@@ -333,6 +337,7 @@ export async function sendProposalDeclinedEmail({
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,
+      reply_to: SUPPORT_EMAIL,
       to: freelancerEmail,
       subject: `Proposal update: ${clientName} declined your proposal`,
       html: `
@@ -958,6 +963,7 @@ export async function sendInvoiceOverdueReminderEmail({
 
   const result = await resend.emails.send({
     from: process.env.FROM_EMAIL || 'invoices@nvoyce.ai',
+    reply_to: SUPPORT_EMAIL,
     to: clientEmail,
     subject: `${daysOverdue >= 30 ? 'Final Notice' : 'Reminder'}: Invoice ${invoiceNumber} is ${daysOverdue} days overdue`,
     html: `
@@ -1037,6 +1043,7 @@ export async function sendProposalExpiringEmail({
 
   const result = await resend.emails.send({
     from: process.env.FROM_EMAIL || 'invoices@nvoyce.ai',
+    reply_to: SUPPORT_EMAIL,
     to: clientEmail,
     subject: `Your proposal from ${businessName} ${urgencyText}`,
     html: `

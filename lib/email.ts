@@ -963,7 +963,7 @@ export async function sendInvoiceOverdueReminderEmail({
 
   const result = await resend.emails.send({
     from: process.env.FROM_EMAIL || 'invoices@nvoyce.ai',
-    reply_to: SUPPORT_EMAIL,
+    replyTo: SUPPORT_EMAIL,
     to: clientEmail,
     subject: `${daysOverdue >= 30 ? 'Final Notice' : 'Reminder'}: Invoice ${invoiceNumber} is ${daysOverdue} days overdue`,
     html: `
@@ -1043,7 +1043,7 @@ export async function sendProposalExpiringEmail({
 
   const result = await resend.emails.send({
     from: process.env.FROM_EMAIL || 'invoices@nvoyce.ai',
-    reply_to: SUPPORT_EMAIL,
+    replyTo: SUPPORT_EMAIL,
     to: clientEmail,
     subject: `Your proposal from ${businessName} ${urgencyText}`,
     html: `

@@ -10,6 +10,7 @@ import Sidebar, { SidebarHandle } from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
 import MobileNav from '@/components/MobileNav'
 import QRModal from '@/components/QRModal'
+import OnboardingModal from '@/components/OnboardingModal'
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart } from 'recharts'
 
 interface Document {
@@ -82,6 +83,24 @@ function DashboardContent() {
   const [showArchived, setShowArchived] = useState(false)
   const [archiving, setArchiving] = useState(false)
   const [bulkActionNotice, setBulkActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null)
+
+  // Onboarding
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  useEffect(() => {
+    if (!userId) return
+    async function checkOnboarding() {
+      const { data } = await supabase
+        .from('user_settings')
+        .select('onboarding_completed')
+        .eq('user_id', userId)
+        .single()
+      if (!data || !data.onboarding_completed) {
+        setShowOnboarding(true)
+      }
+    }
+    checkOnboarding()
+  }, [userId])
 
   // Payment + proposal notification state
   const [paymentToasts, setPaymentToasts] = useState<Array<{ toastId: string; clientName: string; amount: number; isPartial: boolean; type: 'payment' | 'proposal_accepted' }>>([])
@@ -883,6 +902,9 @@ function DashboardContent() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
+      {showOnboarding && (
+        <OnboardingModal onComplete={() => setShowOnboarding(false)} />
+      )}
       <div className="hidden lg:block">
         <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
       </div>

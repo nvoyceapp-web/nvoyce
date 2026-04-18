@@ -9,6 +9,32 @@ import { useUser, useAuth, useClerk } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
 import { PLANS } from '@/lib/plans'
 
+const BUSINESS_TYPES = [
+  'Freelance Designer', 'Freelance Developer', 'Writer / Copywriter',
+  'Consultant', 'Photographer / Videographer', 'Marketing / Ads',
+  'Virtual Assistant', 'Other',
+]
+
+const PAYMENT_TERMS = [
+  { value: 'due_on_receipt', label: 'Due on Receipt' },
+  { value: 'net_15', label: 'Net 15' },
+  { value: 'net_30', label: 'Net 30' },
+  { value: 'net_60', label: 'Net 60' },
+]
+
+const TONE_OPTIONS = [
+  { value: 'professional', label: 'Professional & Formal' },
+  { value: 'friendly', label: 'Friendly & Conversational' },
+  { value: 'concise', label: 'Concise & Direct' },
+]
+
+const PROJECT_TYPE_OPTIONS = [
+  { value: 'hourly', label: 'Hourly' },
+  { value: 'fixed', label: 'Fixed Price' },
+  { value: 'retainer', label: 'Retainer' },
+  { value: 'milestone', label: 'Milestone-Based' },
+]
+
 const TIMEZONES = [
   { value: 'EST', label: 'Eastern Time (ET)', offset: '-5' },
   { value: 'CST', label: 'Central Time (CT)', offset: '-6' },
@@ -47,23 +73,31 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!userId) return
 
-    async function fetchLogo() {
+    async function fetchSettings() {
       try {
         const { data, error } = await supabase
           .from('user_settings')
-          .select('logo_url')
+          .select('logo_url, business_type, industry, common_services, project_types, default_payment_terms, charges_tax, tax_rate, tone_preference')
           .eq('user_id', userId)
           .single()
 
-        if (!error && data?.logo_url) {
-          setLogoUrl(data.logo_url)
+        if (!error && data) {
+          if (data.logo_url) setLogoUrl(data.logo_url)
+          if (data.business_type) setBusinessType(data.business_type)
+          if (data.industry) setIndustry(data.industry)
+          if (data.common_services) setCommonServices(data.common_services)
+          if (data.project_types) setProjectTypes(data.project_types)
+          if (data.default_payment_terms) setPaymentTerms(data.default_payment_terms)
+          if (data.charges_tax !== null) setChargesTax(data.charges_tax)
+          if (data.tax_rate !== null) setTaxRate(String(data.tax_rate))
+          if (data.tone_preference) setTonePreference(data.tone_preference)
         }
       } catch (err) {
-        console.error('Error fetching logo:', err)
+        console.error('Error fetching settings:', err)
       }
     }
 
-    fetchLogo()
+    fetchSettings()
   }, [userId])
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,6 +238,49 @@ export default function SettingsPage() {
     }
   }
 
+  // Business profile state
+  const [businessType, setBusinessType] = useState('')
+  const [industry, setIndustry] = useState('')
+  const [commonServices, setCommonServices] = useState('')
+  const [projectTypes, setProjectTypes] = useState<string[]>([])
+  const [paymentTerms, setPaymentTerms] = useState('net_30')
+  const [chargesTax, setChargesTax] = useState(false)
+  const [taxRate, setTaxRate] = useState('')
+  const [tonePreference, setTonePreference] = useState('professional')
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  const toggleProjectType = (value: string) => {
+    setProjectTypes(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    )
+  }
+
+  const handleSaveProfile = async () => {
+    if (!userId) return
+    setProfileSaving(true)
+    try {
+      await supabase.from('user_settings').upsert({
+        user_id: userId,
+        business_type: businessType || null,
+        industry: industry || null,
+        common_services: commonServices || null,
+        project_types: projectTypes.length > 0 ? projectTypes : null,
+        default_payment_terms: paymentTerms,
+        charges_tax: chargesTax,
+        tax_rate: taxRate ? parseFloat(taxRate) : null,
+        tone_preference: tonePreference,
+        updated_at: new Date().toISOString(),
+      })
+      setProfileMessage({ type: 'success', text: '✅ Business profile saved' })
+      setTimeout(() => setProfileMessage(null), 3000)
+    } catch {
+      setProfileMessage({ type: 'error', text: '❌ Failed to save. Try again.' })
+    } finally {
+      setProfileSaving(false)
+    }
+  }
+
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [paymeAlerts, setPaymeAlerts] = useState(true)
   const [overdueReminders, setOverdueReminders] = useState(true)
@@ -299,6 +376,138 @@ export default function SettingsPage() {
                         <button onClick={() => setEditingName(true)} className="text-purple-600 hover:text-purple-700 text-sm font-semibold ml-4">Edit</button>
                       )}
                     </div>
+                  </div>
+
+                  {/* Business Profile */}
+                  <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-5">
+                    <h3 className="font-medium text-gray-900">Business Profile <span className="text-xs text-gray-400 font-normal ml-1">Used by AI to generate better documents</span></h3>
+
+                    {profileMessage && (
+                      <div className={`p-3 rounded text-sm ${profileMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                        {profileMessage.text}
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Type of work</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {BUSINESS_TYPES.map(type => (
+                          <button
+                            key={type}
+                            onClick={() => setBusinessType(type)}
+                            className={`px-3 py-2 rounded-lg text-sm border text-left transition ${
+                              businessType === type
+                                ? 'border-purple-600 bg-purple-50 text-purple-700 font-medium'
+                                : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Industry / Niche</label>
+                      <input
+                        type="text"
+                        value={industry}
+                        onChange={e => setIndustry(e.target.value)}
+                        placeholder="e.g. SaaS startups, real estate, e-commerce brands"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Project structure</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {PROJECT_TYPE_OPTIONS.map(opt => (
+                          <button
+                            key={opt.value}
+                            onClick={() => toggleProjectType(opt.value)}
+                            className={`px-3 py-2 rounded-lg text-sm border text-left transition ${
+                              projectTypes.includes(opt.value)
+                                ? 'border-purple-600 bg-purple-50 text-purple-700 font-medium'
+                                : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Default payment terms</label>
+                      <select
+                        value={paymentTerms}
+                        onChange={e => setPaymentTerms(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                      >
+                        {PAYMENT_TERMS.map(t => (
+                          <option key={t.value} value={t.value}>{t.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium text-gray-700">Charge tax?</label>
+                        <button
+                          onClick={() => setChargesTax(!chargesTax)}
+                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${chargesTax ? 'bg-purple-600' : 'bg-gray-300'}`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ${chargesTax ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                      </div>
+                      {chargesTax && (
+                        <input
+                          type="number"
+                          value={taxRate}
+                          onChange={e => setTaxRate(e.target.value)}
+                          placeholder="Tax rate % (e.g. 8.5)"
+                          className="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Document tone</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {TONE_OPTIONS.map(opt => (
+                          <button
+                            key={opt.value}
+                            onClick={() => setTonePreference(opt.value)}
+                            className={`px-3 py-2 rounded-lg text-xs border text-center transition ${
+                              tonePreference === opt.value
+                                ? 'border-purple-600 bg-purple-50 text-purple-700 font-medium'
+                                : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Common services</label>
+                      <textarea
+                        value={commonServices}
+                        onChange={e => setCommonServices(e.target.value)}
+                        placeholder="e.g. brand identity, logo design, style guides"
+                        rows={2}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 resize-none"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={profileSaving}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50"
+                    >
+                      {profileSaving ? 'Saving...' : 'Save Business Profile'}
+                    </button>
                   </div>
 
                   <div className="bg-white rounded-lg border border-gray-200 p-4">

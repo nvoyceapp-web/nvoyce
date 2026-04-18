@@ -397,28 +397,110 @@ function SettingsContent() {
         <main className="flex-1 overflow-auto">
           <MobileNav activePage="settings" />
           <div className="max-w-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            {/* Header */}
-            <div className="mb-12">
-              <h1 className="text-4xl font-bold font-display text-gray-900 mb-3">Settings</h1>
-              <p className="text-lg text-gray-600">Customize your Nvoyce experience and manage notifications.</p>
+            {/* Header Infographic */}
+            <div className="mb-10">
+              <div className="flex flex-col sm:flex-row items-center gap-8 bg-gradient-to-br from-orange-50 to-white rounded-2xl p-8 mb-8 border border-orange-100">
+                {/* Illustration */}
+                <div className="flex-shrink-0">
+                  <svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Background circle */}
+                    <circle cx="80" cy="80" r="75" fill="#fff7ed" />
+
+                    {/* Monitor body */}
+                    <rect x="28" y="38" width="90" height="62" rx="7" fill="#1e1b4b" />
+                    <rect x="33" y="43" width="80" height="50" rx="4" fill="#fef3c7" />
+
+                    {/* Screen — toggle rows */}
+                    <rect x="40" y="52" width="28" height="4" rx="2" fill="#9ca3af" opacity="0.6"/>
+                    {/* Toggle ON */}
+                    <rect x="88" y="50" width="18" height="8" rx="4" fill="#f97316"/>
+                    <circle cx="101" cy="54" r="3.5" fill="white"/>
+
+                    <rect x="40" y="63" width="24" height="4" rx="2" fill="#9ca3af" opacity="0.6"/>
+                    {/* Toggle OFF */}
+                    <rect x="88" y="61" width="18" height="8" rx="4" fill="#d1d5db"/>
+                    <circle cx="91" cy="65" r="3.5" fill="white"/>
+
+                    <rect x="40" y="74" width="32" height="4" rx="2" fill="#9ca3af" opacity="0.6"/>
+                    {/* Slider */}
+                    <rect x="40" y="83" width="52" height="3" rx="1.5" fill="#e5e7eb"/>
+                    <rect x="40" y="83" width="34" height="3" rx="1.5" fill="#f97316"/>
+                    <circle cx="74" cy="84.5" r="4" fill="#f97316"/>
+
+                    {/* Monitor stand */}
+                    <rect x="68" y="100" width="10" height="10" rx="1" fill="#374151" opacity="0.6"/>
+                    <rect x="58" y="109" width="30" height="4" rx="2" fill="#374151" opacity="0.5"/>
+
+                    {/* Gear — top right */}
+                    <g transform="translate(118, 38)">
+                      <circle cx="10" cy="10" r="5" fill="none" stroke="#f97316" strokeWidth="2"/>
+                      <circle cx="10" cy="10" r="2" fill="#f97316"/>
+                      {[0,60,120,180,240,300].map((angle, i) => {
+                        const rad = (angle * Math.PI) / 180
+                        const x1 = 10 + 7 * Math.cos(rad)
+                        const y1 = 10 + 7 * Math.sin(rad)
+                        const x2 = 10 + 9 * Math.cos(rad)
+                        const y2 = 10 + 9 * Math.sin(rad)
+                        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#f97316" strokeWidth="2.5" strokeLinecap="round"/>
+                      })}
+                    </g>
+
+                    {/* Person — shadow */}
+                    <ellipse cx="100" cy="142" rx="16" ry="7" fill="#f97316" opacity="0.1"/>
+                    {/* Person — body */}
+                    <rect x="88" y="118" width="22" height="24" rx="5" fill="#f97316" opacity="0.85"/>
+                    {/* Person — head */}
+                    <circle cx="99" cy="108" r="11" fill="#fcd9b1"/>
+                    {/* Hair */}
+                    <path d="M88 106 Q90 95 99 94 Q108 95 110 106 Q106 99 99 98 Q92 99 88 106Z" fill="#92400e"/>
+                    {/* Eyes */}
+                    <circle cx="95.5" cy="107" r="1.5" fill="#1e1b4b"/>
+                    <circle cx="102.5" cy="107" r="1.5" fill="#1e1b4b"/>
+                    {/* Smile */}
+                    <path d="M95 112 Q99 115 103 112" stroke="#e07b54" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                    {/* Arms */}
+                    <path d="M88 124 Q76 126 72 118" stroke="#f97316" strokeWidth="5" strokeLinecap="round" opacity="0.85"/>
+                    <path d="M110 124 Q118 124 116 115" stroke="#f97316" strokeWidth="5" strokeLinecap="round" opacity="0.85"/>
+
+                    {/* Sparkle — small */}
+                    <circle cx="32" cy="130" r="3" fill="#f97316" opacity="0.4"/>
+                    <circle cx="22" cy="118" r="2" fill="#f97316" opacity="0.25"/>
+                    <circle cx="38" cy="142" r="2" fill="#f97316" opacity="0.3"/>
+                  </svg>
+                </div>
+
+                {/* Text */}
+                <div>
+                  <h1 className="text-3xl font-bold font-display text-gray-900 mb-2">Settings</h1>
+                  <p className="text-gray-500">
+                    Customize your Nvoyce experience — your business profile, branding, payouts, and notification preferences all in one place.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Business Settings */}
             <div className="space-y-8">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Business Settings</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                  Business Settings
+                </h2>
                 <div className="space-y-4">
                   <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">Business Name</h3>
+                        <h3 className="font-medium text-gray-900 flex items-center gap-1.5">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                      Business Name
+                    </h3>
                         {editingName ? (
                           <div className="flex items-center gap-2 mt-2">
                             <input
                               type="text"
                               value={nameInput}
                               onChange={(e) => setNameInput(e.target.value)}
-                              className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-purple-500"
+                              className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-orange-400"
                               placeholder="Enter your business name"
                               autoFocus
                             />
@@ -430,14 +512,18 @@ function SettingsContent() {
                         )}
                       </div>
                       {!editingName && (
-                        <button onClick={() => setEditingName(true)} className="text-purple-600 hover:text-purple-700 text-sm font-semibold ml-4">Edit</button>
+                        <button onClick={() => setEditingName(true)} className="text-orange-500 hover:text-orange-600 text-sm font-semibold ml-4">Edit</button>
                       )}
                     </div>
                   </div>
 
                   {/* Business Profile */}
                   <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-5">
-                    <h3 className="font-medium text-gray-900">Business Profile <span className="text-xs text-gray-400 font-normal ml-1">Used by AI to generate better documents</span></h3>
+                    <h3 className="font-medium text-gray-900 flex items-center gap-1.5">
+                      <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                      Business Profile
+                      <span className="text-xs text-gray-400 font-normal ml-1">Used by AI to generate better documents</span>
+                    </h3>
 
                     {profileMessage && (
                       <div className={`p-3 rounded text-sm ${profileMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
@@ -454,7 +540,7 @@ function SettingsContent() {
                             onClick={() => setBusinessType(type)}
                             className={`px-3 py-2 rounded-lg text-sm border text-left transition ${
                               businessType === type
-                                ? 'border-purple-600 bg-purple-50 text-purple-700 font-medium'
+                                ? 'border-orange-500 bg-orange-50 text-orange-600 font-medium'
                                 : 'border-gray-200 text-gray-700 hover:border-gray-300'
                             }`}
                           >
@@ -471,7 +557,7 @@ function SettingsContent() {
                         value={industry}
                         onChange={e => setIndustry(e.target.value)}
                         placeholder="e.g. SaaS startups, real estate, e-commerce brands"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400"
                       />
                     </div>
 
@@ -484,7 +570,7 @@ function SettingsContent() {
                             onClick={() => toggleProjectType(opt.value)}
                             className={`px-3 py-2 rounded-lg text-sm border text-left transition ${
                               projectTypes.includes(opt.value)
-                                ? 'border-purple-600 bg-purple-50 text-purple-700 font-medium'
+                                ? 'border-orange-500 bg-orange-50 text-orange-600 font-medium'
                                 : 'border-gray-200 text-gray-700 hover:border-gray-300'
                             }`}
                           >
@@ -499,7 +585,7 @@ function SettingsContent() {
                       <select
                         value={paymentTerms}
                         onChange={e => setPaymentTerms(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400"
                       >
                         {PAYMENT_TERMS.map(t => (
                           <option key={t.value} value={t.value}>{t.label}</option>
@@ -512,7 +598,7 @@ function SettingsContent() {
                         <label className="text-sm font-medium text-gray-700">Charge tax?</label>
                         <button
                           onClick={() => setChargesTax(!chargesTax)}
-                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${chargesTax ? 'bg-purple-600' : 'bg-gray-300'}`}
+                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${chargesTax ? 'bg-orange-500' : 'bg-gray-300'}`}
                         >
                           <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ${chargesTax ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
@@ -523,7 +609,7 @@ function SettingsContent() {
                           value={taxRate}
                           onChange={e => setTaxRate(e.target.value)}
                           placeholder="Tax rate % (e.g. 8.5)"
-                          className="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                          className="w-full mt-2 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400"
                         />
                       )}
                     </div>
@@ -537,7 +623,7 @@ function SettingsContent() {
                             onClick={() => setTonePreference(opt.value)}
                             className={`px-3 py-2 rounded-lg text-xs border text-center transition ${
                               tonePreference === opt.value
-                                ? 'border-purple-600 bg-purple-50 text-purple-700 font-medium'
+                                ? 'border-orange-500 bg-orange-50 text-orange-600 font-medium'
                                 : 'border-gray-200 text-gray-700 hover:border-gray-300'
                             }`}
                           >
@@ -554,14 +640,14 @@ function SettingsContent() {
                         onChange={e => setCommonServices(e.target.value)}
                         placeholder="e.g. brand identity, logo design, style guides"
                         rows={2}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 resize-none"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 resize-none"
                       />
                     </div>
 
                     <button
                       onClick={handleSaveProfile}
                       disabled={profileSaving}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50"
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50"
                     >
                       {profileSaving ? 'Saving...' : 'Save Business Profile'}
                     </button>
@@ -569,7 +655,10 @@ function SettingsContent() {
 
                   <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <div className="mb-4">
-                      <h3 className="font-medium text-gray-900">Business Logo</h3>
+                      <h3 className="font-medium text-gray-900 flex items-center gap-1.5">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      Business Logo
+                    </h3>
                       <p className="text-sm text-gray-600 mt-1">Upload your logo to display on invoices and proposals</p>
                     </div>
 
@@ -585,7 +674,7 @@ function SettingsContent() {
                           <img src={logoUrl} alt="Your logo" className="max-h-32 max-w-xs" />
                         </div>
                         <div className="flex gap-2">
-                          <label className="flex-1 px-4 py-2 border-2 border-purple-200 rounded-lg text-center cursor-pointer hover:bg-purple-50 transition">
+                          <label className="flex-1 px-4 py-2 border-2 border-orange-200 rounded-lg text-center cursor-pointer hover:bg-orange-50 transition">
                             <input
                               type="file"
                               accept="image/*"
@@ -593,7 +682,7 @@ function SettingsContent() {
                               disabled={uploading}
                               className="hidden"
                             />
-                            <span className="text-sm font-medium text-purple-600">{uploading ? 'Uploading...' : 'Change Logo'}</span>
+                            <span className="text-sm font-medium text-orange-500">{uploading ? 'Uploading...' : 'Change Logo'}</span>
                           </label>
                           <button
                             onClick={handleRemoveLogo}
@@ -604,7 +693,7 @@ function SettingsContent() {
                         </div>
                       </div>
                     ) : (
-                      <label className="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-purple-300 transition">
+                      <label className="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-orange-300 transition">
                         <input
                           type="file"
                           accept="image/*"
@@ -623,7 +712,10 @@ function SettingsContent() {
                   {/* Stripe Payouts */}
                   <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-medium text-gray-900">Stripe Payouts</h3>
+                      <h3 className="font-medium text-gray-900 flex items-center gap-1.5">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                      Stripe Payouts
+                    </h3>
                       {stripeConnectComplete && (
                         <span className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
                           ✓ Connected
@@ -644,7 +736,7 @@ function SettingsContent() {
                       <button
                         onClick={handleConnectStripe}
                         disabled={stripeConnecting}
-                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50"
                       >
                         {stripeConnecting ? 'Redirecting to Stripe...' : 'Connect Stripe Account →'}
                       </button>
@@ -654,13 +746,16 @@ function SettingsContent() {
                   <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-medium text-gray-900">Timezone</h3>
+                        <h3 className="font-medium text-gray-900 flex items-center gap-1.5">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Timezone
+                      </h3>
                         <p className="text-sm text-gray-600 mt-1">All dates and times will be displayed in your selected timezone</p>
                       </div>
                       <select
                         value={timezone}
                         onChange={(e) => setTimezone(e.target.value)}
-                        className="ml-4 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                        className="ml-4 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400"
                       >
                         {TIMEZONES.map((tz) => (
                           <option key={tz.value} value={tz.value}>
@@ -677,7 +772,15 @@ function SettingsContent() {
               <div className="pt-8 border-t border-gray-200">
                 {settings.map((settingGroup) => (
                   <div key={settingGroup.section} className="mb-8">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">{settingGroup.section}</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      {settingGroup.section === 'Notifications' && (
+                        <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                      )}
+                      {settingGroup.section === 'Automation' && (
+                        <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                      )}
+                      {settingGroup.section}
+                    </h2>
                     <div className="space-y-4">
                       {settingGroup.items.map((item) => (
                         <div key={item.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
@@ -688,7 +791,7 @@ function SettingsContent() {
                           <button
                             onClick={() => item.onChange(!item.enabled)}
                             className={`ml-4 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-                              item.enabled ? 'bg-purple-600' : 'bg-gray-300'
+                              item.enabled ? 'bg-orange-500' : 'bg-gray-300'
                             }`}
                           >
                             <span
@@ -707,7 +810,10 @@ function SettingsContent() {
 
             {/* Plan & Billing */}
             <div className="mt-12 pt-8 border-t border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">Plan & Billing</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" /></svg>
+                Plan & Billing
+              </h2>
               <p className="text-sm text-gray-500 mb-6">You are currently on the <span className="font-semibold text-[#0d1b2a] capitalize">{currentPlan}</span> plan.</p>
 
               {subMessage && (
@@ -785,7 +891,10 @@ function SettingsContent() {
 
             {/* Sign Out */}
             <div className="mt-12 pt-8 border-t border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Account</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Account
+              </h2>
               <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
                 <div>
                   <h3 className="font-medium text-gray-900">Sign Out</h3>
@@ -802,7 +911,10 @@ function SettingsContent() {
 
             {/* Danger Zone */}
             <div className="mt-8 pt-8 border-t border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Danger Zone</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                Danger Zone
+              </h2>
               <div className="bg-red-50 rounded-lg border border-red-200 p-4">
                 <h3 className="font-medium text-red-900">Delete Account</h3>
                 <p className="text-sm text-red-700 mt-1">Permanently delete your account and all associated data.</p>

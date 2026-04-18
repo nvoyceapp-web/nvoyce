@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: accountLink.url })
   } catch (err: any) {
-    console.error('Stripe Connect error:', err)
-    return NextResponse.json({ error: 'Failed to create Connect link' }, { status: 500 })
+    console.error('Stripe Connect error:', err?.message || err)
+    return NextResponse.json({ error: err?.message || 'Failed to create Connect link' }, { status: 500 })
   }
 }
 

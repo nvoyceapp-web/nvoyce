@@ -45,6 +45,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
   const [saving, setSaving] = useState(false)
 
   // Step 1
+  const [businessName, setBusinessName] = useState('')
   const [businessType, setBusinessType] = useState('')
   const [industry, setIndustry] = useState('')
 
@@ -82,6 +83,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
     try {
       await supabase.from('user_settings').upsert({
         user_id: userId,
+        business_name: businessName || null,
         business_type: businessType || null,
         industry: industry || null,
         project_types: projectTypes.length > 0 ? projectTypes : null,
@@ -141,6 +143,18 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
         <div className="px-8 py-6 space-y-5">
           {step === 1 && (
             <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  What's your business name?
+                </label>
+                <input
+                  type="text"
+                  value={businessName}
+                  onChange={e => setBusinessName(e.target.value)}
+                  placeholder="e.g. Jane Smith Design, Apex Creative Co."
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">What type of work do you do?</label>
                 <div className="grid grid-cols-2 gap-2">

@@ -35,8 +35,9 @@ export async function createPaymentLink({
     line_items: [{ price: price.id, quantity: 1 }],
     metadata: { documentId },
     // Route funds directly to the freelancer's connected Stripe account
+    // transfer_data is supported by the API but missing from the TS types for this version
     ...(connectedAccountId
-      ? { payment_intent_data: { transfer_data: { destination: connectedAccountId } } }
+      ? { payment_intent_data: { transfer_data: { destination: connectedAccountId } } as Stripe.PaymentLinkCreateParams.PaymentIntentData }
       : {}),
     after_completion: {
       type: 'redirect',

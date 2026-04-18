@@ -198,6 +198,17 @@ export default function AboutPage() {
             >
               Visit nvoyce.ai →
             </a>
+            <p className="text-gray-400 text-xs">
+              Partnerships & general inquiries —{' '}
+              <a href="mailto:hello@nvoyce.ai" className="hover:text-orange-500 transition">
+                hello@nvoyce.ai
+              </a>
+              {' · '}
+              Support —{' '}
+              <a href="mailto:support@nvoyce.ai" className="hover:text-orange-500 transition">
+                support@nvoyce.ai
+              </a>
+            </p>
           </div>
           </div>
         </main>

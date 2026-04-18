@@ -62,7 +62,7 @@ export async function sendInvoiceEmail({
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,
-      reply_to: SUPPORT_EMAIL,
+      replyTo: SUPPORT_EMAIL,
       to: clientEmail,
       subject: `Invoice from ${businessName}`,
       html: `
@@ -150,7 +150,7 @@ export async function sendWelcomeEmail({
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,
-      reply_to: SUPPORT_EMAIL,
+      replyTo: SUPPORT_EMAIL,
       to: userEmail,
       subject: 'Welcome to Nvoyce — your 7-day Pro trial starts now',
       html: `
@@ -252,7 +252,7 @@ export async function sendProposalSentEmail({
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,
-      reply_to: SUPPORT_EMAIL,
+      replyTo: SUPPORT_EMAIL,
       to: clientEmail,
       subject: `Proposal from ${businessName}`,
       html: `
@@ -337,7 +337,7 @@ export async function sendProposalDeclinedEmail({
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,
-      reply_to: SUPPORT_EMAIL,
+      replyTo: SUPPORT_EMAIL,
       to: freelancerEmail,
       subject: `Proposal update: ${clientName} declined your proposal`,
       html: `

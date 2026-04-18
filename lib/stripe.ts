@@ -5,18 +5,21 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-02-24.acacia',
 })
 
-// Create a Stripe payment link for a document
-// This link is embedded directly in the invoice/proposal
+// Create a Stripe payment link for a document.
+// If connectedAccountId is provided (freelancer has completed Stripe Connect),
+// the payment is routed to their account automatically via transfer_data.
 export async function createPaymentLink({
   documentId,
   amount,
   description,
   clientEmail,
+  connectedAccountId,
 }: {
   documentId: string
   amount: number // in dollars
   description: string
   clientEmail: string
+  connectedAccountId?: string
 }): Promise<string> {
   const product = await stripe.products.create({
     name: description,
@@ -31,6 +34,10 @@ export async function createPaymentLink({
   const paymentLink = await stripe.paymentLinks.create({
     line_items: [{ price: price.id, quantity: 1 }],
     metadata: { documentId },
+    // Route funds directly to the freelancer's connected Stripe account
+    ...(connectedAccountId
+      ? { payment_intent_data: { transfer_data: { destination: connectedAccountId } } }
+      : {}),
     after_completion: {
       type: 'redirect',
       redirect: {

@@ -37,6 +37,17 @@ export async function POST(req: NextRequest) {
       documentNumber = await assignDocumentNumber(invoice.user_id, 'invoice', invoiceId)
     }
 
+    // Look up freelancer's connected Stripe account (if they've completed Connect)
+    const { data: ownerSettings } = await supabase
+      .from('user_settings')
+      .select('stripe_account_id, stripe_connect_complete')
+      .eq('user_id', invoice.user_id)
+      .single()
+    const connectedAccountId =
+      ownerSettings?.stripe_connect_complete && ownerSettings?.stripe_account_id
+        ? ownerSettings.stripe_account_id
+        : undefined
+
     // Create Stripe payment link
     let paymentLink = invoice.stripe_payment_link || ''
     if (!paymentLink) {
@@ -46,6 +57,7 @@ export async function POST(req: NextRequest) {
           amount: invoice.price,
           description: `Invoice from ${invoice.business_name}`,
           clientEmail: invoice.client_email,
+          connectedAccountId,
         })
         await supabase
           .from('documents')

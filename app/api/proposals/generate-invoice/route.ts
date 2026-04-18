@@ -166,6 +166,17 @@ Generate ONLY valid JSON, no additional text.`
       console.error('Document number assignment failed (non-fatal):', numErr)
     }
 
+    // Look up freelancer's connected Stripe account (if they've completed Connect)
+    const { data: ownerSettings } = await supabaseServer
+      .from('user_settings')
+      .select('stripe_account_id, stripe_connect_complete')
+      .eq('user_id', proposal.user_id)
+      .single()
+    const connectedAccountId =
+      ownerSettings?.stripe_connect_complete && ownerSettings?.stripe_account_id
+        ? ownerSettings.stripe_account_id
+        : undefined
+
     // Create Stripe payment link
     let paymentLink = ''
     try {
@@ -174,6 +185,7 @@ Generate ONLY valid JSON, no additional text.`
         amount: proposal.price,
         description: `Invoice from ${proposal.business_name}`,
         clientEmail: proposal.client_email,
+        connectedAccountId,
       })
       await supabaseServer
         .from('documents')

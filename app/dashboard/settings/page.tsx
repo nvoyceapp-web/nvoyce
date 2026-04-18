@@ -4,8 +4,9 @@ import Link from 'next/link'
 import Sidebar, { SidebarHandle } from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
 import MobileNav from '@/components/MobileNav'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useUser, useAuth, useClerk } from '@clerk/nextjs'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { PLANS } from '@/lib/plans'
 
@@ -50,10 +51,11 @@ const TIMEZONES = [
   { value: 'AEST', label: 'Australian Eastern Time (AEST)', offset: '+10' },
 ]
 
-export default function SettingsPage() {
+function SettingsContent() {
   const { user } = useUser()
   const { userId } = useAuth()
   const { signOut } = useClerk()
+  const searchParams = useSearchParams()
   const [businessName, setBusinessName] = useState('')
   const [editingName, setEditingName] = useState(false)
   const [nameInput, setNameInput] = useState('')
@@ -77,7 +79,7 @@ export default function SettingsPage() {
       try {
         const { data, error } = await supabase
           .from('user_settings')
-          .select('logo_url, business_name, business_type, industry, common_services, project_types, default_payment_terms, charges_tax, tax_rate, tone_preference')
+          .select('logo_url, business_name, business_type, industry, common_services, project_types, default_payment_terms, charges_tax, tax_rate, tone_preference, stripe_connect_complete')
           .eq('user_id', userId)
           .single()
 
@@ -96,6 +98,7 @@ export default function SettingsPage() {
           if (data.charges_tax !== null) setChargesTax(data.charges_tax)
           if (data.tax_rate !== null) setTaxRate(String(data.tax_rate))
           if (data.tone_preference) setTonePreference(data.tone_preference)
+          if (data.stripe_connect_complete) setStripeConnectComplete(data.stripe_connect_complete)
         }
       } catch (err) {
         console.error('Error fetching settings:', err)
@@ -250,6 +253,47 @@ export default function SettingsPage() {
       setPortalLoading(false)
     }
   }
+
+  // Stripe Connect state
+  const [stripeConnectComplete, setStripeConnectComplete] = useState(false)
+  const [stripeConnecting, setStripeConnecting] = useState(false)
+  const [stripeMessage, setStripeMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  const handleConnectStripe = async () => {
+    setStripeConnecting(true)
+    try {
+      const res = await fetch('/api/stripe/connect', { method: 'POST' })
+      const { url, error } = await res.json()
+      if (error) throw new Error(error)
+      window.location.href = url
+    } catch (err: any) {
+      setStripeMessage({ type: 'error', text: err?.message || 'Could not start Stripe setup. Try again.' })
+      setStripeConnecting(false)
+    }
+  }
+
+  // After returning from Stripe onboarding, verify and persist the completion status
+  useEffect(() => {
+    const isReturn = searchParams.get('stripe_return') === 'true'
+    const isRefresh = searchParams.get('stripe_refresh') === 'true'
+    if (!isReturn && !isRefresh) return
+    if (!userId) return
+
+    async function verifyStripeStatus() {
+      const res = await fetch('/api/stripe/connect')
+      const data = await res.json()
+      if (data.connected) {
+        setStripeConnectComplete(true)
+        setStripeMessage({ type: 'success', text: '✅ Stripe connected! Payments will now go directly to your bank account.' })
+      } else if (isRefresh) {
+        // Link expired — show the connect button again so they can restart
+        setStripeMessage({ type: 'error', text: 'Your Stripe setup link expired. Click "Connect Stripe" to try again.' })
+      }
+      // Clean up the query param without triggering a navigation
+      window.history.replaceState({}, '', '/dashboard/settings')
+    }
+    verifyStripeStatus()
+  }, [userId, searchParams])
 
   // Business profile state
   const [businessType, setBusinessType] = useState('')
@@ -576,6 +620,37 @@ export default function SettingsPage() {
                     )}
                   </div>
 
+                  {/* Stripe Payouts */}
+                  <div className="bg-white rounded-lg border border-gray-200 p-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-medium text-gray-900">Stripe Payouts</h3>
+                      {stripeConnectComplete && (
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
+                          ✓ Connected
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {stripeConnectComplete
+                        ? 'Your Stripe account is connected. Client payments go directly to your bank account.'
+                        : 'Connect your Stripe account so client payments deposit directly into your bank. Takes about 2 minutes.'}
+                    </p>
+                    {stripeMessage && (
+                      <div className={`mb-4 p-3 rounded text-sm ${stripeMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                        {stripeMessage.text}
+                      </div>
+                    )}
+                    {!stripeConnectComplete && (
+                      <button
+                        onClick={handleConnectStripe}
+                        disabled={stripeConnecting}
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50"
+                      >
+                        {stripeConnecting ? 'Redirecting to Stripe...' : 'Connect Stripe Account →'}
+                      </button>
+                    )}
+                  </div>
+
                   <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -740,5 +815,13 @@ export default function SettingsPage() {
         </main>
       </div>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-400 text-sm">Loading...</div></div>}>
+      <SettingsContent />
+    </Suspense>
   )
 }

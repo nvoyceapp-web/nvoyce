@@ -112,7 +112,7 @@ export async function sendInvoiceEmail({
               <p style="margin: 15px 0 0 0; font-size: 12px; color: #6b7280;">Click the button above to view your invoice and complete payment securely.</p>
             </div>
             <p style="margin: 0 0 30px 0; font-size: 13px; color: #6b7280;">
-              Questions about this invoice? Contact ${businessName} directly or reply to this email.
+              Questions about this invoice? Contact ${businessName} directly or email <a href="mailto:support@nvoyce.ai" style="color: #7c3aed;">support@nvoyce.ai</a> for platform support.
             </p>
           </div>
           <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
@@ -297,7 +297,7 @@ export async function sendProposalSentEmail({
               <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">You can accept this proposal, request changes, or decline. ${businessName} will be notified of your response.</p>
             </div>
             <p style="margin: 0 0 30px 0; font-size: 13px; color: #6b7280;">
-              Have questions? Reply to this email or contact ${businessName} directly.
+              Have questions? Contact ${businessName} directly, or email <a href="mailto:support@nvoyce.ai" style="color: #7c3aed;">support@nvoyce.ai</a> for platform support.
             </p>
           </div>
           <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
@@ -1002,7 +1002,7 @@ export async function sendInvoiceOverdueReminderEmail({
           </div>` : ''}
 
           <p style="margin: 0 0 8px 0; font-size: 13px; color: #6b7280;">
-            If you have already sent payment, please disregard this message. If you have any questions, please reply to this email or contact ${freelancerName} directly.
+            If you have already sent payment, please disregard this message. For questions about this invoice contact ${freelancerName} directly, or email <a href="mailto:support@nvoyce.ai" style="color: #7c3aed;">support@nvoyce.ai</a> for platform support.
           </p>
         </div>
         <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
@@ -1082,7 +1082,7 @@ export async function sendProposalExpiringEmail({
           </div>
 
           <p style="margin: 0; font-size: 13px; color: #6b7280;">
-            If you have questions or need more time, please reach out to ${freelancerName} directly.
+            If you have questions or need more time, reach out to ${freelancerName} directly, or email <a href="mailto:support@nvoyce.ai" style="color: #7c3aed;">support@nvoyce.ai</a> for platform support.
           </p>
         </div>
         <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">

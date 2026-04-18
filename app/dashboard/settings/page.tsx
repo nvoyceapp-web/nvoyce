@@ -5,8 +5,7 @@ import Sidebar, { SidebarHandle } from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
 import MobileNav from '@/components/MobileNav'
 import { useState, useEffect, useRef } from 'react'
-import { useUser } from '@clerk/nextjs'
-import { useAuth } from '@clerk/nextjs'
+import { useUser, useAuth, useClerk } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
 import { PLANS } from '@/lib/plans'
 
@@ -28,6 +27,7 @@ const TIMEZONES = [
 export default function SettingsPage() {
   const { user } = useUser()
   const { userId } = useAuth()
+  const { signOut } = useClerk()
   const [businessName, setBusinessName] = useState('')
   const [editingName, setEditingName] = useState(false)
   const [nameInput, setNameInput] = useState('')
@@ -486,8 +486,25 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Danger Zone */}
+            {/* Sign Out */}
             <div className="mt-12 pt-8 border-t border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Account</h2>
+              <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-900">Sign Out</h3>
+                  <p className="text-sm text-gray-600 mt-1">{user?.emailAddresses?.[0]?.emailAddress}</p>
+                </div>
+                <button
+                  onClick={() => signOut({ redirectUrl: '/' })}
+                  className="text-sm font-semibold text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Sign out
+                </button>
+              </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="mt-8 pt-8 border-t border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Danger Zone</h2>
               <div className="bg-red-50 rounded-lg border border-red-200 p-4">
                 <h3 className="font-medium text-red-900">Delete Account</h3>

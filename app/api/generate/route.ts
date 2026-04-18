@@ -56,6 +56,34 @@ export async function POST(req: NextRequest) {
   const today = new Date()
   const todayFormatted = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
+  // Fetch user's business profile to enrich Claude's context
+  const { data: userProfile } = await supabase
+    .from('user_settings')
+    .select('business_type, industry, common_services, project_types, tone_preference, charges_tax, tax_rate, default_payment_terms')
+    .eq('user_id', userId)
+    .single()
+
+  // Build a context string from whatever the user has filled in
+  const profileParts: string[] = []
+  if (userProfile?.business_type) profileParts.push(`They are a ${userProfile.business_type}.`)
+  if (userProfile?.industry) profileParts.push(`They work with clients in: ${userProfile.industry}.`)
+  if (userProfile?.common_services) profileParts.push(`Their typical services include: ${userProfile.common_services}.`)
+  if (userProfile?.project_types?.length) profileParts.push(`They typically do ${userProfile.project_types.join(', ')} projects.`)
+  if (userProfile?.tone_preference) {
+    const toneMap: Record<string, string> = {
+      professional: 'professional and formal',
+      friendly: 'friendly and conversational',
+      concise: 'concise and direct',
+    }
+    profileParts.push(`Use a ${toneMap[userProfile.tone_preference] || userProfile.tone_preference} tone throughout.`)
+  }
+  if (userProfile?.charges_tax && userProfile?.tax_rate) {
+    profileParts.push(`Apply ${userProfile.tax_rate}% tax to the total.`)
+  }
+  const businessContext = profileParts.length > 0
+    ? `\n\nFreelancer context (use this to personalise the document):\n${profileParts.join(' ')}`
+    : ''
+
   const body = await req.json()
   const {
     docType,
@@ -84,7 +112,7 @@ export async function POST(req: NextRequest) {
   // 2. Build the Claude prompt
   // This is where the AI magic happens — we give Claude structured instructions
   // and ask for structured output so we can render it beautifully
-  const systemPrompt = `You are a professional document generator for freelancers and small businesses.
+  const systemPrompt = `You are a professional document generator for freelancers and small businesses.${businessContext}
 Generate a professional ${docType} in JSON format. The output must be ONLY valid JSON — absolutely no markdown formatting, no triple backticks, no code blocks, no extra text. Return only the raw JSON object with this structure:
 {
   "documentNumber": "PENDING",

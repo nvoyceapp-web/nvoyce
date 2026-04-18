@@ -2,8 +2,16 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+
+const paymentTermsDisplayMap: Record<string, string> = {
+  due_on_receipt: 'Due on receipt',
+  net_15: 'Net 15',
+  net_30: 'Net 30',
+  net_60: 'Net 60',
+}
 
 type DocType = 'invoice' | 'proposal'
 
@@ -23,6 +31,7 @@ interface FormData {
 function NewDocumentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { userId } = useAuth()
   const typeParam = searchParams.get('type') as DocType | null
   const prefillId = searchParams.get('prefill')
   // Track the draft ID that came from "← Back to Edit" so we can replace it on regenerate
@@ -43,6 +52,26 @@ function NewDocumentContent() {
     expirationDays: '7',
   })
 
+  // Pre-fill business name and payment terms from user settings (only on fresh wizard, not prefill)
+  useEffect(() => {
+    if (prefillId || !userId) return
+    async function loadUserDefaults() {
+      const { data } = await supabase
+        .from('user_settings')
+        .select('business_name, default_payment_terms')
+        .eq('user_id', userId)
+        .single()
+      if (!data) return
+      setForm(prev => ({
+        ...prev,
+        ...(data.business_name ? { businessName: data.business_name } : {}),
+        ...(data.default_payment_terms && paymentTermsDisplayMap[data.default_payment_terms]
+          ? { paymentTerms: paymentTermsDisplayMap[data.default_payment_terms] }
+          : {}),
+      }))
+    }
+    loadUserDefaults()
+  }, [userId, prefillId])
 
   useEffect(() => {
     if (!prefillId) return
@@ -346,7 +375,9 @@ function NewDocumentContent() {
                 <option>Due on receipt</option>
                 <option>Net 7</option>
                 <option>Net 14</option>
+                <option>Net 15</option>
                 <option>Net 30</option>
+                <option>Net 60</option>
                 <option>50% upfront, 50% on delivery</option>
               </select>
             </div>

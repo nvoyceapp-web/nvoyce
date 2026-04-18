@@ -77,12 +77,17 @@ export default function SettingsPage() {
       try {
         const { data, error } = await supabase
           .from('user_settings')
-          .select('logo_url, business_type, industry, common_services, project_types, default_payment_terms, charges_tax, tax_rate, tone_preference')
+          .select('logo_url, business_name, business_type, industry, common_services, project_types, default_payment_terms, charges_tax, tax_rate, tone_preference')
           .eq('user_id', userId)
           .single()
 
         if (!error && data) {
           if (data.logo_url) setLogoUrl(data.logo_url)
+          // Supabase business_name takes priority over Clerk metadata
+          if (data.business_name) {
+            setBusinessName(data.business_name)
+            setNameInput(data.business_name)
+          }
           if (data.business_type) setBusinessType(data.business_type)
           if (data.industry) setIndustry(data.industry)
           if (data.common_services) setCommonServices(data.common_services)
@@ -168,8 +173,16 @@ export default function SettingsPage() {
   }
 
   async function saveBusinessName() {
-    if (!user) return
-    await user.update({ unsafeMetadata: { ...user.unsafeMetadata, businessName: nameInput } })
+    if (!user || !userId) return
+    // Save to both Clerk metadata and user_settings so all reads are consistent
+    await Promise.all([
+      user.update({ unsafeMetadata: { ...user.unsafeMetadata, businessName: nameInput } }),
+      supabase.from('user_settings').upsert({
+        user_id: userId,
+        business_name: nameInput || null,
+        updated_at: new Date().toISOString(),
+      }),
+    ])
     setBusinessName(nameInput)
     setEditingName(false)
   }

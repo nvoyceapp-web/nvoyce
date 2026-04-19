@@ -308,7 +308,7 @@ export default function DocumentPage() {
     ...editingContent,
     from: editingContent.from ?? { name: '', tagline: '' },
     to: editingContent.to ?? { name: doc.client_name ?? '', email: '' },
-  }
+  } as Record<string, any>
   const effectiveStatus = getEffectiveStatus(doc)
   const isDraft = effectiveStatus === 'draft'
   const isInvoice = doc.doc_type === 'invoice'

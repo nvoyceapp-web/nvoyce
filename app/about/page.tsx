@@ -1,4 +1,6 @@
+import { auth } from '@clerk/nextjs/server'
 import Link from 'next/link'
+import AboutDashboard from './_components/AboutDashboard'
 
 function NvoyceMark() {
   return (
@@ -20,7 +22,9 @@ function NvoyceMark() {
   )
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const { userId } = await auth()
+  if (userId) return <AboutDashboard />
   return (
     <>
       <style>{`

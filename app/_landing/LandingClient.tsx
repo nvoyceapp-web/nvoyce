@@ -510,7 +510,7 @@ export default function LandingClient() {
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 26px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Start free — 3 docs on us</Link>
-                <button disabled style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 26px', borderRadius: 99, background: 'white', color: 'var(--ink)', border: '1px solid var(--line)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, cursor: 'not-allowed', opacity: 1 }}>
+                <button disabled style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 26px', borderRadius: 99, background: 'var(--paper-2)', color: 'var(--ink)', border: '1px solid var(--line)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, cursor: 'not-allowed', opacity: 1 }}>
                   <span style={{ width: 32, height: 32, borderRadius: 99, background: 'var(--orange)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="12" height="14" viewBox="0 0 12 14" fill="white"><path d="M1 1.5l10 5-10 5V1.5z"/></svg>
                   </span>
@@ -671,14 +671,14 @@ export default function LandingClient() {
       {/* CTA */}
       <section style={{ padding: '20px 28px 100px' }}>
         <div style={{ maxWidth: 1240, margin: '0 auto' }}>
-          <div className="nv-cta" style={{ background: 'var(--orange)', color: 'white', padding: '80px 48px', borderRadius: 20, textAlign: 'center' }}>
-            <h2 style={{ fontSize: 'clamp(42px, 6vw, 78px)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1, margin: 0, fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+          <div className="nv-cta" style={{ background: 'var(--paper-2)', color: 'var(--ink)', padding: '80px 48px', borderRadius: 20, textAlign: 'center', border: '1px solid var(--line)' }}>
+            <h2 style={{ fontSize: 'clamp(42px, 6vw, 78px)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1, margin: 0, fontFamily: 'var(--font-space-grotesk), sans-serif', color: 'var(--ink)' }}>
               Stop chasing.<br />Start getting paid.
             </h2>
-            <p style={{ fontSize: 17, opacity: 0.9, maxWidth: 520, margin: '22px auto 32px' }}>Because no one started freelancing to chase invoices.</p>
+            <p style={{ fontSize: 17, color: 'var(--muted)', maxWidth: 520, margin: '22px auto 32px' }}>Because no one started freelancing to chase invoices.</p>
             <div style={{ display: 'inline-flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 26px', borderRadius: 10, background: 'var(--ink)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Start your free trial →</Link>
-              <Link href="/sign-in" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 26px', borderRadius: 10, background: 'rgba(255,255,255,0.12)', color: 'white', border: '1px solid rgba(255,255,255,0.24)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Sign in</Link>
+              <Link href="/sign-in" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 26px', borderRadius: 10, background: 'transparent', color: 'var(--ink)', border: '1px solid var(--line)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Sign in</Link>
             </div>
           </div>
         </div>

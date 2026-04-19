@@ -2072,8 +2072,8 @@ function DashboardContent() {
                 </div>
 
                 {vd.form_data?.notes && (
-                  <div className="bg-orange-50 border border-orange-100 rounded-xl p-4">
-                    <p className="text-xs font-semibold text-orange-500 uppercase tracking-wider mb-1.5">Notes</p>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Notes</p>
                     <p className="text-sm text-gray-700 leading-relaxed">{vd.form_data.notes}</p>
                   </div>
                 )}

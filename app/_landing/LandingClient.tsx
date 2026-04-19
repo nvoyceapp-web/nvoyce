@@ -441,6 +441,8 @@ function NvoyceMark({ size = 30 }: { size?: number }) {
 
 // ─── Main landing page ──────────────────────────────────────────────────────
 export default function LandingClient() {
+  const [selectedPlan, setSelectedPlan] = useState<string>('Pro')
+
   return (
     <>
       <style>{`
@@ -623,25 +625,40 @@ export default function LandingClient() {
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20, maxWidth: 860, margin: '0 auto' }} className="nv-tri">
             {[
-              { name: 'Free',     price: '$0',     desc: '',    features: ['3 documents/month', 'AI generation', 'Stripe payment links', 'Email delivery'],   highlight: false },
-              { name: 'Pro',      price: '$19.99', desc: '/mo', features: ['Unlimited documents', 'Everything in Free', 'Payme smart reminders', 'Priority support'], highlight: true  },
-              { name: 'Business', price: '$39.99', desc: '/mo', features: ['Everything in Pro',  'Team features',     'Custom branding',       'Early access'],          highlight: false },
-            ].map(plan => (
-              <div key={plan.name} style={{ padding: 28, borderRadius: 16, background: plan.highlight ? 'var(--ink)' : 'white', border: plan.highlight ? 'none' : '1px solid var(--line)', textAlign: 'left' }}>
-                <div style={{ fontSize: 11, color: plan.highlight ? 'var(--orange)' : 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: 8 }}>{plan.name}</div>
-                <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1, color: plan.highlight ? 'white' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
-                  {plan.price}<span style={{ fontSize: 14, fontWeight: 400, opacity: 0.6 }}>{plan.desc}</span>
+              { name: 'Free',     price: '$0',     desc: '',    features: ['3 documents/month', 'AI generation', 'Stripe payment links', 'Email delivery'] },
+              { name: 'Pro',      price: '$19.99', desc: '/mo', features: ['Unlimited documents', 'Everything in Free', 'Payme smart reminders', 'Priority support'] },
+              { name: 'Business', price: '$39.99', desc: '/mo', features: ['Everything in Pro',  'Team features',     'Custom branding',       'Early access'] },
+            ].map(plan => {
+              const active = selectedPlan === plan.name
+              return (
+                <div
+                  key={plan.name}
+                  onClick={() => setSelectedPlan(plan.name)}
+                  style={{
+                    padding: 28, borderRadius: 16, textAlign: 'left',
+                    background: active ? '#2563eb' : 'white',
+                    border: active ? '2px solid #2563eb' : '2px solid var(--line)',
+                    cursor: 'pointer',
+                    transition: 'all 200ms ease',
+                    transform: active ? 'translateY(-4px)' : 'translateY(0)',
+                    boxShadow: active ? '0 12px 32px rgba(37,99,235,0.25)' : '0 2px 8px rgba(0,0,0,0.04)',
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: active ? 'rgba(255,255,255,0.75)' : 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: 8 }}>{plan.name}</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1, color: active ? 'white' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                    {plan.price}<span style={{ fontSize: 14, fontWeight: 400, opacity: 0.6 }}>{plan.desc}</span>
+                  </div>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: '20px 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {plan.features.map(f => (
+                      <li key={f} style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, color: active ? 'rgba(255,255,255,0.85)' : 'var(--muted)' }}>
+                        <span style={{ color: active ? 'rgba(255,255,255,0.9)' : 'var(--orange)', fontWeight: 700 }}>✓</span> {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/sign-up" style={{ display: 'block', padding: '12px', borderRadius: 10, textAlign: 'center', background: active ? 'white' : 'transparent', border: active ? 'none' : '1px solid var(--line)', color: active ? '#2563eb' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Get started</Link>
                 </div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '20px 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {plan.features.map(f => (
-                    <li key={f} style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, color: plan.highlight ? 'rgba(255,255,255,0.75)' : 'var(--muted)' }}>
-                      <span style={{ color: 'var(--orange)', fontWeight: 700 }}>✓</span> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/sign-up" style={{ display: 'block', padding: '12px', borderRadius: 10, textAlign: 'center', background: plan.highlight ? 'var(--orange)' : 'transparent', border: plan.highlight ? 'none' : '1px solid var(--line)', color: plan.highlight ? 'white' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Get started</Link>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>

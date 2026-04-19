@@ -510,7 +510,12 @@ export default function LandingClient() {
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 26px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Start free — 3 docs on us</Link>
-                <Link href="/sign-in" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 26px', borderRadius: 10, background: 'transparent', color: 'var(--ink)', border: '1px solid var(--line)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Sign in →</Link>
+                <button disabled style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 26px', borderRadius: 99, background: 'white', color: 'var(--ink)', border: '1px solid var(--line)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, cursor: 'not-allowed', opacity: 1 }}>
+                  <span style={{ width: 32, height: 32, borderRadius: 99, background: 'var(--orange)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="12" height="14" viewBox="0 0 12 14" fill="white"><path d="M1 1.5l10 5-10 5V1.5z"/></svg>
+                  </span>
+                  Watch the 45-second demo
+                </button>
               </div>
               {/* Stats */}
               <div style={{ display: 'flex', gap: 32, marginTop: 44, paddingTop: 24, borderTop: '1px solid var(--line)', flexWrap: 'wrap' }}>

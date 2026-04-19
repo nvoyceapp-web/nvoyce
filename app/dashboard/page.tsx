@@ -84,6 +84,9 @@ function DashboardContent() {
   const [showArchived, setShowArchived] = useState(false)
   const [archiving, setArchiving] = useState(false)
   const [bulkActionNotice, setBulkActionNotice] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null)
+  const [paymeModal, setPaymeModal] = useState<{ doc: Document; action: 'send-reminders' | 'follow-up'; daysSince: number } | null>(null)
+  const [paymeActionLoading, setPaymeActionLoading] = useState(false)
+  const [paymeActionResult, setPaymeActionResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Onboarding
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -1033,22 +1036,21 @@ function DashboardContent() {
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
-                            {rec.action === 'send-reminders' && (
-                              <button
-                                onClick={() => rec.paymeAction?.id && router.push(`/dashboard/documents/${rec.paymeAction.id}`)}
-                                className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition font-semibold"
-                              >
-                                Remind
-                              </button>
-                            )}
-                            {rec.action === 'follow-up' && (
-                              <button
-                                onClick={() => rec.paymeAction?.id && router.push(`/dashboard/documents/${rec.paymeAction.id}`)}
-                                className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition font-semibold"
-                              >
-                                Review
-                              </button>
-                            )}
+                            {(rec.action === 'send-reminders' || rec.action === 'follow-up') && (() => {
+                              const fullDoc = stats.documents.find(d => d.id === rec.paymeAction?.id)
+                              if (!fullDoc) return null
+                              return (
+                                <button
+                                  onClick={() => {
+                                    setPaymeActionResult(null)
+                                    setPaymeModal({ doc: fullDoc, action: rec.action as 'send-reminders' | 'follow-up', daysSince: rec.paymeAction?.days_since ?? 0 })
+                                  }}
+                                  className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition font-semibold"
+                                >
+                                  {rec.action === 'send-reminders' ? 'Remind' : 'Review'}
+                                </button>
+                              )
+                            })()}
                             <button
                               onClick={() => dismissRecommendation(rec.type)}
                               className="text-gray-500 hover:text-gray-300 transition p-1"
@@ -2087,6 +2089,139 @@ function DashboardContent() {
           label={qrModal.label}
           onClose={() => setQrModal(null)}
         />
+      )}
+
+      {/* Payme Action Modal */}
+      {paymeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setPaymeModal(null)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="bg-[#0d1b2a] px-6 py-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">
+                      {paymeModal.action === 'send-reminders' ? 'Overdue Invoice' : 'Pending Proposal'}
+                    </span>
+                  </div>
+                  <h2 className="text-lg font-bold text-white leading-tight">{paymeModal.doc.client_name}</h2>
+                  <p className="text-gray-400 text-sm mt-0.5">
+                    ${paymeModal.doc.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {paymeModal.doc.document_number ? ` · ${paymeModal.doc.document_number}` : ''}
+                  </p>
+                </div>
+                <button onClick={() => setPaymeModal(null)} className="text-gray-500 hover:text-white transition mt-0.5">
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {/* Status pill + days */}
+              <div className="flex items-center gap-2 mt-3">
+                <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-gray-300 capitalize font-medium">{paymeModal.doc.status}</span>
+                <span className="text-xs text-orange-400 font-semibold">
+                  {paymeModal.action === 'send-reminders'
+                    ? `${paymeModal.daysSince} day${paymeModal.daysSince !== 1 ? 's' : ''} overdue`
+                    : `${paymeModal.daysSince} day${paymeModal.daysSince !== 1 ? 's' : ''} pending`}
+                </span>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5 space-y-3">
+              {paymeActionResult && (
+                <div className={`rounded-lg px-4 py-3 text-sm font-medium ${paymeActionResult.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  {paymeActionResult.text}
+                </div>
+              )}
+
+              {paymeModal.action === 'send-reminders' ? (
+                <>
+                  <p className="text-sm text-gray-500">Send an overdue payment reminder email to <strong className="text-gray-900">{paymeModal.doc.client_email}</strong> with your payment link.</p>
+                  <button
+                    disabled={paymeActionLoading}
+                    onClick={async () => {
+                      setPaymeActionLoading(true)
+                      setPaymeActionResult(null)
+                      try {
+                        const res = await fetch('/api/invoices/remind', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ documentId: paymeModal.doc.id }),
+                        })
+                        const data = await res.json()
+                        setPaymeActionResult(res.ok
+                          ? { type: 'success', text: `✓ Reminder sent to ${paymeModal.doc.client_email}` }
+                          : { type: 'error', text: data.error || 'Failed to send reminder' })
+                      } finally {
+                        setPaymeActionLoading(false)
+                      }
+                    }}
+                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold text-sm rounded-xl px-4 py-3 transition"
+                  >
+                    {paymeActionLoading ? 'Sending...' : '📧 Send Payment Reminder'}
+                  </button>
+                  {paymeModal.doc.stripe_payment_link && (
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(paymeModal.doc.stripe_payment_link!); setPaymeActionResult({ type: 'success', text: '✓ Payment link copied to clipboard' }) }}
+                      className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm rounded-xl px-4 py-3 transition"
+                    >
+                      🔗 Copy Payment Link
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-500">Re-send the proposal to <strong className="text-gray-900">{paymeModal.doc.client_email}</strong> to nudge them toward a decision.</p>
+                  <button
+                    disabled={paymeActionLoading}
+                    onClick={async () => {
+                      setPaymeActionLoading(true)
+                      setPaymeActionResult(null)
+                      try {
+                        const res = await fetch('/api/proposals/follow-up', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ documentId: paymeModal.doc.id }),
+                        })
+                        const data = await res.json()
+                        setPaymeActionResult(res.ok
+                          ? { type: 'success', text: `✓ Follow-up sent to ${paymeModal.doc.client_email}` }
+                          : { type: 'error', text: data.error || 'Failed to send follow-up' })
+                      } finally {
+                        setPaymeActionLoading(false)
+                      }
+                    }}
+                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold text-sm rounded-xl px-4 py-3 transition"
+                  >
+                    {paymeActionLoading ? 'Sending...' : '📧 Send Follow-up Email'}
+                  </button>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/p/${paymeModal.doc.id}`); setPaymeActionResult({ type: 'success', text: '✓ Proposal link copied' }) }}
+                    className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium text-sm rounded-xl px-4 py-3 transition"
+                  >
+                    🔗 Copy Proposal Link
+                  </button>
+                </>
+              )}
+
+              {/* View full doc link */}
+              <div className="pt-1 border-t border-gray-100">
+                <Link
+                  href={`/dashboard/documents/${paymeModal.doc.id}`}
+                  onClick={() => setPaymeModal(null)}
+                  className="block text-center text-sm text-gray-400 hover:text-gray-600 py-2 transition"
+                >
+                  View full document →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Payment Toast Stack */}

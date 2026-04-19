@@ -30,7 +30,7 @@ const faqGroups: FAQGroup[] = [
         id: 'proposal-statuses',
         question: 'What are the different proposal statuses?',
         answer:
-          "📝 Draft — Proposal generated and saved. Review and edit it before sending — no document number yet.\n\n📤 Sent — You clicked "Send to Client" and the proposal was emailed. Client can now accept or decline.\n\n👁️ Received — Client has opened the proposal link.\n\n✓ Accepted — Client accepted the proposal. An invoice is automatically generated and sent to the client. You'll receive a 🎉 email notification and a real-time dashboard toast.\n\n✗ Declined — Client declined. You can create a revised proposal if needed.",
+          `📝 Draft — Proposal generated and saved. Review and edit it before sending — no document number yet.\n\n📤 Sent — You clicked "Send to Client" and the proposal was emailed. Client can now accept or decline.\n\n👁️ Received — Client has opened the proposal link.\n\n✓ Accepted — Client accepted the proposal. An invoice is automatically generated and sent to the client. You'll receive a 🎉 email notification and a real-time dashboard toast.\n\n✗ Declined — Client declined. You can create a revised proposal if needed.`,
       },
       {
         id: 'days-outstanding',
@@ -42,7 +42,7 @@ const faqGroups: FAQGroup[] = [
         id: 'overdue',
         question: 'When is an invoice considered overdue?',
         answer:
-          "An invoice becomes overdue once it reaches 30+ days without payment. Payme will flag these as high priority and the row turns red in your dashboard.\n\nAt 45+ days, Payme raises the priority to "very overdue". At 60+ days, it's marked as "critical" — your top priority for follow-up.\n\nUse the Send Reminder action (in the ⋯ Actions dropdown or bulk actions bar) to send a reminder email to the client.",
+          `An invoice becomes overdue once it reaches 30+ days without payment. Payme will flag these as high priority and the row turns red in your dashboard.\n\nAt 45+ days, Payme raises the priority to "very overdue". At 60+ days, it's marked as "critical" — your top priority for follow-up.\n\nUse the Send Reminder action (in the ⋯ Actions dropdown or bulk actions bar) to send a reminder email to the client.`,
       },
       {
         id: 'avg-days-payment',
@@ -66,7 +66,7 @@ const faqGroups: FAQGroup[] = [
         id: 'mark-paid',
         question: 'How do I mark an invoice as paid?',
         answer:
-          "If your client pays via the Stripe payment link in their email, the invoice updates automatically — no action needed on your end. You'll also receive a payment email and a real-time dashboard notification.\n\nFor payments made outside of Stripe (bank transfer, cash, check, etc.), open the ⋯ Actions dropdown on any invoice row and click "✓ Mark Paid". This updates the invoice status to Fully Paid in real time — no page reload needed.",
+          `If your client pays via the Stripe payment link in their email, the invoice updates automatically — no action needed on your end. You'll also receive a payment email and a real-time dashboard notification.\n\nFor payments made outside of Stripe (bank transfer, cash, check, etc.), open the ⋯ Actions dropdown on any invoice row and click "✓ Mark Paid". This updates the invoice status to Fully Paid in real time — no page reload needed.`,
       },
       {
         id: 'copy-payment-link',
@@ -78,7 +78,7 @@ const faqGroups: FAQGroup[] = [
         id: 'notifications',
         question: 'Will I be notified when a client pays or accepts a proposal?',
         answer:
-          "Yes — two ways, both happen automatically:\n\n📧 Email notifications:\n• When a client makes any payment (partial or full), you receive a "You got paid" email with the amount, client name, and invoice number. Your client simultaneously receives a payment receipt.\n• When a client accepts a proposal, you receive a "Proposal accepted" email with a link to the auto-generated invoice.\n\n🔔 Real-time dashboard toasts:\nIf you're on the dashboard when the event happens, a slide-in notification appears bottom-right — green 💰 for payments, purple 🎉 for proposal acceptances. A badge counter also appears on your "You're Owed" card.\n\nThe badge clears once you dismiss the toast (or it auto-dismisses after 6 seconds). No manual refresh needed — the dashboard polls every 15 seconds.",
+          `Yes — two ways, both happen automatically:\n\n📧 Email notifications:\n• When a client makes any payment (partial or full), you receive a "You got paid" email with the amount, client name, and invoice number. Your client simultaneously receives a payment receipt.\n• When a client accepts a proposal, you receive a "Proposal accepted" email with a link to the auto-generated invoice.\n\n🔔 Real-time dashboard toasts:\nIf you're on the dashboard when the event happens, a slide-in notification appears bottom-right — green 💰 for payments, purple 🎉 for proposal acceptances. A badge counter also appears on your "You're Owed" card.\n\nThe badge clears once you dismiss the toast (or it auto-dismisses after 6 seconds). No manual refresh needed — the dashboard polls every 15 seconds.`,
       },
       {
         id: 'send-reminder',
@@ -126,7 +126,7 @@ const faqGroups: FAQGroup[] = [
         id: 'actions-dropdown',
         question: 'What does the "⋯ Actions" dropdown do?',
         answer:
-          "The ⋯ Actions button appears in the Action column for every document. It opens a menu of available actions:\n\nFor invoices:\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to clipboard (only shown if a link exists and status isn't draft)\n• 📱 Show QR Code — opens a scannable QR code for the payment link; downloadable as a PNG (only shown if a link exists)\n• ✓ Mark Paid — manually mark the invoice as fully paid\n• 📧 Send Reminder — send a follow-up email (appears for overdue invoices)\n• 👁️ View Details — opens the full document detail page\n• 🗂 Archive — move the invoice to your archive (only available once fully paid)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFor proposals:\n• 🔗 Copy Link — copies the public proposal URL\n• 📧 Send Follow-up — sends a follow-up email (for stale proposals)\n• 👁️ View Details — opens the full detail page\n• 🗂 Archive — move to archive (only available once accepted)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFrom the draft detail page itself, you'll also see: "Save Draft", "← Back to Edit" (returns to the creation wizard with all data pre-filled), and "Send to Client".",
+          `The ⋯ Actions button appears in the Action column for every document. It opens a menu of available actions:\n\nFor invoices:\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to clipboard (only shown if a link exists and status isn't draft)\n• 📱 Show QR Code — opens a scannable QR code for the payment link; downloadable as a PNG (only shown if a link exists)\n• ✓ Mark Paid — manually mark the invoice as fully paid\n• 📧 Send Reminder — send a follow-up email (appears for overdue invoices)\n• 👁️ View Details — opens the full document detail page\n• 🗂 Archive — move the invoice to your archive (only available once fully paid)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFor proposals:\n• 🔗 Copy Link — copies the public proposal URL\n• 📧 Send Follow-up — sends a follow-up email (for stale proposals)\n• 👁️ View Details — opens the full detail page\n• 🗂 Archive — move to archive (only available once accepted)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFrom the draft detail page itself, you'll also see: "Save Draft", "← Back to Edit" (returns to the creation wizard with all data pre-filled), and "Send to Client".`,
       },
       {
         id: 'bulk-actions',
@@ -138,7 +138,7 @@ const faqGroups: FAQGroup[] = [
         id: 'archive',
         question: 'How does archiving work?',
         answer:
-          "Archiving moves a document out of your active view without deleting it. It's a way to keep your dashboard clean once a job is fully wrapped up.\n\nEligibility rules:\n• Invoices — must be Fully Paid before archiving\n• Proposals — must be Accepted before archiving\n\nTo view your archived documents, click the "🗂 View Archived" button in the top-right of the document table. It switches the view to show only archived docs. Click "← Back to Active" to return.\n\nYou can unarchive any document at any time using the ⋯ Actions dropdown.",
+          `Archiving moves a document out of your active view without deleting it. It's a way to keep your dashboard clean once a job is fully wrapped up.\n\nEligibility rules:\n• Invoices — must be Fully Paid before archiving\n• Proposals — must be Accepted before archiving\n\nTo view your archived documents, click the "🗂 View Archived" button in the top-right of the document table. It switches the view to show only archived docs. Click "← Back to Active" to return.\n\nYou can unarchive any document at any time using the ⋯ Actions dropdown.`,
       },
       {
         id: 'delete',

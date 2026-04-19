@@ -123,7 +123,7 @@ export default function DocumentPage() {
   const updateLineItem = useCallback((index: number, field: string, value: any) => {
     setEditingContent((prev) => {
       if (!prev) return prev
-      const items = prev.lineItems.map((item: any, i: number) => {
+      const items = (prev.lineItems || []).map((item: any, i: number) => {
         if (i !== index) return item
         const updated = { ...item, [field]: value }
         // Auto-compute total when qty or unitPrice changes
@@ -146,7 +146,7 @@ export default function DocumentPage() {
     setEditingContent((prev) => {
       if (!prev) return prev
       const newItem = { description: 'New item', quantity: 1, unitPrice: 0, total: 0 }
-      return { ...prev, lineItems: [...prev.lineItems, newItem] }
+      return { ...prev, lineItems: [...(prev.lineItems || []), newItem] }
     })
     setHasUnsavedChanges(true)
   }, [])
@@ -154,7 +154,7 @@ export default function DocumentPage() {
   const removeLineItem = useCallback((index: number) => {
     setEditingContent((prev) => {
       if (!prev) return prev
-      const items = prev.lineItems.filter((_: any, i: number) => i !== index)
+      const items = (prev.lineItems || []).filter((_: any, i: number) => i !== index)
       const subtotal = items.reduce((sum: number, item: any) => sum + (Number(item.total) || 0), 0)
       return { ...prev, lineItems: items, subtotal, total: subtotal + (prev.tax || 0) }
     })
@@ -303,11 +303,15 @@ export default function DocumentPage() {
     )
   }
 
-  // Normalise: ensure from/to always exist even if generated_content is missing those fields
+  // Normalise: ensure all expected fields exist even if generated_content is partial/missing
   const content = {
     ...editingContent,
-    from: editingContent.from ?? { name: '', tagline: '' },
-    to: editingContent.to ?? { name: doc.client_name ?? '', email: '' },
+    from: editingContent.from && typeof editingContent.from === 'object' ? editingContent.from : { name: '', tagline: '' },
+    to: editingContent.to && typeof editingContent.to === 'object' ? editingContent.to : { name: doc.client_name ?? '', email: '' },
+    lineItems: Array.isArray(editingContent.lineItems) ? editingContent.lineItems : [],
+    subtotal: editingContent.subtotal ?? 0,
+    tax: editingContent.tax ?? 0,
+    total: editingContent.total ?? doc.price ?? 0,
   } as Record<string, any>
   const effectiveStatus = getEffectiveStatus(doc)
   const isDraft = effectiveStatus === 'draft'

@@ -1,218 +1,240 @@
-'use client'
-
 import Link from 'next/link'
-import Sidebar, { SidebarHandle } from '@/components/Sidebar'
-import TopBar from '@/components/TopBar'
-import MobileNav from '@/components/MobileNav'
-import { useRef } from 'react'
+
+function NvoyceMark() {
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 11 }}>
+      <svg width="30" height="30" viewBox="0 0 40 40" fill="none" aria-label="nvoyce">
+        <rect x="2" y="2" width="36" height="36" rx="9" fill="#0d1b2a" />
+        <rect x="9" y="9" width="3.2" height="22" fill="white" />
+        <rect x="27.8" y="9" width="3.2" height="22" fill="white" />
+        <path d="M12.2 9 L15 9 L28 27 L28 31 L25.2 31 Z" fill="white" />
+        <circle cx="17.5" cy="14" r="1.2" fill="#e04e1a" />
+        <circle cx="22.5" cy="14" r="1.2" fill="#e04e1a" />
+        <circle cx="17.5" cy="20" r="1.2" fill="#e04e1a" />
+        <circle cx="22.5" cy="20" r="1.2" fill="#e04e1a" />
+        <circle cx="17.5" cy="26" r="1.2" fill="#e04e1a" />
+        <circle cx="22.5" cy="26" r="1.2" fill="#e04e1a" />
+      </svg>
+      <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 20, letterSpacing: '-0.03em', color: '#0d1b2a', lineHeight: 1 }}>nvoyce</span>
+    </div>
+  )
+}
 
 export default function AboutPage() {
-  const sidebarRef = useRef<SidebarHandle>(null)
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-purple-50">
-      <div className="hidden lg:block">
-        <TopBar onHamburgerClick={() => sidebarRef.current?.open()} />
-      </div>
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar ref={sidebarRef} activePage="about" />
+    <>
+      <style>{`
+        :root {
+          --orange: #e04e1a;
+          --ink: #0d1b2a;
+          --ink-2: #1a2f45;
+          --paper: #fbfaf7;
+          --paper-2: #f3efe7;
+          --line: #e8e2d5;
+          --muted: #6b6558;
+          --text: #1a1915;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          background: var(--paper);
+          color: var(--text);
+          -webkit-font-smoothing: antialiased;
+        }
+        @media (max-width: 640px) {
+          .about-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto">
-          <MobileNav activePage="about" />
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        {/* Hero Section */}
-        <div className="text-center mb-20">
-          <h1 className="text-5xl font-bold font-display text-gray-900 mb-6">We do the hard stuff.</h1>
-          <h2 className="text-5xl font-bold font-display mb-8 pb-1">
-            <span className="bg-gradient-to-r from-[#3b2a4a] to-[#d4622a] bg-clip-text text-transparent">You get paid</span><span className="text-orange-500">.</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Send a proposal in 30 seconds. Get paid without the back-and-forth.
+      {/* Nav */}
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 40,
+        background: 'rgba(251,250,247,0.92)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        borderBottom: '1px solid var(--line)',
+      }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link href="/" style={{ textDecoration: 'none' }}><NvoyceMark /></Link>
+          <nav style={{ display: 'flex', gap: 26, alignItems: 'center' }}>
+            <Link href="/#pricing" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>Pricing</Link>
+            <Link href="/faq" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>FAQ</Link>
+            <Link href="/about" style={{ fontSize: 13, fontWeight: 500, color: 'var(--orange)', textDecoration: 'none' }}>About</Link>
+            <Link href="/sign-in" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>Sign in</Link>
+            <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '8px 16px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Start free</Link>
+          </nav>
+        </div>
+      </header>
+
+      <main style={{ maxWidth: 900, margin: '0 auto', padding: '64px 28px 100px' }}>
+
+        {/* Hero */}
+        <div style={{ marginBottom: 72 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 99, background: 'var(--paper-2)', color: 'var(--muted)', border: '1px solid var(--line)', fontSize: 11, textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontFamily: 'ui-monospace, monospace', marginBottom: 20 }}>
+            <span style={{ width: 5, height: 5, borderRadius: 99, background: 'var(--orange)', display: 'inline-block' }} />
+            About Nvoyce
+          </span>
+          <h1 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 'clamp(42px, 6vw, 72px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, color: 'var(--ink)', margin: '0 0 24px' }}>
+            We do the hard stuff.<br />
+            <span style={{ color: 'var(--orange)' }}>You get paid.</span>
+          </h1>
+          <p style={{ fontSize: 19, color: 'var(--muted)', lineHeight: 1.6, maxWidth: 580, margin: 0 }}>
+            Invoicing and proposals shouldn&apos;t slow you down. Most freelancers spend
+            too much time on admin instead of doing the work they love. We&apos;re changing that.
           </p>
         </div>
 
-        {/* Mission Section */}
-        <section className="mb-20">
-          <h3 className="text-3xl font-bold font-display text-gray-900 mb-6">Our Mission</h3>
-          <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            Invoicing and proposal management shouldn't be complicated. Most freelancers spend valuable time on admin work instead of doing what they love. We're changing that.
+        {/* Mission */}
+        <section style={{ marginBottom: 72 }}>
+          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, fontWeight: 600, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Our Mission</span>
+          <h2 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 'clamp(28px, 3vw, 38px)', fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--ink)', margin: '12px 0 20px' }}>
+            Built for people who work for themselves.
+          </h2>
+          <p style={{ fontSize: 17, color: 'var(--muted)', lineHeight: 1.7, maxWidth: 640, marginBottom: 16 }}>
+            Nvoyce automates the hard stuff — invoice generation, payment tracking, and smart reminders.
+            So you can focus on delivering great work and getting paid on time.
           </p>
-          <p className="text-lg text-gray-700 leading-relaxed">
-            Nvoyce automates the hard stuff—invoice generation, payment tracking, and smart reminders. So you can focus on delivering great work and getting paid on time.
+          <p style={{ fontSize: 17, color: 'var(--muted)', lineHeight: 1.7, maxWidth: 640 }}>
+            We believe freelancers deserve the same professional tools as big companies.
+            A three-line brief in, a ready-to-send invoice out. That&apos;s the whole idea.
           </p>
         </section>
 
         {/* Core Values */}
-        <section className="mb-20">
-          <h3 className="text-3xl font-bold font-display text-gray-900 mb-12">Our Core Values</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg border border-gray-100 p-6">
-              <div className="mb-4">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                </svg>
+        <section style={{ marginBottom: 72 }}>
+          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, fontWeight: 600, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Values</span>
+          <h2 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 'clamp(28px, 3vw, 38px)', fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--ink)', margin: '12px 0 32px' }}>
+            How we think about this.
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }} className="about-grid">
+            {[
+              {
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                ),
+                title: 'Speed',
+                desc: 'Create an invoice in seconds. Get paid faster with automated reminders and intelligent prioritization.',
+              },
+              {
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+                  </svg>
+                ),
+                title: 'Simplicity',
+                desc: 'Intuitive tools that work the way you think. No complicated workflows or unnecessary features.',
+              },
+              {
+                icon: (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                ),
+                title: 'Empowerment',
+                desc: "Built for freelancers, by people who understand your challenges. Your success is our success.",
+              },
+            ].map(v => (
+              <div key={v.title} style={{ padding: 24, borderRadius: 14, background: 'white', border: '1px solid var(--line)' }}>
+                <div style={{ marginBottom: 14 }}>{v.icon}</div>
+                <h3 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 17, fontWeight: 600, color: 'var(--ink)', margin: '0 0 10px' }}>{v.title}</h3>
+                <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6, margin: 0 }}>{v.desc}</p>
               </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">Speed</h4>
-              <p className="text-gray-600">
-                Create an invoice in seconds, not hours. Get paid faster with automated reminders and intelligent prioritization.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-100 p-6">
-              <div className="mb-4">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <circle cx="12" cy="12" r="6"/>
-                  <circle cx="12" cy="12" r="2"/>
-                </svg>
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">Simplicity</h4>
-              <p className="text-gray-600">
-                Intuitive tools that work the way you think. No complicated workflows or unnecessary features.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-100 p-6">
-              <div className="mb-4">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">Empowerment</h4>
-              <p className="text-gray-600">
-                We're built for freelancers, by people who understand your challenges. Your success is our success.
-              </p>
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* Who We Serve */}
-        <section className="mb-20">
-          <h3 className="text-3xl font-bold font-display text-gray-900 mb-8">Who We Serve</h3>
-          <div className="bg-gray-50 rounded-lg border border-gray-200 p-8">
-            <p className="text-lg text-gray-700 leading-relaxed">
-              <strong>Freelancers & Gig Workers</strong> who manage their own invoices and need to track payment quickly. Whether you're a designer, writer, developer, consultant, or service provider—Nvoyce helps you get paid faster.
+        {/* Brand story */}
+        <section style={{ marginBottom: 72 }}>
+          <div style={{ background: 'var(--ink)', borderRadius: 20, padding: '48px 40px', display: 'flex', flexDirection: 'column' as const, gap: 24 }}>
+            <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, fontWeight: 600, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Hidden in plain sight</span>
+            <h2 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 'clamp(26px, 3vw, 36px)', fontWeight: 700, letterSpacing: '-0.025em', color: 'white', margin: 0, lineHeight: 1.1 }}>
+              The orange dots inside the N spell <span style={{ color: 'var(--orange)' }}>"VOICE"</span> in Braille.
+            </h2>
+            <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, maxWidth: 620, margin: 0 }}>
+              Nvoyce is a fusion of <em>invoice</em> and <em>voice</em> — because every invoice is a freelancer&apos;s voice:
+              a declaration of their work, their worth, and their right to be paid. The Braille lettering is a nod
+              to universal access, a reminder that financial tools should work for everyone, and a tiny secret
+              for those who look closely.
             </p>
-            <p className="text-lg text-gray-700 leading-relaxed mt-4">
-              We believe freelancers deserve the same professional tools as big companies. We're making that possible.
-            </p>
           </div>
         </section>
 
-        {/* Brand Story — The Logo */}
-        <section className="mb-20">
-          <h3 className="text-3xl font-bold font-display text-gray-900 mb-8">The Story Behind the Mark</h3>
-          <div className="bg-gradient-to-r from-orange-500 via-[#1a2f45] to-[#0d1b2a] rounded-2xl p-10 flex flex-col md:flex-row items-center gap-10">
-            <div className="flex-shrink-0">
-              <img
-                src="/logo-icon.png"
-                alt="Nvoyce N icon"
-                className="w-28 h-28 object-contain"
-              />
-            </div>
-            <div className="text-white">
-              <p className="text-sm font-semibold text-orange-400 mb-3 tracking-wide uppercase">
-                Hidden in plain sight
-              </p>
-              <p className="text-xl font-bold mb-4 leading-snug text-white">
-                The orange dots inside the N spell <span className="text-orange-400">"VOICE"</span> in Braille.
-              </p>
-              <p className="text-gray-300 leading-relaxed">
-                Nvoyce is a fusion of <em>invoice</em> and <em>voice</em> — because every invoice is a freelancer's voice: a declaration of their work, their worth, and their right to be paid. The Braille lettering is a nod to universal access, a reminder that financial tools should work for everyone, and a tiny secret for those who look closely.
-              </p>
-            </div>
+        {/* What makes us different */}
+        <section style={{ marginBottom: 72 }}>
+          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, fontWeight: 600, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Features</span>
+          <h2 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 'clamp(28px, 3vw, 38px)', fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--ink)', margin: '12px 0 32px' }}>
+            What makes Nvoyce different.
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {[
+              {
+                icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+                title: 'Instant AI invoicing',
+                desc: 'Generate professional invoices and proposals with AI in seconds, not hours.',
+              },
+              {
+                icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>,
+                title: 'Smart reminders (Payme)',
+                desc: "Intelligent follow-ups on overdue invoices so you never lose track of money owed to you.",
+              },
+              {
+                icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
+                title: 'Real-time insights',
+                desc: 'Track payment patterns, outstanding invoices, and cash flow at a glance.',
+              },
+              {
+                icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+                title: 'Shareable proposals',
+                desc: 'Send clients a link to review and accept — no sign-up required. Invoice auto-generates the moment they accept.',
+              },
+            ].map(f => (
+              <div key={f.title} style={{ display: 'flex', gap: 18, alignItems: 'flex-start', padding: 20, background: 'white', borderRadius: 12, border: '1px solid var(--line)' }}>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--paper-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{f.icon}</div>
+                <div>
+                  <h3 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 15, fontWeight: 600, color: 'var(--ink)', margin: '0 0 6px' }}>{f.title}</h3>
+                  <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Features Highlight */}
-        <section className="mb-20">
-          <h3 className="text-3xl font-bold font-display text-gray-900 mb-12">What Makes Nvoyce Different</h3>
-          <div className="space-y-6">
-            <div className="flex gap-5 items-start">
-              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900">Instant Invoicing</h4>
-                <p className="text-gray-600">Generate professional invoices and proposals with AI in seconds, not hours.</p>
-              </div>
-            </div>
-            <div className="flex gap-5 items-start">
-              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900">Smart Payment Assistant (Payme)</h4>
-                <p className="text-gray-600">Get intelligent reminders about overdue invoices so you never lose track of money owed to you.</p>
-              </div>
-            </div>
-            <div className="flex gap-5 items-start">
-              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900">Real-Time Insights</h4>
-                <p className="text-gray-600">Track payment patterns, outstanding invoices, and cash flow at a glance.</p>
-              </div>
-            </div>
-            <div className="flex gap-5 items-start">
-              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900">Shareable Proposals</h4>
-                <p className="text-gray-600">Send clients a link to review and accept proposals. No sign-up required. Once accepted, an invoice is auto-generated and sent to the client instantly.</p>
-              </div>
-            </div>
-            <div className="flex gap-5 items-start">
-              <div className="flex-shrink-0 w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900">Real-Time Notifications</h4>
-                <p className="text-gray-600">Get instant email alerts and live dashboard toasts the moment a client pays or accepts a proposal — partial payments included. No refresh needed.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
-          <h3 className="text-3xl font-bold font-display text-gray-900 mb-4">Stop chasing. Start getting paid.</h3>
-          <p className="text-lg text-gray-600 mb-8">Because no one started freelancing to chase invoices.</p>
-          <Link
-            href="/dashboard"
-            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition text-lg font-semibold inline-block"
-          >
-            Start Your Free Trial →
+        {/* CTA */}
+        <section style={{ background: 'var(--orange)', borderRadius: 20, padding: '56px 40px', textAlign: 'center' }}>
+          <h2 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 'clamp(32px, 4vw, 48px)', fontWeight: 700, letterSpacing: '-0.025em', color: 'white', margin: '0 0 16px', lineHeight: 1 }}>
+            Stop chasing.<br />Start getting paid.
+          </h2>
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.85)', marginBottom: 32 }}>
+            Because no one started freelancing to chase invoices.
+          </p>
+          <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 28px', borderRadius: 10, background: 'var(--ink)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>
+            Start free — 3 docs on us
           </Link>
         </section>
+      </main>
 
-          {/* Footer */}
-          <div className="border-t border-gray-100 mt-20 py-8 text-center flex flex-col items-center gap-3">
-            <img src="/logo-icon.png" alt="Nvoyce" className="w-7 h-7 object-contain opacity-50" />
-            <p className="text-gray-500 text-sm">© 2026 Nvoyce. Stop chasing. Start getting paid.</p>
-            <a
-              href="https://nvoyce.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-orange-500 hover:text-orange-600 transition font-medium"
-            >
-              Visit nvoyce.ai →
-            </a>
-            <p className="text-gray-400 text-xs">
-              Partnerships & general inquiries —{' '}
-              <a href="mailto:hello@nvoyce.ai" className="hover:text-orange-500 transition">
-                hello@nvoyce.ai
-              </a>
+      {/* Footer */}
+      <footer style={{ borderTop: '1px solid var(--line)', padding: '40px 28px 60px', background: 'var(--paper)' }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
+          <Link href="/" style={{ textDecoration: 'none' }}><NvoyceMark /></Link>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            {([['Pricing', '/#pricing'], ['FAQ', '/faq'], ['About', '/about'], ['Sign in', '/sign-in']] as [string, string][]).map(([label, href]) => (
+              <Link key={label} href={href} style={{ fontSize: 13, color: 'var(--muted)', textDecoration: 'none' }}>{label}</Link>
+            ))}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--muted)' }}>© 2026 nvoyce</span>
+            <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--muted)' }}>
+              <a href="mailto:hello@nvoyce.ai" style={{ color: 'var(--muted)', textDecoration: 'none' }}>hello@nvoyce.ai</a>
               {' · '}
-              Support —{' '}
-              <a href="mailto:support@nvoyce.ai" className="hover:text-orange-500 transition">
-                support@nvoyce.ai
-              </a>
-            </p>
+              <a href="mailto:support@nvoyce.ai" style={{ color: 'var(--muted)', textDecoration: 'none' }}>support@nvoyce.ai</a>
+            </div>
           </div>
-          </div>
-        </main>
-      </div>
-    </div>
+        </div>
+      </footer>
+    </>
   )
 }

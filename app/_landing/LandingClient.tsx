@@ -481,7 +481,7 @@ export default function LandingClient() {
           <NvoyceMark />
           <nav style={{ display: 'flex', gap: 26, alignItems: 'center' }}>
             <span className="nv-nav-links" style={{ display: 'flex', gap: 26 }}>
-              {[['Pricing', '#pricing'], ['FAQ', '/dashboard/faq'], ['About', '/about']].map(([label, href]) => (
+              {[['Pricing', '#pricing'], ['FAQ', '/faq'], ['About', '/about']].map(([label, href]) => (
                 <Link key={label} href={href} style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>{label}</Link>
               ))}
             </span>

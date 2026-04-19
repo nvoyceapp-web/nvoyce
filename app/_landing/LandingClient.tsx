@@ -636,26 +636,26 @@ export default function LandingClient() {
                   onClick={() => setSelectedPlan(plan.name)}
                   style={{
                     padding: 28, borderRadius: 16, textAlign: 'left',
-                    background: active ? 'var(--orange)' : 'white',
-                    border: active ? '2px solid var(--orange)' : '2px solid var(--line)',
+                    background: active ? 'var(--ink)' : 'white',
+                    border: active ? '2px solid var(--ink)' : '2px solid var(--line)',
                     cursor: 'pointer',
                     transition: 'all 200ms ease',
                     transform: active ? 'translateY(-4px)' : 'translateY(0)',
-                    boxShadow: active ? '0 12px 32px rgba(224,78,26,0.25)' : '0 2px 8px rgba(0,0,0,0.04)',
+                    boxShadow: active ? '0 12px 32px rgba(13,27,42,0.25)' : '0 2px 8px rgba(0,0,0,0.04)',
                   }}
                 >
-                  <div style={{ fontSize: 11, color: active ? 'rgba(255,255,255,0.75)' : 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: 8 }}>{plan.name}</div>
+                  <div style={{ fontSize: 11, color: active ? 'var(--orange)' : 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: 8 }}>{plan.name}</div>
                   <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1, color: active ? 'white' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
                     {plan.price}<span style={{ fontSize: 14, fontWeight: 400, opacity: 0.6 }}>{plan.desc}</span>
                   </div>
                   <ul style={{ listStyle: 'none', padding: 0, margin: '20px 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {plan.features.map(f => (
                       <li key={f} style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, color: active ? 'rgba(255,255,255,0.85)' : 'var(--muted)' }}>
-                        <span style={{ color: active ? 'rgba(255,255,255,0.9)' : 'var(--orange)', fontWeight: 700 }}>✓</span> {f}
+                        <span style={{ color: active ? 'var(--orange)' : 'var(--orange)', fontWeight: 700 }}>✓</span> {f}
                       </li>
                     ))}
                   </ul>
-                  <Link href="/sign-up" style={{ display: 'block', padding: '12px', borderRadius: 10, textAlign: 'center', background: active ? 'white' : 'transparent', border: active ? 'none' : '1px solid var(--line)', color: active ? 'var(--orange)' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Get started</Link>
+                  <Link href="/sign-up" style={{ display: 'block', padding: '12px', borderRadius: 10, textAlign: 'center', background: active ? 'var(--orange)' : 'transparent', border: active ? 'none' : '1px solid var(--line)', color: active ? 'white' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Get started</Link>
                 </div>
               )
             })}

@@ -95,7 +95,7 @@ export async function sendInvoiceEmail({
               </div>
               <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #d1fae5;">
                 <p style="margin: 0 0 6px 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Total Amount</p>
-                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #f97316;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #e04e1a;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
             </div>
             <div style="background-color: #f9fafb; padding: 20px; border-radius: 4px; margin: 0 0 30px 0;">
@@ -108,7 +108,7 @@ export async function sendInvoiceEmail({
             </div>
             <div style="background-color: #f3f4f6; padding: 30px 20px; border-radius: 4px; margin: 0 0 30px 0; text-align: center;">
               <p style="margin: 0 0 15px 0; font-size: 15px; font-weight: bold; color: #1f2937;">Complete Payment Securely</p>
-              <a href="${paymentLink}" style="display: inline-block; padding: 14px 40px; background-color: #f97316; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">Pay Now</a>
+              <a href="${paymentLink}" style="display: inline-block; padding: 14px 40px; background-color: #e04e1a; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">Pay Now</a>
               <p style="margin: 15px 0 0 0; font-size: 12px; color: #6b7280;">Click the button above to view your invoice and complete payment securely.</p>
             </div>
             <p style="margin: 0 0 30px 0; font-size: 13px; color: #6b7280;">
@@ -168,7 +168,7 @@ export async function sendWelcomeEmail({
 
             <!-- Trial banner -->
             <div style="background-color: #0d1b2a; border-radius: 10px; padding: 20px 24px; margin: 0 0 24px 0; text-align: center;">
-              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: bold; color: #f97316; text-transform: uppercase; letter-spacing: 1px;">Your Pro Trial</p>
+              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: bold; color: #e04e1a; text-transform: uppercase; letter-spacing: 1px;">Your Pro Trial</p>
               <p style="margin: 0 0 8px 0; font-size: 22px; font-weight: bold; color: #ffffff;">7 days of full Pro access</p>
               <p style="margin: 0; font-size: 13px; color: #9ca3af;">No credit card needed. Ends in 7 days.</p>
             </div>
@@ -186,7 +186,7 @@ export async function sendWelcomeEmail({
             </div>
 
             <div style="text-align: center; margin: 0 0 24px 0;">
-              <a href="${appUrl}/dashboard" style="display: inline-block; padding: 14px 36px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+              <a href="${appUrl}/dashboard" style="display: inline-block; padding: 14px 36px; background-color: #e04e1a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
                 Create Your First Invoice →
               </a>
             </div>
@@ -194,7 +194,7 @@ export async function sendWelcomeEmail({
             <div style="border-top: 1px solid #e5e7eb; padding-top: 20px;">
               <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold; color: #1f2937;">What happens after 7 days?</p>
               <p style="margin: 0; font-size: 13px; color: #6b7280; line-height: 1.6;">
-                You'll move to the Free plan (3 docs/month). We'll remind you before your trial ends so you're never caught off guard. Upgrade to Pro anytime from your <a href="${appUrl}/dashboard/settings" style="color: #f97316; text-decoration: none;">settings</a>.
+                You'll move to the Free plan (3 docs/month). We'll remind you before your trial ends so you're never caught off guard. Upgrade to Pro anytime from your <a href="${appUrl}/dashboard/settings" style="color: #e04e1a; text-decoration: none;">settings</a>.
               </p>
             </div>
           </div>
@@ -271,7 +271,7 @@ export async function sendProposalSentEmail({
               </div>
               <div style="margin: 0 0 12px 0;">
                 <p style="margin: 0 0 8px 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Proposed Amount</p>
-                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #f97316;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p style="margin: 0; font-size: 20px; font-weight: bold; color: #e04e1a;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div style="margin: 0 0 12px 0;">
                 <p style="margin: 0 0 8px 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Timeline</p>
@@ -293,7 +293,7 @@ export async function sendProposalSentEmail({
             </div>
             <div style="background-color: #f9fafb; padding: 20px; border-radius: 4px; margin: 0 0 30px 0; text-align: center;">
               <p style="margin: 0 0 15px 0; font-size: 15px; font-weight: bold; color: #1f2937;">Ready to Move Forward?</p>
-              <a href="${proposalLink}" style="display: inline-block; padding: 14px 32px; background-color: #f97316; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; margin: 0 0 12px 0;">Review & Respond to Proposal</a>
+              <a href="${proposalLink}" style="display: inline-block; padding: 14px 32px; background-color: #e04e1a; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; margin: 0 0 12px 0;">Review & Respond to Proposal</a>
               <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">You can accept this proposal, request changes, or decline. ${businessName} will be notified of your response.</p>
             </div>
             <p style="margin: 0 0 30px 0; font-size: 13px; color: #6b7280;">
@@ -361,7 +361,7 @@ export async function sendProposalDeclinedEmail({
               </ul>
             </div>
             <div style="text-align: center;">
-              <a href="${appUrl}/dashboard" style="display: inline-block; padding: 12px 32px; background-color: #f97316; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">Back to Dashboard</a>
+              <a href="${appUrl}/dashboard" style="display: inline-block; padding: 12px 32px; background-color: #e04e1a; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">Back to Dashboard</a>
             </div>
           </div>
           <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
@@ -397,7 +397,7 @@ function trialEmailShell(logoUrl: string, appUrl: string, body: string) {
       <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: center; background-color: #f9fafb;">
         <p style="margin: 0; font-size: 11px; color: #9ca3af;">© 2026 Nvoyce · We do the hard stuff. You get paid.</p>
         <p style="margin: 6px 0 0 0; font-size: 11px; color: #d1d5db;">
-          <a href="${appUrl}/dashboard/settings" style="color: #f97316; text-decoration: none;">Manage your plan</a>
+          <a href="${appUrl}/dashboard/settings" style="color: #e04e1a; text-decoration: none;">Manage your plan</a>
         </p>
       </div>
     </div>
@@ -421,7 +421,7 @@ export async function sendTrialWarningEmail({
     ? 'Your Nvoyce Pro trial ends tomorrow'
     : 'Your Nvoyce Pro trial ends in 2 days'
 
-  const urgencyColor = isLastDay ? '#ef4444' : '#f97316'
+  const urgencyColor = isLastDay ? '#ef4444' : '#e04e1a'
   const urgencyText = isLastDay
     ? 'Last chance — your trial ends tomorrow.'
     : 'Heads up — your trial ends in 2 days.'
@@ -441,7 +441,7 @@ export async function sendTrialWarningEmail({
     </div>
 
     <div style="text-align: center; margin: 0 0 24px 0;">
-      <a href="${appUrl}/dashboard/settings" style="display: inline-block; padding: 14px 36px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+      <a href="${appUrl}/dashboard/settings" style="display: inline-block; padding: 14px 36px; background-color: #e04e1a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
         Keep Pro — $19.99/mo →
       </a>
     </div>
@@ -549,7 +549,7 @@ export async function sendUpgradeConfirmationEmail({
           </p>
 
           <div style="background-color: #0d1b2a; border-radius: 10px; padding: 20px 24px; margin: 0 0 24px 0; text-align: center;">
-            <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: bold; color: #f97316; text-transform: uppercase; letter-spacing: 1px;">Active Plan</p>
+            <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: bold; color: #e04e1a; text-transform: uppercase; letter-spacing: 1px;">Active Plan</p>
             <p style="margin: 0 0 4px 0; font-size: 26px; font-weight: bold; color: #ffffff;">Nvoyce ${planName}</p>
             <p style="margin: 0; font-size: 13px; color: #9ca3af;">${planPrice}/month · Cancel anytime</p>
           </div>
@@ -562,13 +562,13 @@ export async function sendUpgradeConfirmationEmail({
           </div>
 
           <div style="text-align: center; margin: 0 0 24px 0;">
-            <a href="${appUrl}/dashboard" style="display: inline-block; padding: 14px 36px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
+            <a href="${appUrl}/dashboard" style="display: inline-block; padding: 14px 36px; background-color: #e04e1a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">
               Go to Dashboard →
             </a>
           </div>
 
           <p style="margin: 0; font-size: 12px; color: #9ca3af; text-align: center;">
-            Manage your plan anytime from <a href="${appUrl}/dashboard/settings" style="color: #f97316; text-decoration: none;">Settings</a>.
+            Manage your plan anytime from <a href="${appUrl}/dashboard/settings" style="color: #e04e1a; text-decoration: none;">Settings</a>.
           </p>
         </div>
 
@@ -617,7 +617,7 @@ export async function sendLaunchAnnouncementEmail({
             <p style="margin: 0 0 16px 0; font-size: 13px; color: #b45309; line-height: 1.6;">
               If Nvoyce has saved you time or helped you get paid faster, an upvote on Product Hunt goes a long way. It takes 10 seconds and helps more freelancers find the tool.
             </p>
-            <a href="${phUrl}" style="display: inline-block; padding: 12px 28px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">
+            <a href="${phUrl}" style="display: inline-block; padding: 12px 28px; background-color: #e04e1a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">
               ▲ Upvote Nvoyce on Product Hunt
             </a>
           </div>
@@ -808,7 +808,7 @@ export async function sendPaymentReceivedEmail({
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 6px 0; font-size: 13px; color: #9a3412;">This payment</td>
-                <td style="padding: 6px 0; font-size: 18px; color: #f97316; font-weight: bold; text-align: right;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td style="padding: 6px 0; font-size: 18px; color: #e04e1a; font-weight: bold; text-align: right;">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               </tr>
               <tr>
                 <td style="padding: 6px 0; font-size: 13px; color: #9a3412;">Total paid so far</td>
@@ -828,7 +828,7 @@ export async function sendPaymentReceivedEmail({
             </p>
           </div>` : ''}
 
-          <a href="${dashboardLink}" style="display: inline-block; padding: 14px 40px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; margin: 0 0 30px 0;">View in Dashboard →</a>
+          <a href="${dashboardLink}" style="display: inline-block; padding: 14px 40px; background-color: #e04e1a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; margin: 0 0 30px 0;">View in Dashboard →</a>
 
           <p style="margin: 0; font-size: 13px; color: #9ca3af;">
             ${isPartial ? `Invoice ${documentNumber} is now marked as Partially Paid.` : `Invoice ${documentNumber} has been automatically marked as Fully Paid.`}
@@ -914,7 +914,7 @@ export async function sendProposalAcceptedEmail({
             </p>
           </div>
 
-          <a href="${dashboardLink}" style="display: inline-block; padding: 14px 40px; background-color: #f97316; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; margin: 0 0 30px 0;">View Proposal in Dashboard →</a>
+          <a href="${dashboardLink}" style="display: inline-block; padding: 14px 40px; background-color: #e04e1a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; margin: 0 0 30px 0;">View Proposal in Dashboard →</a>
 
           <p style="margin: 0; font-size: 13px; color: #9ca3af;">
             Proposal ${proposalNumber} is now marked as Accepted.

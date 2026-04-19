@@ -413,7 +413,7 @@ function SettingsContent() {
                     {/* Screen — toggle rows */}
                     <rect x="40" y="52" width="28" height="4" rx="2" fill="#9ca3af" opacity="0.6"/>
                     {/* Toggle ON */}
-                    <rect x="88" y="50" width="18" height="8" rx="4" fill="#f97316"/>
+                    <rect x="88" y="50" width="18" height="8" rx="4" fill="#e04e1a"/>
                     <circle cx="101" cy="54" r="3.5" fill="white"/>
 
                     <rect x="40" y="63" width="24" height="4" rx="2" fill="#9ca3af" opacity="0.6"/>
@@ -424,8 +424,8 @@ function SettingsContent() {
                     <rect x="40" y="74" width="32" height="4" rx="2" fill="#9ca3af" opacity="0.6"/>
                     {/* Slider */}
                     <rect x="40" y="83" width="52" height="3" rx="1.5" fill="#e5e7eb"/>
-                    <rect x="40" y="83" width="34" height="3" rx="1.5" fill="#f97316"/>
-                    <circle cx="74" cy="84.5" r="4" fill="#f97316"/>
+                    <rect x="40" y="83" width="34" height="3" rx="1.5" fill="#e04e1a"/>
+                    <circle cx="74" cy="84.5" r="4" fill="#e04e1a"/>
 
                     {/* Monitor stand */}
                     <rect x="68" y="100" width="10" height="10" rx="1" fill="#374151" opacity="0.6"/>
@@ -433,22 +433,22 @@ function SettingsContent() {
 
                     {/* Gear — top right */}
                     <g transform="translate(118, 38)">
-                      <circle cx="10" cy="10" r="5" fill="none" stroke="#f97316" strokeWidth="2"/>
-                      <circle cx="10" cy="10" r="2" fill="#f97316"/>
+                      <circle cx="10" cy="10" r="5" fill="none" stroke="#e04e1a" strokeWidth="2"/>
+                      <circle cx="10" cy="10" r="2" fill="#e04e1a"/>
                       {[0,60,120,180,240,300].map((angle, i) => {
                         const rad = (angle * Math.PI) / 180
                         const x1 = 10 + 7 * Math.cos(rad)
                         const y1 = 10 + 7 * Math.sin(rad)
                         const x2 = 10 + 9 * Math.cos(rad)
                         const y2 = 10 + 9 * Math.sin(rad)
-                        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#f97316" strokeWidth="2.5" strokeLinecap="round"/>
+                        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#e04e1a" strokeWidth="2.5" strokeLinecap="round"/>
                       })}
                     </g>
 
                     {/* Person — shadow */}
-                    <ellipse cx="100" cy="142" rx="16" ry="7" fill="#f97316" opacity="0.1"/>
+                    <ellipse cx="100" cy="142" rx="16" ry="7" fill="#e04e1a" opacity="0.1"/>
                     {/* Person — body */}
-                    <rect x="88" y="118" width="22" height="24" rx="5" fill="#f97316" opacity="0.85"/>
+                    <rect x="88" y="118" width="22" height="24" rx="5" fill="#e04e1a" opacity="0.85"/>
                     {/* Person — head */}
                     <circle cx="99" cy="108" r="11" fill="#fcd9b1"/>
                     {/* Hair */}
@@ -459,13 +459,13 @@ function SettingsContent() {
                     {/* Smile */}
                     <path d="M95 112 Q99 115 103 112" stroke="#e07b54" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
                     {/* Arms */}
-                    <path d="M88 124 Q76 126 72 118" stroke="#f97316" strokeWidth="5" strokeLinecap="round" opacity="0.85"/>
-                    <path d="M110 124 Q118 124 116 115" stroke="#f97316" strokeWidth="5" strokeLinecap="round" opacity="0.85"/>
+                    <path d="M88 124 Q76 126 72 118" stroke="#e04e1a" strokeWidth="5" strokeLinecap="round" opacity="0.85"/>
+                    <path d="M110 124 Q118 124 116 115" stroke="#e04e1a" strokeWidth="5" strokeLinecap="round" opacity="0.85"/>
 
                     {/* Sparkle — small */}
-                    <circle cx="32" cy="130" r="3" fill="#f97316" opacity="0.4"/>
-                    <circle cx="22" cy="118" r="2" fill="#f97316" opacity="0.25"/>
-                    <circle cx="38" cy="142" r="2" fill="#f97316" opacity="0.3"/>
+                    <circle cx="32" cy="130" r="3" fill="#e04e1a" opacity="0.4"/>
+                    <circle cx="22" cy="118" r="2" fill="#e04e1a" opacity="0.25"/>
+                    <circle cx="38" cy="142" r="2" fill="#e04e1a" opacity="0.3"/>
                   </svg>
                 </div>
 

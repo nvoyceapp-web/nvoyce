@@ -238,12 +238,12 @@ export default function FAQPage() {
                     <path d="M107 115 Q118 118 112 105" stroke="#7c3aed" strokeWidth="6" strokeLinecap="round" opacity="0.8"/>
 
                     {/* Question mark bubble */}
-                    <circle cx="118" cy="58" r="16" fill="#f97316"/>
+                    <circle cx="118" cy="58" r="16" fill="#e04e1a"/>
                     <text x="118" y="64" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="serif">?</text>
 
                     {/* Small dots — thinking */}
-                    <circle cx="104" cy="48" r="3" fill="#f97316" opacity="0.5"/>
-                    <circle cx="110" cy="44" r="2" fill="#f97316" opacity="0.3"/>
+                    <circle cx="104" cy="48" r="3" fill="#e04e1a" opacity="0.5"/>
+                    <circle cx="110" cy="44" r="2" fill="#e04e1a" opacity="0.3"/>
                   </svg>
                 </div>
 

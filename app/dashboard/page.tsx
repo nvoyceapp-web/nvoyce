@@ -1001,7 +1001,7 @@ function DashboardContent() {
                     className={`w-full flex items-center justify-between px-5 py-3.5 text-white transition ${hasUrgent ? 'bg-gradient-to-r from-[#0d1b2a] to-[#1a2f45]' : 'bg-gradient-to-r from-[#0d1b2a] to-[#1a2f45]'} hover:opacity-90`}
                   >
                     <div className="flex items-center gap-3">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                       </svg>
                       <span className="font-semibold text-sm tracking-wide">Payme</span>
@@ -1250,7 +1250,7 @@ function DashboardContent() {
                           <YAxis domain={[yMin, yMax]} tickFormatter={fmtY} tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={46} />
                           <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, 'Revenue']} contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }} />
                           <Bar dataKey="revenue" fill="#ea580c" radius={[4, 4, 0, 0]} maxBarSize={32} />
-                          <Line type="monotone" dataKey="revenue" stroke="#f97316" strokeWidth={2} dot={{ fill: '#f97316', r: 3 }} strokeDasharray="4 2" />
+                          <Line type="monotone" dataKey="revenue" stroke="#e04e1a" strokeWidth={2} dot={{ fill: '#e04e1a', r: 3 }} strokeDasharray="4 2" />
                         </ComposedChart>
                       </ResponsiveContainer>
                     </div>

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState, Suspense, useRef } from 'react'
 import { useAuth } from '@clerk/nextjs'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getTopPaymeActions, PaymeAction } from '@/lib/payme-scoring'
 import Sidebar, { SidebarHandle } from '@/components/Sidebar'
@@ -43,6 +43,7 @@ interface Stats {
 function DashboardContent() {
   const { userId } = useAuth()
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
   const [stats, setStats] = useState<Stats>({
     totalSent: 0,
@@ -1034,7 +1035,7 @@ function DashboardContent() {
                           <div className="flex items-center gap-1.5 flex-shrink-0">
                             {rec.action === 'send-reminders' && (
                               <button
-                                onClick={() => setSelectedDocs(new Set([rec.paymeAction?.id]))}
+                                onClick={() => rec.paymeAction?.id && router.push(`/dashboard/documents/${rec.paymeAction.id}`)}
                                 className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition font-semibold"
                               >
                                 Remind
@@ -1042,8 +1043,8 @@ function DashboardContent() {
                             )}
                             {rec.action === 'follow-up' && (
                               <button
-                                onClick={() => setFilterClient(rec.paymeAction?.client_name || '')}
-                                className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition font-semibold"
+                                onClick={() => rec.paymeAction?.id && router.push(`/dashboard/documents/${rec.paymeAction.id}`)}
+                                className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition font-semibold"
                               >
                                 Review
                               </button>

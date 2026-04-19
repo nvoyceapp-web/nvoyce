@@ -101,7 +101,13 @@ export default function DocumentPage() {
   const updateField = useCallback((path: string, value: any) => {
     setEditingContent((prev) => {
       if (!prev) return prev
-      const next = { ...prev }
+      // Ensure from/to always exist before spreading into nested keys
+      const safe = {
+        ...prev,
+        from: prev.from ?? { name: '', tagline: '' },
+        to: prev.to ?? { name: '', email: '' },
+      }
+      const next = { ...safe }
       const keys = path.split('.')
       let obj: any = next
       for (let i = 0; i < keys.length - 1; i++) {
@@ -297,7 +303,12 @@ export default function DocumentPage() {
     )
   }
 
-  const content = editingContent
+  // Normalise: ensure from/to always exist even if generated_content is missing those fields
+  const content = {
+    ...editingContent,
+    from: editingContent.from ?? { name: '', tagline: '' },
+    to: editingContent.to ?? { name: doc.client_name ?? '', email: '' },
+  }
   const effectiveStatus = getEffectiveStatus(doc)
   const isDraft = effectiveStatus === 'draft'
   const isInvoice = doc.doc_type === 'invoice'

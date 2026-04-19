@@ -1,26 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import Link from 'next/link'
 import AboutDashboard from './_components/AboutDashboard'
-
-function NvoyceMark() {
-  return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 11 }}>
-      <svg width="30" height="30" viewBox="0 0 40 40" fill="none" aria-label="nvoyce">
-        <rect x="2" y="2" width="36" height="36" rx="9" fill="#0d1b2a" />
-        <rect x="9" y="9" width="3.2" height="22" fill="white" />
-        <rect x="27.8" y="9" width="3.2" height="22" fill="white" />
-        <path d="M12.2 9 L15 9 L28 27 L28 31 L25.2 31 Z" fill="white" />
-        <circle cx="17.5" cy="14" r="1.2" fill="#e04e1a" />
-        <circle cx="22.5" cy="14" r="1.2" fill="#e04e1a" />
-        <circle cx="17.5" cy="20" r="1.2" fill="#e04e1a" />
-        <circle cx="22.5" cy="20" r="1.2" fill="#e04e1a" />
-        <circle cx="17.5" cy="26" r="1.2" fill="#e04e1a" />
-        <circle cx="22.5" cy="26" r="1.2" fill="#e04e1a" />
-      </svg>
-      <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 20, letterSpacing: '-0.03em', color: '#0d1b2a', lineHeight: 1 }}>nvoyce</span>
-    </div>
-  )
-}
+import PublicNav from '@/components/PublicNav'
 
 export default async function AboutPage() {
   const { userId } = await auth()
@@ -52,24 +33,7 @@ export default async function AboutPage() {
       `}</style>
 
       {/* Nav */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        background: 'rgba(251,250,247,0.92)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        borderBottom: '1px solid var(--line)',
-      }}>
-        <div style={{ maxWidth: 1240, margin: '0 auto', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ textDecoration: 'none' }}><NvoyceMark /></Link>
-          <nav style={{ display: 'flex', gap: 26, alignItems: 'center' }}>
-            <Link href="/#pricing" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>Pricing</Link>
-            <Link href="/faq" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>FAQ</Link>
-            <Link href="/about" style={{ fontSize: 13, fontWeight: 500, color: 'var(--orange)', textDecoration: 'none' }}>About</Link>
-            <Link href="/sign-in" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>Sign in</Link>
-            <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '8px 16px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Start free</Link>
-          </nav>
-        </div>
-      </header>
+      <PublicNav activePage="about" />
 
       <main style={{ maxWidth: 900, margin: '0 auto', padding: '64px 28px 100px' }}>
 

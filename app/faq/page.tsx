@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import PublicNav from '@/components/PublicNav'
 
 interface FAQ {
   id: string
@@ -174,25 +175,6 @@ const faqGroups: FAQGroup[] = [
   },
 ]
 
-function NvoyceMark() {
-  return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 11 }}>
-      <svg width="30" height="30" viewBox="0 0 40 40" fill="none" aria-label="nvoyce">
-        <rect x="2" y="2" width="36" height="36" rx="9" fill="#0d1b2a" />
-        <rect x="9" y="9" width="3.2" height="22" fill="white" />
-        <rect x="27.8" y="9" width="3.2" height="22" fill="white" />
-        <path d="M12.2 9 L15 9 L28 27 L28 31 L25.2 31 Z" fill="white" />
-        <circle cx="17.5" cy="14" r="1.2" fill="#e04e1a" />
-        <circle cx="22.5" cy="14" r="1.2" fill="#e04e1a" />
-        <circle cx="17.5" cy="20" r="1.2" fill="#e04e1a" />
-        <circle cx="22.5" cy="20" r="1.2" fill="#e04e1a" />
-        <circle cx="17.5" cy="26" r="1.2" fill="#e04e1a" />
-        <circle cx="22.5" cy="26" r="1.2" fill="#e04e1a" />
-      </svg>
-      <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 20, letterSpacing: '-0.03em', color: '#0d1b2a', lineHeight: 1 }}>nvoyce</span>
-    </div>
-  )
-}
 
 export default function FAQPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -220,24 +202,7 @@ export default function FAQPage() {
       `}</style>
 
       {/* Nav */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        background: 'rgba(251,250,247,0.92)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        borderBottom: '1px solid var(--line)',
-      }}>
-        <div style={{ maxWidth: 1240, margin: '0 auto', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ textDecoration: 'none' }}><NvoyceMark /></Link>
-          <nav style={{ display: 'flex', gap: 26, alignItems: 'center' }}>
-            <Link href="/#pricing" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>Pricing</Link>
-            <Link href="/faq" style={{ fontSize: 13, fontWeight: 500, color: 'var(--orange)', textDecoration: 'none' }}>FAQ</Link>
-            <Link href="/about" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>About</Link>
-            <Link href="/sign-in" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>Sign in</Link>
-            <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '8px 16px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Start free</Link>
-          </nav>
-        </div>
-      </header>
+      <PublicNav activePage="faq" />
 
       {/* Content */}
       <main style={{ maxWidth: 800, margin: '0 auto', padding: '64px 28px 100px' }}>
@@ -300,7 +265,12 @@ export default function FAQPage() {
       {/* Footer */}
       <footer style={{ borderTop: '1px solid var(--line)', padding: '40px 28px 60px', background: 'var(--paper)' }}>
         <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
-          <Link href="/" style={{ textDecoration: 'none' }}><NvoyceMark /></Link>
+          <Link href="/" style={{ textDecoration: 'none' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 11 }}>
+              <svg width="28" height="28" viewBox="0 0 40 40" fill="none"><rect x="2" y="2" width="36" height="36" rx="9" fill="#0d1b2a"/><rect x="9" y="9" width="3.2" height="22" fill="white"/><rect x="27.8" y="9" width="3.2" height="22" fill="white"/><path d="M12.2 9 L15 9 L28 27 L28 31 L25.2 31 Z" fill="white"/><circle cx="17.5" cy="14" r="1.2" fill="#e04e1a"/><circle cx="22.5" cy="14" r="1.2" fill="#e04e1a"/><circle cx="17.5" cy="20" r="1.2" fill="#e04e1a"/><circle cx="22.5" cy="20" r="1.2" fill="#e04e1a"/><circle cx="17.5" cy="26" r="1.2" fill="#e04e1a"/><circle cx="22.5" cy="26" r="1.2" fill="#e04e1a"/></svg>
+              <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 18, letterSpacing: '-0.03em', color: '#0d1b2a', lineHeight: 1 }}>nvoyce</span>
+            </div>
+          </Link>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             {[['Pricing', '/#pricing'], ['FAQ', '/faq'], ['About', '/about'], ['Sign in', '/sign-in']].map(([label, href]) => (
               <Link key={label} href={href} style={{ fontSize: 13, color: 'var(--muted)', textDecoration: 'none' }}>{label}</Link>

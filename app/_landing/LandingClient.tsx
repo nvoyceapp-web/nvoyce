@@ -636,12 +636,12 @@ export default function LandingClient() {
                   onClick={() => setSelectedPlan(plan.name)}
                   style={{
                     padding: 28, borderRadius: 16, textAlign: 'left',
-                    background: active ? '#2563eb' : 'white',
-                    border: active ? '2px solid #2563eb' : '2px solid var(--line)',
+                    background: active ? 'var(--orange)' : 'white',
+                    border: active ? '2px solid var(--orange)' : '2px solid var(--line)',
                     cursor: 'pointer',
                     transition: 'all 200ms ease',
                     transform: active ? 'translateY(-4px)' : 'translateY(0)',
-                    boxShadow: active ? '0 12px 32px rgba(37,99,235,0.25)' : '0 2px 8px rgba(0,0,0,0.04)',
+                    boxShadow: active ? '0 12px 32px rgba(224,78,26,0.25)' : '0 2px 8px rgba(0,0,0,0.04)',
                   }}
                 >
                   <div style={{ fontSize: 11, color: active ? 'rgba(255,255,255,0.75)' : 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: 8 }}>{plan.name}</div>
@@ -655,7 +655,7 @@ export default function LandingClient() {
                       </li>
                     ))}
                   </ul>
-                  <Link href="/sign-up" style={{ display: 'block', padding: '12px', borderRadius: 10, textAlign: 'center', background: active ? 'white' : 'transparent', border: active ? 'none' : '1px solid var(--line)', color: active ? '#2563eb' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Get started</Link>
+                  <Link href="/sign-up" style={{ display: 'block', padding: '12px', borderRadius: 10, textAlign: 'center', background: active ? 'white' : 'transparent', border: active ? 'none' : '1px solid var(--line)', color: active ? 'var(--orange)' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Get started</Link>
                 </div>
               )
             })}

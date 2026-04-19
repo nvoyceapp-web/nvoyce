@@ -1772,7 +1772,7 @@ function DashboardContent() {
                                           }}
                                           className="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-50"
                                         >
-                                          👁️ View Details
+                                          View Details
                                         </button>
                                         {canArchive(doc) && (
                                           <button
@@ -1974,113 +1974,152 @@ function DashboardContent() {
       </div>
 
       {/* Document Details Modal */}
-      {viewingDocument && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  {viewingDocument.doc_type.charAt(0).toUpperCase() + viewingDocument.doc_type.slice(1)} Details
-                </h2>
-                {viewingDocument.document_number && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    <span className="font-mono font-semibold text-gray-900">{viewingDocument.document_number}</span>
-                  </p>
+      {viewingDocument && (() => {
+        const vd = viewingDocument
+        const isInv = vd.doc_type === 'invoice'
+        const daysOld = Math.floor((Date.now() - new Date(vd.created_at).getTime()) / 86400000)
+        const statusLabel = vd.status === 'fully_paid' ? 'Fully Paid' : vd.status === 'partially_paid' ? 'Partially Paid' : vd.status.charAt(0).toUpperCase() + vd.status.slice(1)
+        const statusStyle: Record<string, string> = {
+          draft: 'bg-gray-100 text-gray-500',
+          sent: 'bg-blue-50 text-blue-600',
+          viewed: 'bg-yellow-50 text-yellow-700',
+          partially_paid: 'bg-yellow-100 text-yellow-700',
+          fully_paid: 'bg-green-50 text-green-700',
+          overdue: 'bg-red-50 text-red-600',
+          accepted: 'bg-green-50 text-green-700',
+          declined: 'bg-red-50 text-red-600',
+          expired: 'bg-gray-100 text-gray-500',
+        }
+        return (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setViewingDocument(null)}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <div
+              className="relative bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Dark navy header */}
+              <div className="bg-[#0d1b2a] px-6 pt-6 pb-5 flex-shrink-0">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <span className="text-xs font-bold text-orange-400 uppercase tracking-widest">
+                      {isInv ? 'Invoice' : 'Proposal'}{vd.document_number ? ` · ${vd.document_number}` : ''}
+                    </span>
+                    <h2 className="text-xl font-bold text-white mt-1 leading-tight">{vd.client_name}</h2>
+                    <p className="text-gray-400 text-sm mt-0.5">{vd.client_email}</p>
+                  </div>
+                  <button onClick={() => setViewingDocument(null)} className="text-gray-500 hover:text-white transition mt-0.5 flex-shrink-0">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                {/* Amount + status row */}
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Amount</p>
+                    <p className="text-3xl font-bold text-white">${vd.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                    {vd.amount_paid && vd.amount_paid > 0 && vd.amount_paid < vd.price && (
+                      <p className="text-xs text-orange-400 mt-0.5">${vd.amount_paid.toLocaleString('en-US', { minimumFractionDigits: 2 })} collected</p>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${statusStyle[vd.status] || 'bg-gray-100 text-gray-500'}`}>
+                      {statusLabel}
+                    </span>
+                    <p className="text-xs text-gray-500 mt-1.5">{daysOld} day{daysOld !== 1 ? 's' : ''} old</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scrollable body */}
+              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+                {/* Description */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Service</p>
+                  <p className="text-sm text-gray-800 leading-relaxed">{vd.form_data?.serviceDescription || 'No description provided'}</p>
+                </div>
+
+                {/* Meta grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Created</p>
+                    <p className="text-sm font-medium text-gray-800">
+                      {new Date(vd.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                  {vd.form_data?.timeline && (
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Timeline</p>
+                      <p className="text-sm font-medium text-gray-800">{vd.form_data.timeline}</p>
+                    </div>
+                  )}
+                  {vd.form_data?.paymentTerms && (
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Payment Terms</p>
+                      <p className="text-sm font-medium text-gray-800">{vd.form_data.paymentTerms}</p>
+                    </div>
+                  )}
+                  {vd.doc_type === 'proposal' && vd.form_data?.expirationDays && (
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Expires</p>
+                      <p className="text-sm font-medium text-gray-800">{vd.form_data.expirationDays} days</p>
+                    </div>
+                  )}
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">From</p>
+                    <p className="text-sm font-medium text-gray-800">{vd.business_name || '—'}</p>
+                  </div>
+                </div>
+
+                {vd.form_data?.notes && (
+                  <div className="bg-orange-50 border border-orange-100 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-orange-500 uppercase tracking-wider mb-1.5">Notes</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">{vd.form_data.notes}</p>
+                  </div>
                 )}
               </div>
-              <button
-                onClick={() => setViewingDocument(null)}
-                className="text-gray-500 hover:text-gray-700 text-2xl font-light"
-              >
-                ×
-              </button>
-            </div>
 
-            {/* Content */}
-            <div className="p-6 space-y-6">
-              {/* From/To Section */}
-              <div className="grid grid-cols-2 gap-6 pb-6 border-b border-gray-100">
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">From</h3>
-                  <div className="text-lg font-semibold text-gray-900">{viewingDocument.business_name}</div>
-                </div>
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">To</h3>
-                  <div className="text-lg font-semibold text-gray-900">{viewingDocument.client_name}</div>
-                  <div className="text-sm text-gray-600">{viewingDocument.client_email}</div>
-                </div>
-              </div>
-
-              {/* Details */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Amount</h3>
-                  <div className="text-2xl font-bold text-purple-600">${viewingDocument.price.toLocaleString()}</div>
-                </div>
-
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Description</h3>
-                  <div className="text-gray-700">{viewingDocument.form_data?.serviceDescription || 'No description provided'}</div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Timeline</h3>
-                    <div className="text-gray-700">{viewingDocument.form_data?.timeline || 'Not specified'}</div>
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Payment Terms</h3>
-                    <div className="text-gray-700">{viewingDocument.form_data?.paymentTerms || 'Not specified'}</div>
-                  </div>
-                </div>
-
-                {viewingDocument.form_data?.notes && (
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Notes</h3>
-                    <div className="text-gray-700">{viewingDocument.form_data.notes}</div>
-                  </div>
-                )}
-
-                {viewingDocument.doc_type === 'proposal' && viewingDocument.form_data?.expirationDays && (
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Expires In</h3>
-                    <div className="text-gray-700">{viewingDocument.form_data.expirationDays} business days</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Date Created & Status */}
-              <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Date Created</h3>
-                  <div className="text-sm font-medium text-gray-700">
-                    {new Date(viewingDocument.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Status</h3>
-                  <div className="text-sm font-medium text-gray-700 capitalize">{viewingDocument.status}</div>
+              {/* Action footer */}
+              <div className="border-t border-gray-100 px-6 py-4 flex-shrink-0 flex flex-col gap-2">
+                <Link
+                  href={`/dashboard/documents/${vd.id}`}
+                  onClick={() => setViewingDocument(null)}
+                  className="w-full flex items-center justify-center gap-2 bg-[#0d1b2a] hover:bg-[#1a2f45] text-white font-semibold text-sm rounded-xl px-4 py-3 transition"
+                >
+                  Open Document
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
+                <div className="flex gap-2">
+                  {isInv && vd.stripe_payment_link && (
+                    <button
+                      onClick={() => navigator.clipboard.writeText(vd.stripe_payment_link!)}
+                      className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium rounded-xl px-3 py-2.5 transition"
+                    >
+                      Copy Payment Link
+                    </button>
+                  )}
+                  {!isInv && vd.status !== 'draft' && (
+                    <button
+                      onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${vd.id}`)}
+                      className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium rounded-xl px-3 py-2.5 transition"
+                    >
+                      Copy Proposal Link
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setViewingDocument(null)}
+                    className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-500 text-sm rounded-xl px-3 py-2.5 transition"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
-            </div>
-
-            {/* Footer */}
-            <div className="border-t border-gray-100 p-6 bg-gray-50 rounded-b-2xl flex justify-end">
-              <button
-                onClick={() => setViewingDocument(null)}
-                className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition"
-              >
-                Close
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* QR Code Modal */}
       {qrModal && (

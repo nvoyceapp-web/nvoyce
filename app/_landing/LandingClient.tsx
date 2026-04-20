@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import PublicNav from '@/components/PublicNav'
 
 // ─── Color token ───────────────────────────────────────────────────────────
 const ORANGE = '#e04e1a'
@@ -442,7 +443,6 @@ function NvoyceMark({ size = 30 }: { size?: number }) {
 // ─── Main landing page ──────────────────────────────────────────────────────
 export default function LandingClient() {
   const [selectedPlan, setSelectedPlan] = useState<string>('Pro')
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <>
@@ -472,55 +472,13 @@ export default function LandingClient() {
           .nv-footer-grid { grid-template-columns: 1fr 1fr !important; }
         }
         @media (max-width: 640px) {
-          .nv-nav-links    { display: none !important; }
-          .nv-nav-desktop  { display: none !important; }
-          .nv-hamburger    { display: flex !important; }
           .nv-footer-grid  { grid-template-columns: 1fr !important; }
           .nv-cta          { padding: 48px 28px !important; }
-        }
-        @media (min-width: 641px) {
-          .nv-hamburger    { display: none !important; }
         }
       `}</style>
 
       {/* NAV */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(251,250,247,0.92)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderBottom: '1px solid var(--line)' }}>
-        <div style={{ maxWidth: 1240, margin: '0 auto', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <NvoyceMark />
-          {/* Desktop nav */}
-          <nav className="nv-nav-desktop" style={{ display: 'flex', gap: 26, alignItems: 'center' }}>
-            <span className="nv-nav-links" style={{ display: 'flex', gap: 26 }}>
-              {[['Pricing', '#pricing'], ['FAQ', '/faq'], ['About', '/about']].map(([label, href]) => (
-                <Link key={label} href={href} style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>{label}</Link>
-              ))}
-            </span>
-            <Link href="/sign-in" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}>Sign in</Link>
-            <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '8px 16px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Start free</Link>
-          </nav>
-          {/* Mobile hamburger */}
-          <button
-            className="nv-hamburger"
-            onClick={() => setMobileMenuOpen(o => !o)}
-            style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', cursor: 'pointer' }}
-            aria-label="Menu"
-          >
-            {mobileMenuOpen
-              ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2.5" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            }
-          </button>
-        </div>
-        {/* Mobile dropdown */}
-        {mobileMenuOpen && (
-          <div style={{ borderTop: '1px solid var(--line)', background: 'var(--paper)', padding: '16px 28px 20px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {[['Pricing', '#pricing'], ['FAQ', '/faq'], ['About', '/about']].map(([label, href]) => (
-              <Link key={label} href={href} onClick={() => setMobileMenuOpen(false)} style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)', textDecoration: 'none', padding: '10px 0', borderBottom: '1px solid var(--line)' }}>{label}</Link>
-            ))}
-            <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)', textDecoration: 'none', padding: '10px 0', borderBottom: '1px solid var(--line)' }}>Sign in</Link>
-            <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginTop: 8, padding: '14px 20px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Start free — 3 docs on us</Link>
-          </div>
-        )}
-      </header>
+      <PublicNav />
 
       {/* HERO */}
       <section style={{ padding: '64px 28px 48px' }}>

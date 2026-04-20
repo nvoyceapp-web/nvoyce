@@ -720,26 +720,43 @@ export default function LandingClient() {
 
       {/* FOOTER */}
       <footer style={{ borderTop: '1px solid var(--line)', padding: '40px 28px 60px', background: 'var(--paper)' }}>
-        <div style={{ maxWidth: 1240, margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 40 }} className="nv-footer-grid">
+        <div style={{ maxWidth: 1240, margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 40 }} className="nv-footer-grid">
+          {/* Brand blurb */}
           <div>
             <NvoyceMark />
             <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 14, maxWidth: 280, lineHeight: 1.6 }}>
               We do the hard stuff. You get paid. Invoices, proposals, reminders and payouts — from one quiet tab.
             </p>
           </div>
-          {([
-            ['Product',  ['Invoices', 'Proposals', 'Payme', 'Pricing']],
-            ['Company',  ['About', 'FAQ', 'Changelog']],
-            ['Contact',  ['hello@nvoyce.ai', 'support@nvoyce.ai']],
-          ] as [string, string[]][]).map(([t, items]) => (
-            <div key={t}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)', marginBottom: 12, fontFamily: 'var(--font-space-grotesk), sans-serif' }}>{t}</div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {items.map(i => <li key={i}><a href={i.includes('@') ? `mailto:${i}` : '#'} style={{ fontSize: 13, color: 'var(--muted)', textDecoration: 'none' }}>{i}</a></li>)}
-              </ul>
-            </div>
-          ))}
+
+          {/* Company */}
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)', marginBottom: 12, fontFamily: 'var(--font-space-grotesk), sans-serif' }}>Company</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {([['About', '/about'], ['FAQ', '/faq'], ['Pricing', '/#pricing']] as [string, string][]).map(([label, href]) => (
+                <li key={label}>
+                  <a href={href} style={{ fontSize: 13, color: 'var(--muted)', textDecoration: 'none' }}>{label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)', marginBottom: 12, fontFamily: 'var(--font-space-grotesk), sans-serif' }}>Contact</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <li>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Customer Support</div>
+                <a href="mailto:support@nvoyce.ai" style={{ fontSize: 13, color: 'var(--muted)', textDecoration: 'none' }}>support@nvoyce.ai</a>
+              </li>
+              <li>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Investors · Press · Partnerships</div>
+                <a href="mailto:hello@nvoyce.ai" style={{ fontSize: 13, color: 'var(--muted)', textDecoration: 'none' }}>hello@nvoyce.ai</a>
+              </li>
+            </ul>
+          </div>
         </div>
+
         <div style={{ maxWidth: 1240, margin: '40px auto 0', display: 'flex', justifyContent: 'space-between', paddingTop: 24, borderTop: '1px solid var(--line)', flexWrap: 'wrap', gap: 14 }}>
           <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace' }}>© 2026 nvoyce · Stop chasing. Start getting paid.</span>
           <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace' }}>The orange dots in the N spell "VOICE" in Braille.</span>

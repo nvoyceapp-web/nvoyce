@@ -44,7 +44,7 @@ export default function PublicNav({ activePage }: PublicNavProps) {
       WebkitBackdropFilter: 'blur(10px)',
       borderBottom: '1px solid var(--line)',
     }}>
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Link href="/" style={{ textDecoration: 'none' }}>
           <NvoyceMark />
         </Link>

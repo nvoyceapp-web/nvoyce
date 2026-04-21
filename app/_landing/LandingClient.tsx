@@ -757,9 +757,9 @@ export default function LandingClient() {
               {/* Stats */}
               <div style={{ display: 'flex', gap: 32, marginTop: 44, paddingTop: 24, borderTop: '1px solid var(--line)', flexWrap: 'wrap' }}>
                 {[
-                  { label: 'Avg. time to first send', value: '38s' },
-                  { label: 'Faster payouts', value: '2.4×', delta: 'vs. email-first workflows' },
-                  { label: 'Paid in full', value: '94%', delta: 'within 14 days of send' },
+                  { label: 'Brief to invoice', value: '60s', delta: 'start to send' },
+                  { label: 'Client experience', value: '1 tap', delta: 'no login required' },
+                  { label: 'Payments via', value: 'Stripe', delta: 'Apple Pay · Card · ACH' },
                 ].map(s => (
                   <div key={s.label}>
                     <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>{s.label}</div>

@@ -544,25 +544,25 @@ function DemoPlayer({ onClose }: { onClose: () => void }) {
           {/* Scene 2 — Draft */}
           <SceneWrap idx={1}>
             <div style={{ maxWidth: 900, margin: '0 auto' }}>{activeIdx === 1 && <InvoiceGenDemo />}</div>
-            <Caption small="Step 01 · Invoice creation" big={<>4 fields in. Professional<br />invoice out. Written for you.</>} />
+            <Caption small="Step 01 · Invoice creation" big="4 fields in. Professional invoice out. Written for you." />
           </SceneWrap>
 
           {/* Scene 3 — Send */}
           <SceneWrap idx={2}>
             <div style={{ maxWidth: 800, margin: '0 auto' }}>{activeIdx === 2 && <ProposalFlowDemo />}</div>
-            <Caption small="Step 02 · Proposal to payment" big={<>Client accepts. Invoice and<br />pay link generate themselves.</>} />
+            <Caption small="Step 02 · Proposal to payment" big="Client accepts. Invoice and pay link generate themselves." />
           </SceneWrap>
 
           {/* Scene 4 — Pay */}
           <SceneWrap idx={3}>
             <div style={{ display: 'grid', placeItems: 'center', height: '100%', paddingBottom: 80 }}>{activeIdx === 3 && <PaymentPhoneDemo />}</div>
-            <Caption small="Step 03 · Your client's experience" big={<>A link on their phone.<br />No login. Tap once — money moves.</>} />
+            <Caption small="Step 03 · Your client's experience" big="A link on their phone. No login. Tap once — money moves." />
           </SceneWrap>
 
           {/* Scene 5 — Dashboard */}
           <SceneWrap idx={4}>
             <div style={{ maxWidth: 900, margin: '0 auto' }}>{activeIdx === 4 && <DashboardDemo />}</div>
-            <Caption small="Always on · Live dashboard" big={<>Every dollar tracked. The moment<br />a payment lands, you'll know.</>} />
+            <Caption small="Always on · Live dashboard" big="Every dollar tracked. The moment a payment lands, you'll know." />
           </SceneWrap>
 
           {/* Scene 6 — Outro */}
@@ -789,7 +789,7 @@ export default function LandingClient() {
             {/* Animated invoice demo */}
             <div style={{ position: 'relative' }}>
               <InvoiceGenDemo />
-              <div style={{ position: 'absolute', top: -16, right: -8, background: 'var(--ink)', color: 'white', padding: '6px 10px', borderRadius: 8, transform: 'rotate(3deg)', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-space-grotesk), sans-serif' }}>← AI-generated in 38s</div>
+              <div style={{ position: 'absolute', top: -16, right: -8, background: 'var(--ink)', color: 'white', padding: '6px 10px', borderRadius: 8, transform: 'rotate(3deg)', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-space-grotesk), sans-serif' }}>← AI-generated in 60s</div>
             </div>
           </div>
         </div>

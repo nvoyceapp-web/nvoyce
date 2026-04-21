@@ -530,7 +530,7 @@ function DemoPlayer({ onClose }: { onClose: () => void }) {
           {/* Scene 2 — Draft */}
           <SceneWrap idx={1}>
             <div style={{ maxWidth: 900, margin: '0 auto' }}>{activeIdx === 1 && <InvoiceGenDemo />}</div>
-            <Caption small="Step 01 · Drafts itself" big={<>Type the brief.<br />Claude does the rest.</>} />
+            <Caption small="Step 01 · Drafts itself" big={<>Type the brief.<br />Nvoyce does the rest.</>} />
           </SceneWrap>
 
           {/* Scene 3 — Send */}
@@ -654,7 +654,7 @@ function FAQAccordion() {
   const [open, setOpen] = useState(-1)
   const items = [
     { q: 'How is this different from QuickBooks or FreshBooks?', a: 'QuickBooks and FreshBooks are accounting tools that happen to send invoices. Nvoyce is built around the single act of getting paid — draft fast, send clean, collect automatically. No general-ledger bloat, no client logins, no PDF wrangling.' },
-    { q: 'Who writes the invoice — me or the AI?', a: 'You type a three-line brief (client, project, amount). Claude drafts the line items, the description, and the thank-you line. You review and approve before anything sends. Nothing ever goes to a client without you clicking "Send".' },
+    { q: 'Who writes the invoice — me or the AI?', a: 'You type a three-line brief (client, project, amount). Nvoyce drafts the line items, the description, and the thank-you line. You review and approve before anything sends. Nothing ever goes to a client without you clicking "Send".' },
     { q: 'Do my clients need an account?', a: 'No. Clients click a link, see a clean pay page, and tap Apple Pay / Google Pay / card / ACH. No login, no download, no PDF.' },
     { q: 'Does Payme spam my clients?', a: 'Payme sends a soft, on-brand nudge at 14 days and a firmer one at 30. You can turn it off per invoice, or disable it entirely. It never sends more than what you configure.' },
     { q: 'Is my data safe?', a: 'Yes. Payments are handled by Stripe — we never see card details. Invoice data is encrypted at rest and in transit. You can export everything as CSV anytime, and delete your account in one click.' },
@@ -801,7 +801,7 @@ export default function LandingClient() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }} className="nv-tri">
             {[
-              { n: '01', t: 'Drafts itself', d: 'Three fields in, one invoice out. Claude writes the line items, the tone, and the details. You approve.' },
+              { n: '01', t: 'Drafts itself', d: 'Three fields in, one invoice out. Nvoyce writes the line items, the tone, and the details. You approve.' },
               { n: '02', t: 'Sends and signs', d: 'Proposals get a link. Clients accept without signing up. The moment they do, an invoice is born and sent.' },
               { n: '03', t: 'Chases politely', d: "Payme — Nvoyce's built-in reminder assistant — watches who owes you and when. Soft nudges at 14 and 30 days. You forget; we don't." },
             ].map(f => (
@@ -847,7 +847,7 @@ export default function LandingClient() {
               Nvoyce features Payme — an AI-powered assistant that chases your unpaid invoices so you never have to.
             </h2>
             <p style={{ fontSize: 17, color: 'var(--muted)', lineHeight: 1.6, maxWidth: 600, margin: 0 }}>
-              Send your invoice once. Payme watches who owes you, sends a polite nudge at 14 days and a firmer one at 30, then goes quiet the moment they pay. It's a Nvoyce feature — included automatically, no extra setup.
+              Payme is an AI assistant that keeps you aware of recently paid invoices, outstanding payments, and stale proposals — so you stay in the driver's seat of your cash flow. Send your invoice once; Payme handles everything after that.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }} className="nv-tri">

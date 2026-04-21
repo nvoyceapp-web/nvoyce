@@ -109,47 +109,33 @@ function SettingsContent() {
   }, [userId])
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!userId || !e.target.files?.[0]) return
+    if (!e.target.files?.[0]) return
 
     const file = e.target.files[0]
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadMessage({ type: 'error', text: 'Logo must be under 5MB' })
-      return
-    }
 
     setUploading(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${userId}-logo-${Date.now()}.${fileExt}`
+      const formData = new FormData()
+      formData.append('file', file)
 
-      const { error: uploadError } = await supabase.storage
-        .from('logos')
-        .upload(fileName, file, { upsert: true })
+      const res = await fetch('/api/upload-logo', {
+        method: 'POST',
+        body: formData,
+      })
 
-      if (uploadError) throw uploadError
+      const json = await res.json()
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('logos')
-        .getPublicUrl(fileName)
+      if (!res.ok) {
+        setUploadMessage({ type: 'error', text: `❌ ${json.error || 'Failed to upload logo'}` })
+        return
+      }
 
-      setLogoUrl(publicUrl)
-
-      // Save to user_settings
-      const { error: saveError } = await supabase
-        .from('user_settings')
-        .upsert({
-          user_id: userId,
-          logo_url: publicUrl,
-          updated_at: new Date().toISOString(),
-        })
-
-      if (saveError) throw saveError
-
+      setLogoUrl(json.publicUrl)
       setUploadMessage({ type: 'success', text: '✅ Logo uploaded successfully' })
       setTimeout(() => setUploadMessage(null), 3000)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Upload error:', err)
-      setUploadMessage({ type: 'error', text: '❌ Failed to upload logo' })
+      setUploadMessage({ type: 'error', text: '❌ Upload failed — please try again' })
     } finally {
       setUploading(false)
     }

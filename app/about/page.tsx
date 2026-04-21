@@ -117,15 +117,14 @@ export default async function AboutPage() {
         {/* Brand story */}
         <section style={{ marginBottom: 72 }}>
           <div style={{ background: 'var(--ink)', borderRadius: 20, padding: '48px 40px', display: 'flex', flexDirection: 'column' as const, gap: 24 }}>
-            <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, fontWeight: 600, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Hidden in plain sight</span>
+            <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, fontWeight: 600, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>The name</span>
             <h2 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 'clamp(26px, 3vw, 36px)', fontWeight: 700, letterSpacing: '-0.025em', color: 'white', margin: 0, lineHeight: 1.1 }}>
-              The orange dots inside the N spell <span style={{ color: 'var(--orange)' }}>"VOICE"</span> in Braille.
+              Nvoyce — a fusion of <span style={{ color: 'var(--orange)' }}>invoice</span> and <span style={{ color: 'var(--orange)' }}>voice</span>.
             </h2>
             <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, maxWidth: 620, margin: 0 }}>
-              Nvoyce is a fusion of <em>invoice</em> and <em>voice</em> — because every invoice is a freelancer&apos;s voice:
-              a declaration of their work, their worth, and their right to be paid. The Braille lettering is a nod
-              to universal access, a reminder that financial tools should work for everyone, and a tiny secret
-              for those who look closely.
+              Every invoice is a freelancer&apos;s voice — a declaration of their work, their worth, and their right
+              to be paid. The orange Braille-inspired dots in the N are a nod to that idea: financial tools
+              should be clear, accessible, and work for everyone.
             </p>
           </div>
         </section>

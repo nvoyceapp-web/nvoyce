@@ -1123,7 +1123,7 @@ export default function LandingClient() {
 
         <div style={{ maxWidth: 1240, margin: '40px auto 0', display: 'flex', justifyContent: 'space-between', paddingTop: 24, borderTop: '1px solid var(--line)', flexWrap: 'wrap', gap: 14 }}>
           <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace' }}>© 2026 nvoyce · Stop chasing. Start getting paid.</span>
-          <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace' }}>The orange dots in the N spell "VOICE" in Braille.</span>
+          <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace' }}>The orange dots in the N are a nod to Braille — a reminder that every invoice is a declaration of work and worth.</span>
         </div>
       </footer>
     </>

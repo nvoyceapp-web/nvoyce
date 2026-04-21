@@ -807,7 +807,7 @@ export default function LandingClient() {
             {[
               { n: '01', t: 'Drafts itself', d: 'Three fields in, one invoice out. Nvoyce writes the line items, the tone, and the details. You approve.' },
               { n: '02', t: 'Sends and signs', d: 'Proposals get a link. Clients accept without signing up. The moment they do, an invoice is born and sent.' },
-              { n: '03', t: 'Chases politely', d: "Payme — Nvoyce's built-in reminder assistant — watches who owes you and when. Soft nudges at 14 and 30 days. You forget; we don't." },
+              { n: '03', t: 'Follows up for you', d: "Payme — Nvoyce's built-in reminder assistant — watches who owes you and when. Soft nudges at 14 and 30 days. You forget; we don't." },
             ].map(f => (
               <div key={f.n} style={{ padding: 26, borderRadius: 14, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <span style={{ fontSize: 11, color: 'var(--orange)', letterSpacing: '0.08em', fontFamily: 'ui-monospace, monospace' }}>{f.n}</span>
@@ -848,7 +848,7 @@ export default function LandingClient() {
           <div style={{ marginBottom: 40 }}>
             <Tag>Introducing Payme</Tag>
             <h2 style={{ fontSize: 'clamp(32px, 4vw, 46px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '18px 0 12px', maxWidth: 760, fontFamily: 'var(--font-space-grotesk), sans-serif', color: 'var(--ink)' }}>
-              Nvoyce features Payme — an AI-powered assistant that chases your unpaid invoices so you never have to.
+              Nvoyce features Payme — an AI-powered assistant that follows up on unpaid invoices so you never have to.
             </h2>
             <p style={{ fontSize: 17, color: 'var(--muted)', lineHeight: 1.6, maxWidth: 600, margin: 0 }}>
               Payme is an AI assistant that keeps you aware of recently paid invoices, outstanding payments, and stale proposals — so you stay in the driver's seat of your cash flow. Send your invoice once; Payme handles everything after that.

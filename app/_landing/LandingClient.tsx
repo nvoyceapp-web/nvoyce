@@ -456,7 +456,7 @@ function DemoPlayer({ onClose }: { onClose: () => void }) {
   const [playing, setPlaying] = useState(true)
   const tRef = useRef(0)
   const startRef = useRef<number | null>(null)
-  const rafRef = useRef<number>()
+  const rafRef = useRef<number | null>(null)
   const barRef = useRef<HTMLDivElement>(null)
   const lastIdxRef = useRef(0)
 

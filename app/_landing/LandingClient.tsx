@@ -517,10 +517,11 @@ function DemoPlayer({ onClose }: { onClose: () => void }) {
 
       {/* Top bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', color: 'rgba(255,255,255,0.5)', fontFamily: 'ui-monospace, monospace', fontSize: 11, flexShrink: 0 }}>
-        <span style={{ display: 'none' }} className="nv-demo-title-wide">nvoyce · product demo · 00:45</span>
-        <span>nvoyce · demo</span>
+        <button onClick={onClose} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: 12, fontFamily: 'ui-monospace, monospace' }}>
+          ← back to nvoyce.ai
+        </button>
         <span>{activeIdx + 1} / {DEMO_SCENES.length} · {DEMO_SCENES[activeIdx].label}</span>
-        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.7)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: 13, fontFamily: 'ui-monospace, monospace' }}>✕ close</button>
+        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.5)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: 13, fontFamily: 'ui-monospace, monospace' }}>✕</button>
       </div>
 
       {/* Canvas */}
@@ -571,8 +572,9 @@ function DemoPlayer({ onClose }: { onClose: () => void }) {
                 <h1 style={{ fontSize: 'clamp(42px,7vw,96px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, margin: 0, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
                   Stop chasing.<br /><span style={{ color: 'var(--orange)' }}>Start getting paid.</span>
                 </h1>
-                <div style={{ marginTop: 36 }}>
+                <div style={{ marginTop: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
                   <Link href="/sign-up" onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 28px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Start free — 3 docs on us</Link>
+                  <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 13, cursor: 'pointer', fontFamily: 'ui-monospace, monospace', textDecoration: 'underline' }}>← back to nvoyce.ai</button>
                 </div>
               </div>
             </div>

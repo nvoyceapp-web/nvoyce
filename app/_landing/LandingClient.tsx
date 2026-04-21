@@ -543,25 +543,25 @@ function DemoPlayer({ onClose }: { onClose: () => void }) {
           {/* Scene 2 — Draft */}
           <SceneWrap idx={1}>
             <div style={{ maxWidth: 900, margin: '0 auto' }}>{activeIdx === 1 && <InvoiceGenDemo />}</div>
-            <Caption small="Step 01 · Drafts itself" big={<>Type the brief.<br />Nvoyce does the rest.</>} />
+            <Caption small="Step 01 · Invoice creation" big={<>4 fields in. Professional<br />invoice out. Written for you.</>} />
           </SceneWrap>
 
           {/* Scene 3 — Send */}
           <SceneWrap idx={2}>
             <div style={{ maxWidth: 800, margin: '0 auto' }}>{activeIdx === 2 && <ProposalFlowDemo />}</div>
-            <Caption small="Step 02 · Send" big={<>A link.<br />A one-click accept.</>} />
+            <Caption small="Step 02 · Proposal to payment" big={<>Client accepts. Invoice and<br />pay link generate themselves.</>} />
           </SceneWrap>
 
           {/* Scene 4 — Pay */}
           <SceneWrap idx={3}>
             <div style={{ display: 'grid', placeItems: 'center', height: '100%', paddingBottom: 80 }}>{activeIdx === 3 && <PaymentPhoneDemo />}</div>
-            <Caption small="Step 03 · Get paid" big={<>Apple Pay, Google Pay,<br />card, ACH — one tap.</>} />
+            <Caption small="Step 03 · Your client's experience" big={<>A link on their phone.<br />No login. Tap once — money moves.</>} />
           </SceneWrap>
 
           {/* Scene 5 — Dashboard */}
           <SceneWrap idx={4}>
             <div style={{ maxWidth: 900, margin: '0 auto' }}>{activeIdx === 4 && <DashboardDemo />}</div>
-            <Caption small="Bonus · Always on" big={<>Payme handles<br />the follow-ups.</>} />
+            <Caption small="Always on · Live dashboard" big={<>Every dollar tracked. The moment<br />a payment lands, you'll know.</>} />
           </SceneWrap>
 
           {/* Scene 6 — Outro */}
@@ -836,7 +836,7 @@ export default function LandingClient() {
                 ),
                 title: 'Same client, new month',
                 sub: 'Ongoing work, regular billing, same drill every time.',
-                body: 'Create a new invoice in seconds. Payme tracks it automatically and sends a nudge if they\'re slow — so you never have to send an awkward follow-up yourself.',
+                body: 'Create a new invoice in seconds. Nvoyce\'s built-in assistant, Payme, watches every outstanding invoice and sends a polite nudge at 14 days and a firmer one at 30 — so you never have to chase a client yourself.',
               },
             ].map((uc) => (
               <div key={uc.title} style={{ background: 'var(--paper)', border: '1px solid var(--line)', borderRadius: 16, padding: 28 }}>

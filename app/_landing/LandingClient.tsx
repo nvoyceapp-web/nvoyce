@@ -654,7 +654,7 @@ function FAQAccordion() {
   const [open, setOpen] = useState(-1)
   const items = [
     { q: 'How is this different from QuickBooks or FreshBooks?', a: 'QuickBooks and FreshBooks are accounting tools that happen to send invoices. Nvoyce is built around the single act of getting paid — draft fast, send clean, collect automatically. No general-ledger bloat, no client logins, no PDF wrangling.' },
-    { q: 'Who writes the invoice — me or the AI?', a: 'You type a three-line brief (client, project, amount). Nvoyce drafts the line items, the description, and the thank-you line. You review and approve before anything sends. Nothing ever goes to a client without you clicking "Send".' },
+    { q: 'Who writes the invoice — me or the AI?', a: 'Both, depending on the flow. When you create an invoice manually, you fill in a short brief (client, project, amount) and Nvoyce drafts the line items, description, and closing. You review and edit the draft before anything sends — nothing reaches your client without you clicking "Send". If a client accepts a proposal, Nvoyce automatically generates and sends the invoice on your behalf, with no extra steps required.' },
     { q: 'Do my clients need an account?', a: 'No. Clients click a link, see a clean pay page, and tap Apple Pay / Google Pay / card / ACH. No login, no download, no PDF.' },
     { q: 'Does Payme spam my clients?', a: 'Payme sends a soft, on-brand nudge at 14 days and a firmer one at 30. You can turn it off per invoice, or disable it entirely. It never sends more than what you configure.' },
     { q: 'Is my data safe?', a: 'Yes. Payments are handled by Stripe — we never see card details. Invoice data is encrypted at rest and in transit. You can export everything as CSV anytime, and delete your account in one click.' },
@@ -684,6 +684,10 @@ function FAQAccordion() {
               </div>
             )
           })}
+        </div>
+        <div style={{ marginTop: 36, textAlign: 'center' }}>
+          <span style={{ fontSize: 15, color: 'var(--muted)' }}>More questions? </span>
+          <Link href="/faq" style={{ fontSize: 15, color: 'var(--orange)', fontWeight: 600, textDecoration: 'none' }}>See the full FAQ →</Link>
         </div>
       </div>
     </section>

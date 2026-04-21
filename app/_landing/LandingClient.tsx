@@ -440,9 +440,133 @@ function NvoyceMark({ size = 30 }: { size?: number }) {
   )
 }
 
+// ─── Watch Demo Button ──────────────────────────────────────────────────────
+function WatchDemoButton({ dark = false }: { dark?: boolean }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 10,
+          padding: '6px 16px 6px 6px', borderRadius: 99,
+          background: dark ? 'rgba(255,255,255,0.1)' : 'var(--paper-2)',
+          border: dark ? '1px solid rgba(255,255,255,0.15)' : '1px solid var(--line)',
+          cursor: 'pointer', color: dark ? 'white' : 'var(--text)',
+        }}
+      >
+        <span style={{ width: 30, height: 30, borderRadius: 99, background: 'var(--orange)', color: 'white', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="white"><polygon points="2,1 9,5 2,9" /></svg>
+        </span>
+        <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13 }}>Watch the 45-second demo</span>
+      </button>
+      {open && (
+        <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(13,27,42,0.7)', backdropFilter: 'blur(6px)', display: 'grid', placeItems: 'center', padding: 24 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--paper)', borderRadius: 20, padding: '48px 40px', maxWidth: 480, width: '100%', textAlign: 'center', position: 'relative' }}>
+            <button onClick={() => setOpen(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'var(--paper-2)', border: 'none', borderRadius: 99, width: 30, height: 30, cursor: 'pointer', fontSize: 16, color: 'var(--muted)', display: 'grid', placeItems: 'center' }}>×</button>
+            <div style={{ width: 56, height: 56, borderRadius: 99, background: 'var(--orange)', margin: '0 auto 20px', display: 'grid', placeItems: 'center' }}>
+              <svg width="18" height="18" viewBox="0 0 10 10" fill="white"><polygon points="2,1 9,5 2,9" /></svg>
+            </div>
+            <h3 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 22, color: 'var(--ink)', margin: '0 0 12px', letterSpacing: '-0.02em' }}>Demo dropping soon</h3>
+            <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 28px' }}>We're recording the 45-second walkthrough now. Sign up free and you'll be first to see it — plus 3 docs on us.</p>
+            <Link href="/sign-up" onClick={() => setOpen(false)} style={{ display: 'inline-flex', alignItems: 'center', padding: '14px 24px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>Start free — 3 docs on us</Link>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+// ─── Comparison Table ───────────────────────────────────────────────────────
+function ComparisonTable() {
+  const cols = ['nvoyce', 'QuickBooks', 'FreshBooks', 'Spreadsheets']
+  const rows: [string, ...(boolean | string)[]][] = [
+    ['AI-drafted invoices & proposals',         true,      false,     false,      false],
+    ['One-click client pay (Apple/Google/Card)', true,      true,      true,       false],
+    ['Auto reminders (Payme)',                   true,      false,     'manual',   false],
+    ['Proposal → invoice in one flow',           true,      false,     false,      false],
+    ['No client login required',                 true,      false,     false,      true],
+    ['Free tier',                                true,      false,     false,      true],
+    ['Monthly cost (solo)',                      '$19.99',  '$35+',    '$19+',     '$0'],
+  ]
+  return (
+    <section style={{ padding: '60px 28px', background: 'var(--paper-2)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <Tag><span style={{ width: 5, height: 5, borderRadius: 99, background: 'var(--orange)', display: 'inline-block' }} />Head to head</Tag>
+          <h2 style={{ fontSize: 'clamp(30px, 3.6vw, 44px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '16px 0 0', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>Why freelancers switch.</h2>
+        </div>
+        <div style={{ background: 'var(--paper)', border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(4, 1fr)', fontSize: 12 }}>
+            <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--line)' }} />
+            {cols.map((c, i) => (
+              <div key={c} style={{ padding: '18px 14px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: i === 0 ? 'var(--orange)' : 'var(--muted)', borderBottom: '1px solid var(--line)', background: i === 0 ? 'var(--orange-soft)' : 'transparent', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>{c}</div>
+            ))}
+            {rows.map((row, ri) => (
+              <>
+                <div key={`label-${ri}`} style={{ padding: '16px 20px', fontSize: 13, borderBottom: ri === rows.length - 1 ? 'none' : '1px solid var(--line)', color: 'var(--text)' }}>{row[0]}</div>
+                {(row.slice(1) as (boolean | string)[]).map((v, ci) => (
+                  <div key={`cell-${ri}-${ci}`} style={{ padding: '16px 14px', textAlign: 'center', borderBottom: ri === rows.length - 1 ? 'none' : '1px solid var(--line)', background: ci === 0 ? 'var(--orange-soft)' : 'transparent' }}>
+                    {v === true  && <span style={{ color: ci === 0 ? 'var(--orange)' : 'var(--ink)', fontWeight: 700, fontSize: 16 }}>✓</span>}
+                    {v === false && <span style={{ color: 'var(--muted)', fontSize: 16 }}>—</span>}
+                    {v === 'manual' && <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const }}>manual</span>}
+                    {typeof v === 'string' && v !== 'manual' && <span style={{ fontSize: 12, color: ci === 0 ? 'var(--ink)' : 'var(--muted)', fontWeight: ci === 0 ? 700 : 400, fontFamily: 'ui-monospace, monospace' }}>{v}</span>}
+                  </div>
+                ))}
+              </>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── FAQ Accordion ──────────────────────────────────────────────────────────
+function FAQAccordion() {
+  const [open, setOpen] = useState(-1)
+  const items = [
+    { q: 'How is this different from QuickBooks or FreshBooks?', a: 'QuickBooks and FreshBooks are accounting tools that happen to send invoices. Nvoyce is built around the single act of getting paid — draft fast, send clean, collect automatically. No general-ledger bloat, no client logins, no PDF wrangling.' },
+    { q: 'Who writes the invoice — me or the AI?', a: 'You type a three-line brief (client, project, amount). Claude drafts the line items, the description, and the thank-you line. You review and approve before anything sends. Nothing ever goes to a client without you clicking "Send".' },
+    { q: 'Do my clients need an account?', a: 'No. Clients click a link, see a clean pay page, and tap Apple Pay / Google Pay / card / ACH. No login, no download, no PDF.' },
+    { q: 'Does Payme spam my clients?', a: 'Payme sends a soft, on-brand nudge at 14 days and a firmer one at 30. You can turn it off per invoice, or disable it entirely. It never sends more than what you configure.' },
+    { q: 'Is my data safe?', a: 'Yes. Payments are handled by Stripe — we never see card details. Invoice data is encrypted at rest and in transit. You can export everything as CSV anytime, and delete your account in one click.' },
+    { q: 'Can I cancel anytime?', a: 'Yes. No contracts. Cancel in the app and you drop back to Free. Your invoices and client list stay available — you keep your own data.' },
+  ]
+  return (
+    <section id="faq" style={{ padding: '90px 28px', background: 'var(--paper)' }}>
+      <div style={{ maxWidth: 860, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <Tag><span style={{ width: 5, height: 5, borderRadius: 99, background: 'var(--orange)', display: 'inline-block' }} />FAQ</Tag>
+          <h2 style={{ fontSize: 'clamp(30px, 3.6vw, 44px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '16px 0 0', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>Things freelancers ask before signing up.</h2>
+        </div>
+        <div style={{ borderTop: '1px solid var(--line)' }}>
+          {items.map((it, i) => {
+            const isOpen = open === i
+            return (
+              <div key={i} style={{ borderBottom: '1px solid var(--line)' }}>
+                <button onClick={() => setOpen(isOpen ? -1 : i)} style={{ width: '100%', textAlign: 'left', padding: '22px 4px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+                  <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>{it.q}</span>
+                  <span style={{ width: 28, height: 28, borderRadius: 99, background: isOpen ? 'var(--orange)' : 'var(--paper-2)', color: isOpen ? 'white' : 'var(--muted)', border: isOpen ? 'none' : '1px solid var(--line)', display: 'grid', placeItems: 'center', flexShrink: 0, fontSize: 18, fontWeight: 300, transition: 'all 160ms ease' }}>
+                    {isOpen ? '−' : '+'}
+                  </span>
+                </button>
+                {isOpen && (
+                  <p style={{ margin: '0 0 22px 4px', fontSize: 15, lineHeight: 1.65, color: 'var(--muted)', maxWidth: 720 }}>{it.a}</p>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── Main landing page ──────────────────────────────────────────────────────
 export default function LandingClient() {
   const [selectedPlan, setSelectedPlan] = useState<string>('Pro')
+  const [annual, setAnnual] = useState(true)
 
   return (
     <>
@@ -495,14 +619,9 @@ export default function LandingClient() {
               <p style={{ fontSize: 19, lineHeight: 1.55, color: 'var(--muted)', maxWidth: 520, margin: '0 0 32px' }}>
                 Nvoyce turns a three-line brief into a ready-to-send invoice or proposal. Reminders send themselves. Payments land with a toast. Your job is the work — not the chasing.
               </p>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
                 <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 26px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Start free — 3 docs on us</Link>
-                <button disabled style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 26px', borderRadius: 99, background: 'var(--paper-2)', color: 'var(--ink)', border: '1px solid var(--line)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, cursor: 'not-allowed', opacity: 1 }}>
-                  <span style={{ width: 32, height: 32, borderRadius: 99, background: 'var(--orange)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="12" height="14" viewBox="0 0 12 14" fill="white"><path d="M1 1.5l10 5-10 5V1.5z"/></svg>
-                  </span>
-                  Watch the 45-second demo
-                </button>
+                <WatchDemoButton />
               </div>
               {/* Stats */}
               <div style={{ display: 'flex', gap: 32, marginTop: 44, paddingTop: 24, borderTop: '1px solid var(--line)', flexWrap: 'wrap' }}>
@@ -608,20 +727,38 @@ export default function LandingClient() {
         </div>
       </section>
 
+      {/* COMPARISON TABLE */}
+      <ComparisonTable />
+
       {/* PRICING */}
       <section id="pricing" style={{ padding: '90px 28px', background: 'var(--paper-2)', borderTop: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 1240, margin: '0 auto', textAlign: 'center' }}>
           <Tag>Simple pricing</Tag>
-          <h2 style={{ fontSize: 'clamp(32px, 4vw, 48px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1, margin: '22px 0 48px', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+          <h2 style={{ fontSize: 'clamp(32px, 4vw, 48px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1, margin: '22px 0 28px', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
             Start free. Upgrade when it pays for itself.
           </h2>
+
+          {/* Annual toggle */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: 4, borderRadius: 99, background: 'white', border: '1px solid var(--line)', marginBottom: 40 }}>
+            {([{ k: false, l: 'Monthly' }, { k: true, l: 'Annual', save: '−20%' }] as { k: boolean; l: string; save?: string }[]).map(o => {
+              const on = annual === o.k
+              return (
+                <button key={String(o.k)} onClick={() => setAnnual(o.k)} style={{ border: 'none', cursor: 'pointer', padding: '8px 16px', borderRadius: 99, background: on ? 'var(--ink)' : 'transparent', color: on ? 'white' : 'var(--muted)', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'all 160ms ease' }}>
+                  {o.l}
+                  {o.save && <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 99, background: on ? 'var(--orange)' : 'var(--orange-soft)', color: on ? 'white' : 'var(--orange)', fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}>{o.save}</span>}
+                </button>
+              )
+            })}
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20, maxWidth: 860, margin: '0 auto' }} className="nv-tri">
             {[
-              { name: 'Free',     price: '$0',     desc: '',    features: ['3 documents/month', 'AI generation', 'Stripe payment links', 'Email delivery'] },
-              { name: 'Pro',      price: '$19.99', desc: '/mo', features: ['Unlimited documents', 'Everything in Free', 'Payme smart reminders', 'Priority support'] },
-              { name: 'Business', price: '$39.99', desc: '/mo', features: ['Everything in Pro',  'Team features',     'Custom branding',       'Early access'] },
+              { name: 'Free',     monthly: 0,     desc: 'To try the product',        features: ['3 documents/month', 'AI generation', 'Stripe payment links', 'Email delivery'] },
+              { name: 'Pro',      monthly: 19.99, desc: 'For working freelancers',    features: ['Unlimited documents', 'Everything in Free', 'Payme smart reminders', 'Priority support'] },
+              { name: 'Business', monthly: 39.99, desc: 'For small studios',          features: ['Everything in Pro',  'Team features',     'Custom branding',       'Early access'] },
             ].map(plan => {
               const active = selectedPlan === plan.name
+              const displayPrice = plan.monthly === 0 ? '$0' : annual ? `$${(plan.monthly * 0.8).toFixed(2)}` : `$${plan.monthly}`
               return (
                 <div
                   key={plan.name}
@@ -636,14 +773,18 @@ export default function LandingClient() {
                     boxShadow: active ? '0 12px 32px rgba(13,27,42,0.25)' : '0 2px 8px rgba(0,0,0,0.04)',
                   }}
                 >
-                  <div style={{ fontSize: 11, color: active ? 'var(--orange)' : 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: 8 }}>{plan.name}</div>
+                  <div style={{ fontSize: 11, color: active ? 'var(--orange)' : 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: 4 }}>{plan.name}</div>
+                  <div style={{ fontSize: 12, color: active ? 'rgba(255,255,255,0.5)' : 'var(--muted)', marginBottom: 10 }}>{plan.desc}</div>
                   <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1, color: active ? 'white' : 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
-                    {plan.price}<span style={{ fontSize: 14, fontWeight: 400, opacity: 0.6 }}>{plan.desc}</span>
+                    {displayPrice}<span style={{ fontSize: 14, fontWeight: 400, opacity: 0.6 }}>{plan.monthly > 0 ? '/mo' : ''}</span>
                   </div>
+                  {plan.monthly > 0 && annual && (
+                    <div style={{ fontSize: 11, color: 'var(--orange)', fontFamily: 'ui-monospace, monospace', marginTop: 4 }}>billed annually</div>
+                  )}
                   <ul style={{ listStyle: 'none', padding: 0, margin: '20px 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {plan.features.map(f => (
                       <li key={f} style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, color: active ? 'rgba(255,255,255,0.85)' : 'var(--muted)' }}>
-                        <span style={{ color: active ? 'var(--orange)' : 'var(--orange)', fontWeight: 700 }}>✓</span> {f}
+                        <span style={{ color: 'var(--orange)', fontWeight: 700 }}>✓</span> {f}
                       </li>
                     ))}
                   </ul>
@@ -655,6 +796,9 @@ export default function LandingClient() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <FAQAccordion />
+
       {/* CTA */}
       <section style={{ padding: '20px 28px 100px' }}>
         <div style={{ maxWidth: 1240, margin: '0 auto' }}>
@@ -665,12 +809,7 @@ export default function LandingClient() {
             <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.6)', maxWidth: 520, margin: '22px auto 32px' }}>Because no one started freelancing to chase invoices.</p>
             <div style={{ display: 'inline-flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 26px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Start your free trial →</Link>
-              <button disabled style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 26px', borderRadius: 99, background: 'var(--paper-2)', color: 'var(--ink)', border: 'none', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, cursor: 'not-allowed' }}>
-                <span style={{ width: 32, height: 32, borderRadius: 99, background: 'var(--orange)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="12" height="14" viewBox="0 0 12 14" fill="white"><path d="M1 1.5l10 5-10 5V1.5z"/></svg>
-                </span>
-                Watch the 45-second demo
-              </button>
+              <WatchDemoButton dark />
             </div>
           </div>
         </div>

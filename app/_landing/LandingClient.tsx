@@ -440,6 +440,145 @@ function NvoyceMark({ size = 30 }: { size?: number }) {
   )
 }
 
+// ─── Demo Player ────────────────────────────────────────────────────────────
+const DEMO_SCENES = [
+  { id: 'intro',     dur: 4000,  label: 'Welcome' },
+  { id: 'draft',     dur: 10000, label: 'AI drafts the invoice' },
+  { id: 'send',      dur: 7000,  label: 'Send to client' },
+  { id: 'pay',       dur: 8000,  label: 'Client pays' },
+  { id: 'dashboard', dur: 9000,  label: 'Live dashboard' },
+  { id: 'outro',     dur: 7000,  label: 'Stop chasing.' },
+]
+const DEMO_TOTAL = DEMO_SCENES.reduce((a, s) => a + s.dur, 0)
+
+function DemoPlayer({ onClose }: { onClose: () => void }) {
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [playing, setPlaying] = useState(true)
+  const tRef = useRef(0)
+  const startRef = useRef<number | null>(null)
+  const rafRef = useRef<number>()
+  const barRef = useRef<HTMLDivElement>(null)
+  const lastIdxRef = useRef(0)
+
+  const getIdx = (t: number) => {
+    let cum = 0
+    for (let i = 0; i < DEMO_SCENES.length; i++) {
+      if (t < cum + DEMO_SCENES[i].dur) return i
+      cum += DEMO_SCENES[i].dur
+    }
+    return DEMO_SCENES.length - 1
+  }
+
+  useEffect(() => {
+    if (!playing) return
+    function step(ts: number) {
+      if (startRef.current == null) startRef.current = ts - tRef.current
+      const next = ts - startRef.current
+      tRef.current = next >= DEMO_TOTAL ? 0 : next
+      if (next >= DEMO_TOTAL) startRef.current = ts
+      if (barRef.current) barRef.current.style.width = `${(tRef.current / DEMO_TOTAL) * 100}%`
+      const idx = getIdx(tRef.current)
+      if (idx !== lastIdxRef.current) { lastIdxRef.current = idx; setActiveIdx(idx) }
+      rafRef.current = requestAnimationFrame(step)
+    }
+    rafRef.current = requestAnimationFrame(step)
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
+  }, [playing])
+
+  const restart = () => { tRef.current = 0; startRef.current = null; lastIdxRef.current = 0; setActiveIdx(0); setPlaying(true) }
+
+  const SceneWrap = ({ idx, children }: { idx: number; children: React.ReactNode }) => (
+    <div style={{ position: 'absolute', inset: 0, opacity: activeIdx === idx ? 1 : 0, transform: activeIdx === idx ? 'translateY(0)' : 'translateY(14px)', transition: 'opacity 600ms ease, transform 600ms ease', pointerEvents: activeIdx === idx ? 'auto' : 'none', padding: '40px 48px' }}>
+      {children}
+    </div>
+  )
+
+  const Caption = ({ small, big }: { small: string; big: React.ReactNode }) => (
+    <div style={{ position: 'absolute', left: 48, bottom: 48, maxWidth: 480 }}>
+      <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.12em', marginBottom: 8 }}>{small}</div>
+      <div style={{ fontSize: 'clamp(28px,3.5vw,40px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>{big}</div>
+    </div>
+  )
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#0b0d10', display: 'flex', flexDirection: 'column' }}>
+      {/* Top bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', color: 'rgba(255,255,255,0.5)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>
+        <span>nvoyce · product demo · 00:45</span>
+        <span>{activeIdx + 1} / {DEMO_SCENES.length} · {DEMO_SCENES[activeIdx].label}</span>
+        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.7)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: 13, fontFamily: 'ui-monospace, monospace' }}>✕ close</button>
+      </div>
+
+      {/* Canvas */}
+      <div style={{ flex: 1, display: 'grid', placeItems: 'center', padding: '0 20px' }}>
+        <div style={{ width: '100%', maxWidth: 1200, aspectRatio: '16/9', background: 'var(--paper)', borderRadius: 12, position: 'relative', overflow: 'hidden', boxShadow: '0 40px 120px rgba(0,0,0,0.5)' }}>
+          <style>{`@keyframes nvIn { from { opacity:0; transform: scale(0.92); } to { opacity:1; transform:none; } }`}</style>
+
+          {/* Scene 1 — Intro */}
+          <SceneWrap idx={0}>
+            <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
+              <div style={{ textAlign: 'center', animation: 'nvIn 700ms ease-out' }}>
+                <NvoyceMark size={60} />
+                <h1 style={{ fontSize: 'clamp(42px,7vw,88px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, margin: '22px 0 14px', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                  We do the hard stuff.<br /><span style={{ color: 'var(--orange)' }}>You get paid.</span>
+                </h1>
+                <p style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase' as const, letterSpacing: '0.14em' }}>A 45-second product demo</p>
+              </div>
+            </div>
+          </SceneWrap>
+
+          {/* Scene 2 — Draft */}
+          <SceneWrap idx={1}>
+            <div style={{ maxWidth: 900, margin: '0 auto' }}>{activeIdx === 1 && <InvoiceGenDemo />}</div>
+            <Caption small="Step 01 · Drafts itself" big={<>Type the brief.<br />Claude does the rest.</>} />
+          </SceneWrap>
+
+          {/* Scene 3 — Send */}
+          <SceneWrap idx={2}>
+            <div style={{ maxWidth: 800, margin: '0 auto' }}>{activeIdx === 2 && <ProposalFlowDemo />}</div>
+            <Caption small="Step 02 · Send" big={<>A link.<br />A one-click accept.</>} />
+          </SceneWrap>
+
+          {/* Scene 4 — Pay */}
+          <SceneWrap idx={3}>
+            <div style={{ display: 'grid', placeItems: 'center', height: '100%', paddingBottom: 80 }}>{activeIdx === 3 && <PaymentPhoneDemo />}</div>
+            <Caption small="Step 03 · Get paid" big={<>Apple Pay, Google Pay,<br />card, ACH — one tap.</>} />
+          </SceneWrap>
+
+          {/* Scene 5 — Dashboard */}
+          <SceneWrap idx={4}>
+            <div style={{ maxWidth: 900, margin: '0 auto' }}>{activeIdx === 4 && <DashboardDemo />}</div>
+            <Caption small="Bonus · Always on" big={<>Payme handles<br />the follow-ups.</>} />
+          </SceneWrap>
+
+          {/* Scene 6 — Outro */}
+          <SceneWrap idx={5}>
+            <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
+              <div style={{ textAlign: 'center' }}>
+                <h1 style={{ fontSize: 'clamp(42px,7vw,96px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, margin: 0, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                  Stop chasing.<br /><span style={{ color: 'var(--orange)' }}>Start getting paid.</span>
+                </h1>
+                <div style={{ marginTop: 36 }}>
+                  <Link href="/sign-up" onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 28px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Start free — 3 docs on us</Link>
+                </div>
+              </div>
+            </div>
+          </SceneWrap>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '14px 20px' }}>
+        <button onClick={() => setPlaying(p => !p)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: 99, width: 36, height: 36, cursor: 'pointer', fontSize: 14, display: 'grid', placeItems: 'center' }}>{playing ? '❚❚' : '▶'}</button>
+        <div style={{ width: 280, height: 3, background: 'rgba(255,255,255,0.15)', borderRadius: 99, overflow: 'hidden' }}>
+          <div ref={barRef} style={{ height: '100%', background: 'var(--orange)', width: '0%', transition: 'none' }} />
+        </div>
+        <button onClick={restart} title="Restart" style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: 99, width: 36, height: 36, cursor: 'pointer', fontSize: 16, display: 'grid', placeItems: 'center' }}>↺</button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Watch Demo Button ──────────────────────────────────────────────────────
 function WatchDemoButton({ dark = false }: { dark?: boolean }) {
   const [open, setOpen] = useState(false)
@@ -460,19 +599,7 @@ function WatchDemoButton({ dark = false }: { dark?: boolean }) {
         </span>
         <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 13 }}>Watch the 45-second demo</span>
       </button>
-      {open && (
-        <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(13,27,42,0.7)', backdropFilter: 'blur(6px)', display: 'grid', placeItems: 'center', padding: 24 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--paper)', borderRadius: 20, padding: '48px 40px', maxWidth: 480, width: '100%', textAlign: 'center', position: 'relative' }}>
-            <button onClick={() => setOpen(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'var(--paper-2)', border: 'none', borderRadius: 99, width: 30, height: 30, cursor: 'pointer', fontSize: 16, color: 'var(--muted)', display: 'grid', placeItems: 'center' }}>×</button>
-            <div style={{ width: 56, height: 56, borderRadius: 99, background: 'var(--orange)', margin: '0 auto 20px', display: 'grid', placeItems: 'center' }}>
-              <svg width="18" height="18" viewBox="0 0 10 10" fill="white"><polygon points="2,1 9,5 2,9" /></svg>
-            </div>
-            <h3 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 22, color: 'var(--ink)', margin: '0 0 12px', letterSpacing: '-0.02em' }}>Demo dropping soon</h3>
-            <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 28px' }}>We're recording the 45-second walkthrough now. Sign up free and you'll be first to see it — plus 3 docs on us.</p>
-            <Link href="/sign-up" onClick={() => setOpen(false)} style={{ display: 'inline-flex', alignItems: 'center', padding: '14px 24px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>Start free — 3 docs on us</Link>
-          </div>
-        </div>
-      )}
+      {open && <DemoPlayer onClose={() => setOpen(false)} />}
     </>
   )
 }
@@ -613,7 +740,7 @@ export default function LandingClient() {
                 <span style={{ width: 5, height: 5, borderRadius: 99, background: 'var(--orange)', display: 'inline-block' }} />
                 AI-powered · Invoices & Proposals
               </Tag>
-              <h1 style={{ fontSize: 'clamp(46px, 7vw, 88px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, color: 'var(--ink)', margin: '22px 0 28px', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+              <h1 style={{ fontSize: 'clamp(38px, 7vw, 88px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, color: 'var(--ink)', margin: '22px 0 28px', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
                 We do the<br />hard stuff.<br /><span style={{ color: 'var(--orange)' }}>You get paid.</span>
               </h1>
               <p style={{ fontSize: 19, lineHeight: 1.55, color: 'var(--muted)', maxWidth: 520, margin: '0 0 32px' }}>
@@ -656,7 +783,7 @@ export default function LandingClient() {
               The only number<br />you'll want to watch.
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.55, color: 'var(--muted)', maxWidth: 460 }}>
-              Cash flow, outstanding, overdue, drafts — at a glance. When a client pays, a toast lands on your screen before their bank email does.
+              Cash flow, outstanding, overdue, drafts — at a glance. The moment a payment clears, a toast lands on your screen.
             </p>
           </div>
           <DashboardDemo />

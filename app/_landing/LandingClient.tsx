@@ -724,9 +724,11 @@ export default function LandingClient() {
         @media (max-width: 880px) {
           .nv-hero-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
           .nv-tri       { grid-template-columns: 1fr !important; }
+          .nv-quad      { grid-template-columns: 1fr 1fr !important; }
           .nv-footer-grid { grid-template-columns: 1fr 1fr !important; }
         }
         @media (max-width: 640px) {
+          .nv-quad         { grid-template-columns: 1fr !important; }
           .nv-footer-grid  { grid-template-columns: 1fr !important; }
           .nv-cta          { padding: 48px 28px !important; }
         }
@@ -991,6 +993,78 @@ export default function LandingClient() {
 
       {/* FAQ */}
       <FAQAccordion />
+
+      {/* TRUST + SECURITY */}
+      <section style={{ padding: '80px 28px', background: 'var(--paper-2)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 52 }}>
+            <Tag>Security &amp; privacy</Tag>
+            <h2 style={{ fontSize: 'clamp(28px, 3.2vw, 40px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '16px 0 12px', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+              Your data and your clients' data are safe.
+            </h2>
+            <p style={{ fontSize: 16, color: 'var(--muted)', maxWidth: 520, margin: '0 auto' }}>
+              We don't cut corners on infrastructure. Nvoyce is built on Stripe, Supabase, and Clerk — each independently SOC 2 Type II certified.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }} className="nv-quad">
+            {[
+              {
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 2L4 5v5c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V5l-6-3z" stroke="white" strokeWidth="1.6" strokeLinejoin="round"/>
+                    <path d="M7 10l2 2 4-4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
+                title: 'End-to-end encryption',
+                body: 'All data is encrypted at rest (AES-256) and in transit (TLS). Your invoice data and client details are never exposed.',
+              },
+              {
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <rect x="4" y="8" width="12" height="9" rx="2" stroke="white" strokeWidth="1.6"/>
+                    <path d="M7 8V6a3 3 0 0 1 6 0v2" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+                    <circle cx="10" cy="12.5" r="1" fill="white"/>
+                  </svg>
+                ),
+                title: 'We never see card details',
+                body: 'All payments flow directly through Stripe — PCI DSS Level 1 compliant. Nvoyce never touches, stores, or sees your clients\' card information.',
+              },
+              {
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="8" r="3.5" stroke="white" strokeWidth="1.6"/>
+                    <path d="M4 17c0-3.31 2.686-6 6-6s6 2.69 6 6" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+                  </svg>
+                ),
+                title: 'Secure authentication',
+                body: 'Sign-in is handled by Clerk — no passwords stored by Nvoyce. Supports Google OAuth and magic links out of the box.',
+              },
+              {
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M5 4h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" stroke="white" strokeWidth="1.6"/>
+                    <path d="M7 8h6M7 11h4" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+                    <path d="M13 14l2 2" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+                  </svg>
+                ),
+                title: 'You own your data',
+                body: 'Export all your invoices and client data as CSV anytime. Delete your account in one click and everything goes with it — no questions asked.',
+              },
+            ].map((t) => (
+              <div key={t.title} style={{ background: 'var(--paper)', border: '1px solid var(--line)', borderRadius: 16, padding: 26 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: ORANGE, display: 'grid', placeItems: 'center', marginBottom: 16 }}>
+                  {t.icon}
+                </div>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', margin: '0 0 8px', fontFamily: 'var(--font-space-grotesk), sans-serif', letterSpacing: '-0.01em' }}>{t.title}</h3>
+                <p style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--muted)', margin: 0 }}>{t.body}</p>
+              </div>
+            ))}
+          </div>
+          <p style={{ textAlign: 'center', marginTop: 36, fontSize: 13, color: 'var(--muted)' }}>
+            Built on <span style={{ color: 'var(--ink)', fontWeight: 600 }}>Stripe</span> · <span style={{ color: 'var(--ink)', fontWeight: 600 }}>Supabase</span> · <span style={{ color: 'var(--ink)', fontWeight: 600 }}>Clerk</span> — each SOC 2 Type II certified.
+          </p>
+        </div>
+      </section>
 
       {/* CTA */}
       <section style={{ padding: '20px 28px 100px' }}>

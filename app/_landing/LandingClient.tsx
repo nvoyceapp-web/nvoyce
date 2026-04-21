@@ -384,7 +384,7 @@ function ProposalFlowDemo() {
     { label: 'Proposal sent',           sub: 'PRO-2026-019' },
     { label: 'Client accepted ✓',       sub: 'by client' },
     { label: 'Invoice auto-generated',  sub: 'INV-2026-042' },
-    { label: 'Payment link sent',       sub: 'via Stripe' },
+    { label: 'Pay link + QR sent',       sub: 'via Stripe' },
   ]
 
   return (
@@ -655,7 +655,7 @@ function FAQAccordion() {
   const items = [
     { q: 'How is this different from QuickBooks or FreshBooks?', a: 'QuickBooks and FreshBooks are accounting tools that happen to send invoices. Nvoyce is built around the single act of getting paid — draft fast, send clean, collect automatically. No general-ledger bloat, no client logins, no PDF wrangling.' },
     { q: 'Who writes the invoice — me or the AI?', a: 'Both, depending on the flow. When you create an invoice manually, you fill in a short brief (client, project, amount) and Nvoyce drafts the line items, description, and closing. You review and edit the draft before anything sends — nothing reaches your client without you clicking "Send". If a client accepts a proposal, Nvoyce automatically generates and sends the invoice on your behalf, with no extra steps required.' },
-    { q: 'Do my clients need an account?', a: 'No. Clients click a link, see a clean pay page, and tap Apple Pay / Google Pay / card / ACH. No login, no download, no PDF.' },
+    { q: 'Do my clients need an account?', a: 'No. Clients click a pay link or scan a QR code, see a clean pay page, and tap Apple Pay / Google Pay / card / ACH. No login, no download, no PDF.' },
     { q: 'Does Payme spam my clients?', a: 'Payme sends a soft, on-brand nudge at 14 days and a firmer one at 30. You can turn it off per invoice, or disable it entirely. It never sends more than what you configure.' },
     { q: 'Is my data safe?', a: 'Yes. Payments are handled by Stripe — we never see card details. Invoice data is encrypted at rest and in transit. You can export everything as CSV anytime, and delete your account in one click.' },
     { q: 'Can I cancel anytime?', a: 'Yes. No contracts. Cancel in the app and you drop back to Free. Your invoices and client list stay available — you keep your own data.' },
@@ -799,7 +799,7 @@ export default function LandingClient() {
                 ),
                 title: 'You just finished a job',
                 sub: 'No proposal, no back-and-forth — just a client who owes you.',
-                body: 'Open Nvoyce, fill in three fields — client name, project, amount. The invoice drafts itself, a Stripe pay link attaches, and it\'s in their inbox in under a minute.',
+                body: 'Open Nvoyce, fill in three fields — client name, project, amount. The invoice drafts itself, a Stripe pay link and QR code attach automatically, and it\'s in their inbox in under a minute.',
               },
               {
                 icon: (
@@ -810,7 +810,7 @@ export default function LandingClient() {
                 ),
                 title: 'A client accepted your proposal',
                 sub: 'They clicked Accept and now you need to get paid.',
-                body: 'Nvoyce auto-generates and sends the invoice the moment they accept — no extra steps. The pay link is already there. You just watch the notification land.',
+                body: 'Nvoyce auto-generates and sends the invoice the moment they accept — no extra steps. The pay link and QR code are already there. You just watch the notification land.',
               },
               {
                 icon: (
@@ -892,7 +892,7 @@ export default function LandingClient() {
               A link.<br />A tap.<br />Paid.
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.55, color: 'var(--muted)', maxWidth: 460, marginBottom: 28 }}>
-              Clients get a link. No login, no PDF wrangling, no wire instructions. One clean page with your brand, your amount, and a Stripe-powered pay button.
+              Clients get a pay link and a QR code — whichever works for them. No login, no PDF wrangling, no wire instructions. One clean page with your brand, your amount, and a Stripe-powered pay button.
             </p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {['Apple Pay', 'Google Pay', 'Card', 'ACH', 'Bank transfer'].map(m => (

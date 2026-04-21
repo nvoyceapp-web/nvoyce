@@ -471,7 +471,23 @@ export default function DocumentPage() {
             {userLogo ? (
               <img src={userLogo} alt="Logo" className="max-w-sm max-h-48 mx-auto mb-2 object-contain" />
             ) : (
-              <img src="/logo.png" alt="Nvoyce" className="max-w-sm max-h-48 mx-auto mb-2 object-contain" />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 11 }}>
+                <svg width="44" height="44" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="2" width="36" height="36" rx="9" fill="#0d1b2a" />
+                  <rect x="9" y="9" width="3.2" height="22" fill="white" />
+                  <rect x="27.8" y="9" width="3.2" height="22" fill="white" />
+                  <path d="M12.2 9 L15 9 L28 27 L28 31 L25.2 31 Z" fill="white" />
+                  <circle cx="17.5" cy="14" r="1.2" fill="#e04e1a" />
+                  <circle cx="22.5" cy="14" r="1.2" fill="#e04e1a" />
+                  <circle cx="17.5" cy="20" r="1.2" fill="#e04e1a" />
+                  <circle cx="22.5" cy="20" r="1.2" fill="#e04e1a" />
+                  <circle cx="17.5" cy="26" r="1.2" fill="#e04e1a" />
+                  <circle cx="22.5" cy="26" r="1.2" fill="#e04e1a" />
+                </svg>
+                <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 26, letterSpacing: '-0.03em', color: '#0d1b2a', lineHeight: 1 }}>
+                  nvoyce
+                </span>
+              </div>
             )}
           </div>
 
@@ -771,10 +787,22 @@ export default function DocumentPage() {
 
           {/* Made with nvoyce footer */}
           <div className="border-t border-gray-100 mt-12 pt-8 text-center flex flex-col items-center gap-2">
-            <img src="/logo-icon.png" alt="Nvoyce" className="w-6 h-6 object-contain opacity-50" />
-            <p className="text-xs text-gray-400">
-              Made with <span className="text-purple-600 font-semibold">nvoyce</span>
-            </p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, opacity: 0.5 }}>
+              <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="36" height="36" rx="9" fill="#0d1b2a" />
+                <rect x="9" y="9" width="3.2" height="22" fill="white" />
+                <rect x="27.8" y="9" width="3.2" height="22" fill="white" />
+                <path d="M12.2 9 L15 9 L28 27 L28 31 L25.2 31 Z" fill="white" />
+                <circle cx="17.5" cy="14" r="1.2" fill="#e04e1a" />
+                <circle cx="22.5" cy="14" r="1.2" fill="#e04e1a" />
+                <circle cx="17.5" cy="20" r="1.2" fill="#e04e1a" />
+                <circle cx="22.5" cy="20" r="1.2" fill="#e04e1a" />
+                <circle cx="17.5" cy="26" r="1.2" fill="#e04e1a" />
+                <circle cx="22.5" cy="26" r="1.2" fill="#e04e1a" />
+              </svg>
+              <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 13, letterSpacing: '-0.03em', color: '#0d1b2a', lineHeight: 1 }}>nvoyce</span>
+            </div>
+            <p className="text-xs text-gray-400">Made with nvoyce</p>
           </div>
         </div>
       </div>

@@ -845,10 +845,10 @@ export default function LandingClient() {
           <div>
             <Tag>Live dashboard</Tag>
             <h2 style={{ fontSize: 'clamp(36px, 4.2vw, 56px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1, margin: '18px 0 20px', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
-              The only number<br />you'll want to watch.
+              The moment a payment clears,<br />you'll know.
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.55, color: 'var(--muted)', maxWidth: 460 }}>
-              Cash flow, outstanding, overdue, drafts — at a glance. The moment a payment clears, a toast lands on your screen.
+              Cash flow, outstanding, overdue, drafts — all in one tab.
             </p>
           </div>
           <DashboardDemo />
@@ -860,7 +860,7 @@ export default function LandingClient() {
         <div style={{ maxWidth: 1240, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 50, flexWrap: 'wrap', gap: 20 }}>
             <h2 style={{ fontSize: 'clamp(32px, 4vw, 48px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1, margin: 0, maxWidth: 600, fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
-              Three small robots.<br />One quiet tab.
+              Three things that used to eat your day.<br />Now they run themselves.
             </h2>
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.12em' }}>01 · Draft · 02 · Send · 03 · Collect</span>
           </div>

@@ -866,9 +866,9 @@ export default function LandingClient() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }} className="nv-tri">
             {[
-              { n: '01', t: 'Drafts itself', d: 'Three fields in, one invoice out. Nvoyce writes the line items, the tone, and the details. You approve.' },
-              { n: '02', t: 'Sends and signs', d: 'Proposals get a link. Clients accept without signing up. The moment they do, an invoice is born and sent.' },
-              { n: '03', t: 'Follows up for you', d: "Payme — Nvoyce's built-in reminder assistant — watches who owes you and when. Soft nudges at 14 and 30 days. You forget; we don't." },
+              { n: '01', t: 'Drafts itself', d: 'Three fields in, one invoice out. Nvoyce writes the line items, the tone, and the closing. You review and approve.' },
+              { n: '02', t: 'Sends to your client', d: 'One click and it\'s gone — pay link and QR code included. For proposals, clients accept without signing up and the invoice generates itself.' },
+              { n: '03', t: 'Follows up for you', d: 'If they\'re slow to pay, Payme sends a nudge at 14 days and a firmer one at 30. You never have to ask twice.' },
             ].map(f => (
               <div key={f.n} style={{ padding: 26, borderRadius: 14, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <span style={{ fontSize: 11, color: 'var(--orange)', letterSpacing: '0.08em', fontFamily: 'ui-monospace, monospace' }}>{f.n}</span>

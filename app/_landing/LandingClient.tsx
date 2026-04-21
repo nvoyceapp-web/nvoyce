@@ -778,6 +778,47 @@ export default function LandingClient() {
         </div>
       </section>
 
+      {/* USE CASES */}
+      <section style={{ padding: '80px 28px', background: 'var(--paper-2)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <Tag>However you work</Tag>
+            <h2 style={{ fontSize: 'clamp(28px, 3.2vw, 40px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '16px 0 0', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+              Sound familiar?
+            </h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }} className="nv-tri">
+            {[
+              {
+                icon: '⚡',
+                title: 'You just finished a job',
+                sub: 'No proposal, no back-and-forth — just a client who owes you.',
+                body: 'Open Nvoyce, fill in three fields — client name, project, amount. The invoice drafts itself, a Stripe pay link attaches, and it\'s in their inbox in under a minute.',
+              },
+              {
+                icon: '🤝',
+                title: 'A client accepted your proposal',
+                sub: 'They clicked Accept and now you need to get paid.',
+                body: 'Nvoyce auto-generates and sends the invoice the moment they accept — no extra steps. The pay link is already there. You just watch the notification land.',
+              },
+              {
+                icon: '🔁',
+                title: 'Same client, new month',
+                sub: 'Ongoing work, regular billing, same drill every time.',
+                body: 'Create a new invoice in seconds. Payme tracks it automatically and sends a nudge if they\'re slow — so you never have to send an awkward follow-up yourself.',
+              },
+            ].map((uc) => (
+              <div key={uc.title} style={{ background: 'var(--paper)', border: '1px solid var(--line)', borderRadius: 16, padding: 28 }}>
+                <div style={{ fontSize: 28, marginBottom: 14 }}>{uc.icon}</div>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--ink)', margin: '0 0 6px', fontFamily: 'var(--font-space-grotesk), sans-serif', letterSpacing: '-0.01em' }}>{uc.title}</h3>
+                <p style={{ fontSize: 13, color: 'var(--orange)', fontWeight: 600, margin: '0 0 14px', fontFamily: 'ui-monospace, monospace' }}>{uc.sub}</p>
+                <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--muted)', margin: 0 }}>{uc.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* DASHBOARD DEMO */}
       <section style={{ padding: '90px 28px' }}>
         <div style={{ maxWidth: 1240, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }} className="nv-hero-grid">

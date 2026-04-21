@@ -790,26 +790,44 @@ export default function LandingClient() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }} className="nv-tri">
             {[
               {
-                icon: '⚡',
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 2L4 11h6l-1 7 7-9h-6l1-7z" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
                 title: 'You just finished a job',
                 sub: 'No proposal, no back-and-forth — just a client who owes you.',
                 body: 'Open Nvoyce, fill in three fields — client name, project, amount. The invoice drafts itself, a Stripe pay link attaches, and it\'s in their inbox in under a minute.',
               },
               {
-                icon: '🤝',
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="7.5" stroke="white" strokeWidth="1.6"/>
+                    <path d="M6.5 10l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
                 title: 'A client accepted your proposal',
                 sub: 'They clicked Accept and now you need to get paid.',
                 body: 'Nvoyce auto-generates and sends the invoice the moment they accept — no extra steps. The pay link is already there. You just watch the notification land.',
               },
               {
-                icon: '🔁',
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 10a6 6 0 0 1 6-6 6 6 0 0 1 4.24 1.76L16 8" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+                    <path d="M16 4v4h-4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M16 10a6 6 0 0 1-6 6 6 6 0 0 1-4.24-1.76L4 12" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+                    <path d="M4 16v-4h4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ),
                 title: 'Same client, new month',
                 sub: 'Ongoing work, regular billing, same drill every time.',
                 body: 'Create a new invoice in seconds. Payme tracks it automatically and sends a nudge if they\'re slow — so you never have to send an awkward follow-up yourself.',
               },
             ].map((uc) => (
               <div key={uc.title} style={{ background: 'var(--paper)', border: '1px solid var(--line)', borderRadius: 16, padding: 28 }}>
-                <div style={{ fontSize: 28, marginBottom: 14 }}>{uc.icon}</div>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: ORANGE, display: 'grid', placeItems: 'center', marginBottom: 18 }}>
+                  {uc.icon}
+                </div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--ink)', margin: '0 0 6px', fontFamily: 'var(--font-space-grotesk), sans-serif', letterSpacing: '-0.01em' }}>{uc.title}</h3>
                 <p style={{ fontSize: 13, color: 'var(--orange)', fontWeight: 600, margin: '0 0 14px', fontFamily: 'ui-monospace, monospace' }}>{uc.sub}</p>
                 <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--muted)', margin: 0 }}>{uc.body}</p>

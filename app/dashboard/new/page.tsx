@@ -11,6 +11,7 @@ const paymentTermsDisplayMap: Record<string, string> = {
   net_15: 'Net 15',
   net_30: 'Net 30',
   net_60: 'Net 60',
+  net_90: 'Net 90',
 }
 
 type DocType = 'invoice' | 'proposal'
@@ -378,6 +379,7 @@ function NewDocumentContent() {
                 <option>Net 15</option>
                 <option>Net 30</option>
                 <option>Net 60</option>
+                <option>Net 90</option>
                 <option>50% upfront, 50% on delivery</option>
               </select>
             </div>

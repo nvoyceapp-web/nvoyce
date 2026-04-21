@@ -21,6 +21,7 @@ const PAYMENT_TERMS = [
   { value: 'net_15', label: 'Net 15' },
   { value: 'net_30', label: 'Net 30' },
   { value: 'net_60', label: 'Net 60' },
+  { value: 'net_90', label: 'Net 90' },
 ]
 
 const TONE_OPTIONS = [

@@ -328,8 +328,8 @@ function PaymeDemo() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
         <div style={{ width: 34, height: 34, borderRadius: 10, background: ORANGE, display: 'grid', placeItems: 'center', color: 'white', fontWeight: 700, fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 16 }}>P</div>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>Payme</div>
-          <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace' }}>Smart reminder assistant</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>Payme by Nvoyce</div>
+          <div style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace' }}>Built-in reminder assistant</div>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ width: 6, height: 6, borderRadius: 99, background: '#10b981', display: 'inline-block', animation: 'nvPulse 2s ease-in-out infinite' }} />
@@ -803,7 +803,7 @@ export default function LandingClient() {
             {[
               { n: '01', t: 'Drafts itself', d: 'Three fields in, one invoice out. Claude writes the line items, the tone, and the details. You approve.' },
               { n: '02', t: 'Sends and signs', d: 'Proposals get a link. Clients accept without signing up. The moment they do, an invoice is born and sent.' },
-              { n: '03', t: 'Chases politely', d: "Payme remembers who owes you and when. Soft nudges at 14 and 30 days. You forget; we don't." },
+              { n: '03', t: 'Chases politely', d: "Payme — Nvoyce's built-in reminder assistant — watches who owes you and when. Soft nudges at 14 and 30 days. You forget; we don't." },
             ].map(f => (
               <div key={f.n} style={{ padding: 26, borderRadius: 14, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <span style={{ fontSize: 11, color: 'var(--orange)', letterSpacing: '0.08em', fontFamily: 'ui-monospace, monospace' }}>{f.n}</span>
@@ -842,10 +842,13 @@ export default function LandingClient() {
       <section style={{ padding: '40px 28px 90px' }}>
         <div style={{ maxWidth: 1240, margin: '0 auto' }}>
           <div style={{ marginBottom: 40 }}>
-            <Tag>The Braille tells the story</Tag>
-            <h2 style={{ fontSize: 'clamp(32px, 4vw, 46px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '18px 0 0', maxWidth: 760, fontFamily: 'var(--font-space-grotesk), sans-serif', color: 'var(--ink)' }}>
-              Every invoice is a freelancer's voice —<br />a declaration of work, worth, and the right to be paid.
+            <Tag>Introducing Payme</Tag>
+            <h2 style={{ fontSize: 'clamp(32px, 4vw, 46px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '18px 0 12px', maxWidth: 760, fontFamily: 'var(--font-space-grotesk), sans-serif', color: 'var(--ink)' }}>
+              Nvoyce features Payme — an AI-powered assistant that chases your unpaid invoices so you never have to.
             </h2>
+            <p style={{ fontSize: 17, color: 'var(--muted)', lineHeight: 1.6, maxWidth: 600, margin: 0 }}>
+              Send your invoice once. Payme watches who owes you, sends a polite nudge at 14 days and a firmer one at 30, then goes quiet the moment they pay. It's a Nvoyce feature — included automatically, no extra setup.
+            </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }} className="nv-tri">
             <PaymeDemo />

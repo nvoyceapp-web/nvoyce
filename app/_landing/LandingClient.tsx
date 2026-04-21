@@ -488,31 +488,44 @@ function DemoPlayer({ onClose }: { onClose: () => void }) {
   const restart = () => { tRef.current = 0; startRef.current = null; lastIdxRef.current = 0; setActiveIdx(0); setPlaying(true) }
 
   const SceneWrap = ({ idx, children }: { idx: number; children: React.ReactNode }) => (
-    <div style={{ position: 'absolute', inset: 0, opacity: activeIdx === idx ? 1 : 0, transform: activeIdx === idx ? 'translateY(0)' : 'translateY(14px)', transition: 'opacity 600ms ease, transform 600ms ease', pointerEvents: activeIdx === idx ? 'auto' : 'none', padding: '40px 48px' }}>
+    <div className="nv-demo-scene" style={{ position: 'absolute', inset: 0, opacity: activeIdx === idx ? 1 : 0, transform: activeIdx === idx ? 'translateY(0)' : 'translateY(14px)', transition: 'opacity 600ms ease, transform 600ms ease', pointerEvents: activeIdx === idx ? 'auto' : 'none' }}>
       {children}
     </div>
   )
 
   const Caption = ({ small, big }: { small: string; big: React.ReactNode }) => (
-    <div style={{ position: 'absolute', left: 48, bottom: 48, maxWidth: 480 }}>
+    <div className="nv-demo-cap" style={{ position: 'absolute', bottom: 48 }}>
       <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.12em', marginBottom: 8 }}>{small}</div>
-      <div style={{ fontSize: 'clamp(28px,3.5vw,40px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>{big}</div>
+      <div style={{ fontSize: 'clamp(22px,3.5vw,40px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>{big}</div>
     </div>
   )
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#0b0d10', display: 'flex', flexDirection: 'column' }}>
+      <style>{`
+        @keyframes nvIn { from { opacity:0; transform: scale(0.92); } to { opacity:1; transform:none; } }
+        .nv-demo-canvas { aspect-ratio: 16/9; }
+        .nv-demo-scene  { padding: 40px 48px; }
+        .nv-demo-cap    { left: 48px; bottom: 48px; max-width: 480px; }
+        @media (max-width: 640px) {
+          .nv-demo-canvas { aspect-ratio: unset; height: 100%; }
+          .nv-demo-scene  { padding: 16px; }
+          .nv-demo-cap    { left: 16px; bottom: 16px; max-width: 280px; }
+          .nv-demo-cap div:last-child { font-size: 22px !important; }
+        }
+      `}</style>
+
       {/* Top bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', color: 'rgba(255,255,255,0.5)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>
-        <span>nvoyce · product demo · 00:45</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', color: 'rgba(255,255,255,0.5)', fontFamily: 'ui-monospace, monospace', fontSize: 11, flexShrink: 0 }}>
+        <span style={{ display: 'none' }} className="nv-demo-title-wide">nvoyce · product demo · 00:45</span>
+        <span>nvoyce · demo</span>
         <span>{activeIdx + 1} / {DEMO_SCENES.length} · {DEMO_SCENES[activeIdx].label}</span>
         <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.7)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontSize: 13, fontFamily: 'ui-monospace, monospace' }}>✕ close</button>
       </div>
 
       {/* Canvas */}
-      <div style={{ flex: 1, display: 'grid', placeItems: 'center', padding: '0 20px' }}>
-        <div style={{ width: '100%', maxWidth: 1200, aspectRatio: '16/9', background: 'var(--paper)', borderRadius: 12, position: 'relative', overflow: 'hidden', boxShadow: '0 40px 120px rgba(0,0,0,0.5)' }}>
-          <style>{`@keyframes nvIn { from { opacity:0; transform: scale(0.92); } to { opacity:1; transform:none; } }`}</style>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 12px', minHeight: 0 }}>
+        <div className="nv-demo-canvas" style={{ width: '100%', maxWidth: 1200, background: 'var(--paper)', borderRadius: 12, position: 'relative', overflow: 'hidden', boxShadow: '0 40px 120px rgba(0,0,0,0.5)' }}>
 
           {/* Scene 1 — Intro */}
           <SceneWrap idx={0}>

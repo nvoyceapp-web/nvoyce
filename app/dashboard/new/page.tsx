@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import type { Contact } from '@/lib/supabase'
 
 const paymentTermsDisplayMap: Record<string, string> = {
   due_on_receipt: 'Due on receipt',
@@ -40,6 +41,11 @@ function NewDocumentContent() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [clientSuggestions, setClientSuggestions] = useState<Contact[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const clientNameRef = useRef<HTMLInputElement>(null)
+  const suggestionsRef = useRef<HTMLDivElement>(null)
   const [form, setForm] = useState<FormData>({
     docType: (typeParam && ['invoice', 'proposal'].includes(typeParam) ? typeParam : 'invoice') as DocType,
     clientName: '',
@@ -102,6 +108,52 @@ function NewDocumentContent() {
     }
     prefillForm()
   }, [prefillId])
+
+  // Load contacts for autocomplete
+  useEffect(() => {
+    if (!userId) return
+    fetch('/api/contacts').then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setContacts(data)
+    })
+  }, [userId])
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node) &&
+          clientNameRef.current && !clientNameRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  function handleClientNameChange(value: string) {
+    update('clientName', value)
+    if (value.trim().length >= 1) {
+      const q = value.toLowerCase()
+      const matches = contacts.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.company?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q)
+      )
+      setClientSuggestions(matches)
+      setShowSuggestions(matches.length > 0)
+    } else {
+      setShowSuggestions(false)
+    }
+  }
+
+  function selectContact(c: Contact) {
+    setForm(prev => ({
+      ...prev,
+      clientName: c.name,
+      clientEmail: c.email || prev.clientEmail,
+    }))
+    setShowSuggestions(false)
+    setValidationErrors([])
+  }
 
   const validateStep = (currentStep: number): boolean => {
     const errors: string[] = []
@@ -283,15 +335,43 @@ function NewDocumentContent() {
               />
             </div>
 
-            <div>
+            <div className="relative">
               <label className="text-sm font-medium text-gray-700 block mb-1">Client name</label>
               <input
+                ref={clientNameRef}
                 type="text"
                 value={form.clientName}
-                onChange={(e) => update('clientName', e.target.value)}
+                onChange={(e) => handleClientNameChange(e.target.value)}
+                onFocus={() => {
+                  if (form.clientName.trim().length >= 1 && clientSuggestions.length > 0) setShowSuggestions(true)
+                }}
                 placeholder="e.g. Acme Corp"
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                autoComplete="off"
               />
+              {showSuggestions && clientSuggestions.length > 0 && (
+                <div
+                  ref={suggestionsRef}
+                  className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
+                >
+                  {clientSuggestions.slice(0, 5).map(c => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onMouseDown={() => selectContact(c)}
+                      className="w-full px-4 py-2.5 text-left hover:bg-purple-50 flex items-center gap-3 transition"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 text-purple-700 font-bold text-xs">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-[#0d1b2a] truncate">{c.name}</p>
+                        <p className="text-xs text-gray-400 truncate">{c.email || c.company || ''}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>

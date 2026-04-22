@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 interface MobileNavProps {
-  activePage?: 'dashboard' | 'faq' | 'settings' | 'about'
+  activePage?: 'dashboard' | 'clients' | 'faq' | 'settings' | 'about'
 }
 
 export default function MobileNav({ activePage }: MobileNavProps) {
@@ -85,6 +85,9 @@ export default function MobileNav({ activePage }: MobileNavProps) {
           {/* Nav links */}
           <Link href="/dashboard" onClick={() => setShowMenu(false)} className={linkClass('dashboard')}>
             Dashboard
+          </Link>
+          <Link href="/dashboard/clients" onClick={() => setShowMenu(false)} className={linkClass('clients')}>
+            Clients
           </Link>
           <Link href="/dashboard/faq" onClick={() => setShowMenu(false)} className={linkClass('faq')}>
             FAQ

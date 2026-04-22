@@ -619,6 +619,77 @@ function WatchDemoButton({ dark = false }: { dark?: boolean }) {
   )
 }
 
+// ─── Work Smarter section ──────────────────────────────────────────────────
+function WorkSmarter() {
+  const cards = [
+    {
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      ),
+      label: 'Client Book',
+      headline: 'Save clients once. Never retype.',
+      body: 'Add a client to your contact book — name, email, phone. The next time you invoice them, type two letters and their info fills in automatically.',
+    },
+    {
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      ),
+      label: 'Rate Card',
+      headline: 'Your prices, one click away.',
+      body: 'Build a menu of your standard services with set prices. When creating an invoice or proposal, pick a service and the description and price fill in instantly.',
+    },
+    {
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="17 1 21 5 17 9"/>
+          <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/>
+          <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+      ),
+      label: 'Repeat',
+      headline: 'Past invoices become new ones.',
+      body: 'Open any sent invoice or proposal, hit Repeat, and the wizard pre-fills with everything. Swap the client, tweak the price, and send. Works in under a minute.',
+    },
+  ]
+
+  return (
+    <section style={{ padding: '80px 28px', background: 'var(--paper)', borderTop: '1px solid var(--line)' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <Tag><span style={{ width: 5, height: 5, borderRadius: 99, background: 'var(--orange)', display: 'inline-block' }} />Built for repeat business</Tag>
+          <h2 style={{ fontSize: 'clamp(30px, 3.6vw, 44px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '16px 0 12px', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+            The second invoice<br />takes 30 seconds.
+          </h2>
+          <p style={{ fontSize: 17, color: 'var(--muted)', maxWidth: 500, margin: '0 auto', lineHeight: 1.6 }}>
+            Your clients, your rates, your past work — all saved and ready to go again.
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }} className="nv-tri">
+          {cards.map(c => (
+            <div key={c.label} style={{ background: 'var(--paper-2)', border: '1px solid var(--line)', borderRadius: 16, padding: '28px 28px 32px' }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--orange-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--orange)', marginBottom: 18 }}>
+                {c.icon}
+              </div>
+              <div style={{ fontSize: 10, fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.1em', color: 'var(--orange)', marginBottom: 8 }}>{c.label}</div>
+              <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', margin: '0 0 10px', letterSpacing: '-0.01em', lineHeight: 1.2, fontFamily: 'var(--font-space-grotesk), sans-serif' }}>{c.headline}</p>
+              <p style={{ fontSize: 14, color: 'var(--muted)', margin: 0, lineHeight: 1.65 }}>{c.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── Comparison Table ───────────────────────────────────────────────────────
 function ComparisonTable() {
   const cols = ['nvoyce', 'QuickBooks', 'FreshBooks', 'Spreadsheets']
@@ -627,6 +698,7 @@ function ComparisonTable() {
     ['One-click client pay (Apple/Google/Card)', true,      true,      true,       false],
     ['Auto reminders (Payme)',                   true,      false,     'manual',   false],
     ['Proposal → invoice in one flow',           true,      false,     false,      false],
+    ['Saved clients, rate card & repeat',        true,      false,     false,      false],
     ['No client login required',                 true,      false,     false,      true],
     ['Free tier',                                true,      false,     false,      true],
     ['Monthly cost (solo)',                      '$19.99',  '$35+',    '$19+',     '$0'],
@@ -673,6 +745,7 @@ function FAQAccordion() {
     { q: 'Do my clients need an account?', a: 'No. Clients click a pay link or scan a QR code, see a clean pay page, and tap Apple Pay / Google Pay / card / ACH. No login, no download, no PDF.' },
     { q: 'Does Payme spam my clients?', a: 'Payme sends a soft, on-brand nudge at 14 days and a firmer one at 30. You can turn it off per invoice, or disable it entirely. It never sends more than what you configure.' },
     { q: 'Is my data safe?', a: 'Yes. Payments are handled by Stripe — we never see card details. Invoice data is encrypted at rest and in transit. You can export everything as CSV anytime, and delete your account in one click.' },
+    { q: 'Do I have to re-enter client info every time?', a: 'No. Save a client once to your Contact Book — name, email, phone. Next invoice, type two letters and their info auto-fills. You can also build a Rate Card of your standard services with set prices, so your line items fill in one click. And for repeat jobs, the Repeat button on any sent invoice pre-fills the whole wizard from that document — change whatever you need, generate, and send.' },
     { q: 'Can I cancel anytime?', a: 'Yes. No contracts. Cancel in the app and you drop back to Free. Your invoices and client list stay available — you keep your own data.' },
   ]
   return (
@@ -936,6 +1009,9 @@ export default function LandingClient() {
           </div>
         </div>
       </section>
+
+      {/* WORK SMARTER */}
+      <WorkSmarter />
 
       {/* COMPARISON TABLE */}
       <ComparisonTable />

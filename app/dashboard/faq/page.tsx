@@ -262,6 +262,37 @@ export default function FAQPage() {
       ],
     },
     {
+      label: 'Clients, Rate Card & History',
+      icon: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      ),
+      faqs: [
+        {
+          id: 'client-book',
+          question: 'How does the Client Book work?',
+          answer:
+            'Your Client Book lives at /dashboard/clients (or click Clients in the sidebar). Add a client once — name, email, phone, and company.\n\nNext time you open the creation wizard, start typing their name in the Client Name field. Matching contacts appear in a dropdown below the field. Select one and their email fills in automatically. No re-entering the same details every time.',
+        },
+        {
+          id: 'rate-card',
+          question: 'What is the Rate Card?',
+          answer:
+            'Your Rate Card lives at /dashboard/rate-card (or click Rate Card in the sidebar). Build a menu of your standard services — each with a name, optional description, and price.\n\nIn Step 2 of the creation wizard, a "Use saved service" button appears above the service description field (only shown when you have saved services). Tap it, pick a service from your rate card, and both the service description and price fields fill in instantly.\n\nYou can still edit them for that specific job — your rate card is a starting point, not a lock.',
+        },
+        {
+          id: 'repeat',
+          question: 'Can I reuse a past invoice or proposal as a starting point?',
+          answer:
+            'Yes — this is the Repeat feature. Open any sent invoice or proposal from your dashboard, then click "Repeat" in the top bar of the detail page. The creation wizard opens pre-filled with all the original data: client name, email, service description, price, and payment terms.\n\nMake any changes you need — update the scope, adjust the price, change the date — then generate a new draft. Nothing sends automatically.\n\nYou can also use Repeat across clients: just clear the client name field and type a different client. If they\'re in your Contact Book, the autocomplete will surface them. Everything else stays from the original.',
+        },
+      ],
+    },
+    {
       label: 'About Nvoyce',
       icon: <IconInfo />,
       faqs: [

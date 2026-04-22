@@ -29,19 +29,26 @@ function AnswerRenderer({ text }: { text: string }) {
         const isNumberedBlock = lines.some(l => /^\d+\./.test(l.trimStart()))
 
         if (isBulletBlock) {
+          const labelLines = lines.filter(l => !l.trimStart().startsWith('•') && l.trim())
+          const bulletLines = lines.filter(l => l.trimStart().startsWith('•'))
           return (
-            <ul key={i} className="flex flex-col gap-1.5 pl-0 m-0" style={{ listStyle: 'none' }}>
-              {lines.map((line, j) => {
-                const clean = line.replace(/^•\s*/, '').trim()
-                if (!clean) return null
-                return (
-                  <li key={j} className="flex items-start gap-2 text-gray-700 text-sm leading-relaxed">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
-                    {clean}
-                  </li>
-                )
-              })}
-            </ul>
+            <div key={i} className="flex flex-col gap-1.5">
+              {labelLines.map((label, j) => (
+                <p key={j} className="text-gray-800 text-sm font-semibold m-0">{label}</p>
+              ))}
+              <ul className="flex flex-col gap-1.5 pl-0 m-0" style={{ listStyle: 'none' }}>
+                {bulletLines.map((line, j) => {
+                  const clean = line.replace(/^•\s*/, '').trim()
+                  if (!clean) return null
+                  return (
+                    <li key={j} className="flex items-start gap-2 text-gray-700 text-sm leading-relaxed">
+                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
+                      {clean}
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           )
         }
 

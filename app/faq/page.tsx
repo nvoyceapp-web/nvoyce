@@ -62,19 +62,26 @@ function AnswerRenderer({ text }: { text: string }) {
         const isNumberedBlock = lines.some(l => /^\d+\./.test(l.trimStart()))
 
         if (isBulletBlock) {
+          const labelLines = lines.filter(l => !l.trimStart().startsWith('•') && l.trim())
+          const bulletLines = lines.filter(l => l.trimStart().startsWith('•'))
           return (
-            <ul key={i} style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 5 }}>
-              {lines.map((line, j) => {
-                const clean = line.replace(/^•\s*/, '').trim()
-                if (!clean) return null
-                return (
-                  <li key={j} style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.65, listStyleType: 'none', paddingLeft: 4, position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: -14, top: 7, width: 5, height: 5, borderRadius: '50%', background: 'var(--orange)', display: 'inline-block', flexShrink: 0 }} />
-                    {clean}
-                  </li>
-                )
-              })}
-            </ul>
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {labelLines.map((label, j) => (
+                <p key={j} style={{ color: 'var(--ink)', fontSize: 13, fontWeight: 600, margin: 0 }}>{label}</p>
+              ))}
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {bulletLines.map((line, j) => {
+                  const clean = line.replace(/^•\s*/, '').trim()
+                  if (!clean) return null
+                  return (
+                    <li key={j} style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.65, listStyleType: 'none', paddingLeft: 4, position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: -14, top: 7, width: 5, height: 5, borderRadius: '50%', background: 'var(--orange)', display: 'inline-block', flexShrink: 0 }} />
+                      {clean}
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           )
         }
 

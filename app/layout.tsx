@@ -13,8 +13,11 @@ export const metadata: Metadata = {
   title: 'Nvoyce — Proposals & Invoices in Seconds',
   description: 'Generate professional proposals and invoices with AI. Get paid faster.',
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48', type: 'image/x-icon' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/favicon.ico',
     apple: '/favicon.svg',
   },
 }

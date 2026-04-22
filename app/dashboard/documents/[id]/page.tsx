@@ -393,6 +393,21 @@ export default function DocumentPage() {
               {generatingLink ? 'Creating...' : 'Generate payment link'}
             </button>
           )}
+          {!isDraft && (
+            <Link
+              href={`/dashboard/new?prefill=${doc.id}`}
+              className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition flex items-center gap-1.5"
+              title={`Repeat this ${doc.doc_type}`}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="17 1 21 5 17 9"/>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <polyline points="7 23 3 19 7 15"/>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
+              Repeat
+            </Link>
+          )}
           <button onClick={() => window.print()} className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition hidden sm:block">
             Print / PDF
           </button>

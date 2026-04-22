@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
               invoiceTotal: doc.price,
               documentNumber: doc.document_number || documentId,
               isPartial: newStatus === 'partially_paid',
+              userId: doc.user_id,
             })
           }
 

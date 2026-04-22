@@ -669,6 +669,7 @@ export async function sendPaymentConfirmationEmail({
   invoiceTotal,
   documentNumber,
   isPartial = false,
+  userId,
 }: {
   clientEmail: string
   clientName: string
@@ -678,9 +679,14 @@ export async function sendPaymentConfirmationEmail({
   invoiceTotal: number
   documentNumber: string
   isPartial?: boolean
+  userId?: string
 }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.nvoyce.ai'
-  const logoUrl = `${appUrl}/logo.png`
+  let logoUrl = `${appUrl}/logo.png`
+  if (userId) {
+    const userLogo = await getUserLogo(userId)
+    if (userLogo) logoUrl = userLogo
+  }
   const remaining = invoiceTotal - totalPaid
 
   const result = await resend.emails.send({

@@ -419,6 +419,127 @@ function ProposalFlowDemo() {
 // ─── Utility ────────────────────────────────────────────────────────────────
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
 
+// ─── Work Smarter Demo (demo scene) ────────────────────────────────────────
+function WorkSmarterDemo() {
+  const [phase, setPhase] = useState(0)
+  const mounted = useRef(true)
+
+  useEffect(() => {
+    mounted.current = true
+    async function run() {
+      setPhase(0)
+      await delay(400);  if (!mounted.current) return; setPhase(1)
+      await delay(600);  if (!mounted.current) return; setPhase(2)
+      await delay(600);  if (!mounted.current) return; setPhase(3)
+    }
+    run()
+    return () => { mounted.current = false }
+  }, [])
+
+  const card = (visible: boolean, content: React.ReactNode) => (
+    <div style={{
+      background: 'white', border: '1px solid var(--line)', borderRadius: 14,
+      padding: '20px 22px', flex: 1,
+      opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(16px)',
+      transition: 'opacity 500ms ease, transform 500ms ease',
+    }}>
+      {content}
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', gap: 16, alignItems: 'stretch', padding: '0 8px' }}>
+      {card(phase >= 1, (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontSize: 9, fontFamily: 'ui-monospace,monospace', textTransform: 'uppercase' as const, letterSpacing: '0.1em', color: 'var(--orange)', marginBottom: 2 }}>Client Book</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk),sans-serif' }}>Save once. Auto-fill forever.</div>
+            </div>
+          </div>
+          <div style={{ background: 'var(--paper-2)', border: '1px solid var(--line)', borderRadius: 8, padding: '8px 12px', marginBottom: 8 }}>
+            <div style={{ fontSize: 10, color: 'var(--muted)', marginBottom: 3 }}>Client name</div>
+            <div style={{ fontSize: 13, color: 'var(--ink)', fontWeight: 500 }}>Mar<span style={{ color: 'var(--orange)' }}>|</span></div>
+          </div>
+          {['Marcus Johnson', 'Maria Reyes'].map((name, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', background: i === 0 ? '#f3e8ff' : 'transparent', borderRadius: 8, marginBottom: 2 }}>
+              <div style={{ width: 24, height: 24, borderRadius: 99, background: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 10, fontWeight: 700 }}>{name[0]}</div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{name}</div>
+                <div style={{ fontSize: 10, color: 'var(--muted)' }}>{name === 'Marcus Johnson' ? 'marcus@meridian.co' : 'maria@studiorey.com'}</div>
+              </div>
+            </div>
+          ))}
+        </>
+      ))}
+
+      {card(phase >= 2, (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#fff1e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontSize: 9, fontFamily: 'ui-monospace,monospace', textTransform: 'uppercase' as const, letterSpacing: '0.1em', color: 'var(--orange)', marginBottom: 2 }}>Rate Card</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk),sans-serif' }}>Your prices, one click away.</div>
+            </div>
+          </div>
+          {[
+            { name: 'Half-Day Shoot', price: '$800' },
+            { name: 'Full-Day Shoot', price: '$1,500' },
+            { name: 'Monthly Retainer', price: '$2,500' },
+          ].map((s, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 8, marginBottom: 6, background: i === 1 ? '#fff1e8' : 'white', cursor: 'pointer' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{s.name}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: i === 1 ? ORANGE : 'var(--ink)' }}>{s.price}</span>
+            </div>
+          ))}
+        </>
+      ))}
+
+      {card(phase >= 3, (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontSize: 9, fontFamily: 'ui-monospace,monospace', textTransform: 'uppercase' as const, letterSpacing: '0.1em', color: 'var(--orange)', marginBottom: 2 }}>Repeat</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk),sans-serif' }}>Past invoices become new ones.</div>
+            </div>
+          </div>
+          <div style={{ border: '1px solid var(--line)', borderRadius: 10, padding: '12px 14px', marginBottom: 10 }}>
+            <div style={{ fontSize: 10, color: 'var(--muted)', marginBottom: 4 }}>INV-2026-007 · Marcus Johnson</div>
+            <div style={{ fontSize: 12, color: 'var(--ink)', marginBottom: 2, fontWeight: 600 }}>Full-Day Shoot</div>
+            <div style={{ fontSize: 11, color: 'var(--muted)' }}>$1,500 · Fully Paid</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', border: '1.5px solid #16a34a', borderRadius: 8, background: '#f0fdf4', cursor: 'pointer' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+              <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+            </svg>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#16a34a' }}>Repeat this invoice</span>
+          </div>
+          <div style={{ marginTop: 10, fontSize: 11, color: 'var(--muted)', lineHeight: 1.5, paddingLeft: 4 }}>
+            Opens the wizard pre-filled. Swap the client, tweak the price — send in 30 seconds.
+          </div>
+        </>
+      ))}
+    </div>
+  )
+}
+
 // ─── Logo ───────────────────────────────────────────────────────────────────
 function NvoyceMark({ size = 30 }: { size?: number }) {
   return (
@@ -442,12 +563,13 @@ function NvoyceMark({ size = 30 }: { size?: number }) {
 
 // ─── Demo Player ────────────────────────────────────────────────────────────
 const DEMO_SCENES = [
-  { id: 'intro',     dur: 4000,  label: 'Welcome' },
-  { id: 'draft',     dur: 10000, label: 'AI drafts the invoice' },
-  { id: 'send',      dur: 7000,  label: 'Send to client' },
-  { id: 'pay',       dur: 8000,  label: 'Client pays' },
-  { id: 'dashboard', dur: 9000,  label: 'Live dashboard' },
-  { id: 'outro',     dur: 7000,  label: 'Stop chasing.' },
+  { id: 'intro',      dur: 4000,  label: 'Welcome' },
+  { id: 'draft',      dur: 10000, label: 'AI drafts the invoice' },
+  { id: 'send',       dur: 7000,  label: 'Send to client' },
+  { id: 'pay',        dur: 8000,  label: 'Client pays' },
+  { id: 'dashboard',  dur: 9000,  label: 'Live dashboard' },
+  { id: 'smarter',    dur: 8000,  label: 'Clients · Rate Card · Repeat' },
+  { id: 'outro',      dur: 7000,  label: 'Stop chasing.' },
 ]
 const DEMO_TOTAL = DEMO_SCENES.reduce((a, s) => a + s.dur, 0)
 
@@ -536,7 +658,7 @@ function DemoPlayer({ onClose }: { onClose: () => void }) {
                 <h1 style={{ fontSize: 'clamp(42px,7vw,88px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, margin: '22px 0 14px', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
                   We do the hard stuff.<br /><span style={{ color: 'var(--orange)' }}>You get paid.</span>
                 </h1>
-                <p style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase' as const, letterSpacing: '0.14em' }}>A 45-second product demo</p>
+                <p style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase' as const, letterSpacing: '0.14em' }}>A 60-second product demo</p>
               </div>
             </div>
           </SceneWrap>
@@ -565,8 +687,14 @@ function DemoPlayer({ onClose }: { onClose: () => void }) {
             <Caption small="Always on · Live dashboard" big="Every dollar tracked. The moment a payment lands, you'll know." />
           </SceneWrap>
 
-          {/* Scene 6 — Outro */}
+          {/* Scene 6 — Work Smarter */}
           <SceneWrap idx={5}>
+            <div style={{ maxWidth: 900, margin: '0 auto' }}>{activeIdx === 5 && <WorkSmarterDemo />}</div>
+            <Caption small="Always ready · Your data" big="Client book. Rate card. Repeat. The second invoice takes 30 seconds." />
+          </SceneWrap>
+
+          {/* Scene 7 — Outro */}
+          <SceneWrap idx={6}>
             <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
               <div style={{ textAlign: 'center' }}>
                 <h1 style={{ fontSize: 'clamp(42px,7vw,96px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, margin: 0, color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>

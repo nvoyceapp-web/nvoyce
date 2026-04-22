@@ -960,17 +960,24 @@ export default function LandingClient() {
             <div>
               <Tag>
                 <span style={{ width: 5, height: 5, borderRadius: 99, background: 'var(--orange)', display: 'inline-block' }} />
-                AI-powered · Invoices & Proposals
+                For freelancers & gig workers
               </Tag>
               <h1 style={{ fontSize: 'clamp(38px, 7vw, 88px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, color: 'var(--ink)', margin: '22px 0 28px', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
                 We do the<br />hard stuff.<br /><span style={{ color: 'var(--orange)' }}>You get paid.</span>
               </h1>
               <p style={{ fontSize: 19, lineHeight: 1.55, color: 'var(--muted)', maxWidth: 520, margin: '0 0 32px' }}>
-                Nvoyce turns a three-line brief into a ready-to-send invoice or proposal. Reminders send themselves. Payments land with a toast. Your job is the work — not the chasing.
+                Nvoyce is built for freelancers and gig workers who bill clients for their time and skills. Type three fields — Nvoyce drafts the invoice, attaches a pay link, and follows up if they're slow. Your job is the work, not the chasing.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
                 <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', padding: '16px 26px', borderRadius: 10, background: 'var(--orange)', color: 'white', fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>Start free — 3 docs on us</Link>
                 <WatchDemoButton />
+              </div>
+              {/* Who it's for */}
+              <div style={{ marginTop: 24, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'ui-monospace, monospace', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginRight: 4 }}>For:</span>
+                {['Photographers', 'Designers', 'Writers', 'Contractors', 'Consultants', 'Coaches', 'Videographers', 'Developers'].map(p => (
+                  <span key={p} style={{ fontSize: 12, color: 'var(--muted)', background: 'var(--paper-2)', border: '1px solid var(--line)', borderRadius: 99, padding: '3px 10px', fontFamily: 'ui-monospace, monospace' }}>{p}</span>
+                ))}
               </div>
               {/* Stats */}
               <div style={{ display: 'flex', gap: 32, marginTop: 44, paddingTop: 24, borderTop: '1px solid var(--line)', flexWrap: 'wrap' }}>
@@ -1000,9 +1007,9 @@ export default function LandingClient() {
       <section style={{ padding: '80px 28px', background: 'var(--paper-2)', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 1240, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <Tag>However you work</Tag>
+            <Tag>Built for the gig economy</Tag>
             <h2 style={{ fontSize: 'clamp(28px, 3.2vw, 40px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '16px 0 0', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
-              Sound familiar?
+              Sound like your week?
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }} className="nv-tri">

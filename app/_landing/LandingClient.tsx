@@ -960,7 +960,7 @@ export default function LandingClient() {
             <div>
               <Tag>
                 <span style={{ width: 5, height: 5, borderRadius: 99, background: 'var(--orange)', display: 'inline-block' }} />
-                For freelancers & gig workers
+                Built for freelancers & gig workers
               </Tag>
               <h1 style={{ fontSize: 'clamp(38px, 7vw, 88px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 0.95, color: 'var(--ink)', margin: '22px 0 28px', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
                 We do the<br />hard stuff.<br /><span style={{ color: 'var(--orange)' }}>You get paid.</span>

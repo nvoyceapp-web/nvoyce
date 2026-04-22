@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import type { Contact } from '@/lib/supabase'
+import type { Contact, ServiceTemplate } from '@/lib/supabase'
 
 const paymentTermsDisplayMap: Record<string, string> = {
   due_on_receipt: 'Due on receipt',
@@ -46,6 +46,9 @@ function NewDocumentContent() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const clientNameRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
+  const [serviceTemplates, setServiceTemplates] = useState<ServiceTemplate[]>([])
+  const [showServicePicker, setShowServicePicker] = useState(false)
+  const [serviceSearch, setServiceSearch] = useState('')
   const [form, setForm] = useState<FormData>({
     docType: (typeParam && ['invoice', 'proposal'].includes(typeParam) ? typeParam : 'invoice') as DocType,
     clientName: '',
@@ -109,11 +112,14 @@ function NewDocumentContent() {
     prefillForm()
   }, [prefillId])
 
-  // Load contacts for autocomplete
+  // Load contacts and service templates
   useEffect(() => {
     if (!userId) return
     fetch('/api/contacts').then(r => r.json()).then(data => {
       if (Array.isArray(data)) setContacts(data)
+    })
+    fetch('/api/service-templates').then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setServiceTemplates(data)
     })
   }, [userId])
 
@@ -152,6 +158,14 @@ function NewDocumentContent() {
       clientEmail: c.email || prev.clientEmail,
     }))
     setShowSuggestions(false)
+    setValidationErrors([])
+  }
+
+  function selectService(t: ServiceTemplate) {
+    const desc = t.description ? `${t.name} — ${t.description}` : t.name
+    setForm(prev => ({ ...prev, serviceDescription: desc, price: String(t.unit_price) }))
+    setShowServicePicker(false)
+    setServiceSearch('')
     setValidationErrors([])
   }
 
@@ -249,6 +263,7 @@ function NewDocumentContent() {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50">
       {/* Mobile top bar */}
       <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
@@ -391,9 +406,23 @@ function NewDocumentContent() {
         {step === 2 && (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                What service did you provide / are you proposing?
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-sm font-medium text-gray-700">
+                  What service did you provide / are you proposing?
+                </label>
+                {serviceTemplates.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => { setShowServicePicker(true); setServiceSearch('') }}
+                    className="flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 font-medium transition"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    Use saved service
+                  </button>
+                )}
+              </div>
               <textarea
                 value={form.serviceDescription}
                 onChange={(e) => update('serviceDescription', e.target.value)}
@@ -569,6 +598,55 @@ function NewDocumentContent() {
       </div>
       </div>
     </div>
+
+    {/* Service Picker Modal */}
+    {showServicePicker && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={e => { if (e.target === e.currentTarget) setShowServicePicker(false) }}>
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-[#0d1b2a]">Choose a Service</h2>
+            <button onClick={() => setShowServicePicker(false)} className="text-gray-400 hover:text-gray-600 transition">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          {serviceTemplates.length > 5 && (
+            <div className="relative mb-3">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                type="text"
+                placeholder="Search services..."
+                value={serviceSearch}
+                onChange={e => setServiceSearch(e.target.value)}
+                autoFocus
+                className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+            </div>
+          )}
+          <div className="space-y-2 max-h-72 overflow-y-auto">
+            {serviceTemplates
+              .filter(t => !serviceSearch || t.name.toLowerCase().includes(serviceSearch.toLowerCase()) || t.description?.toLowerCase().includes(serviceSearch.toLowerCase()))
+              .map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => selectService(t)}
+                  className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition group"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-[#0d1b2a] group-hover:text-orange-700 transition truncate">{t.name}</p>
+                    <span className="text-sm font-bold text-[#0d1b2a] flex-shrink-0">${Number(t.unit_price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  {t.description && <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{t.description}</p>}
+                </button>
+              ))}
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
 

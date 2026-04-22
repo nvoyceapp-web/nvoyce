@@ -66,6 +66,16 @@ export interface Contact {
   updated_at: string
 }
 
+export interface ServiceTemplate {
+  id: string
+  user_id: string
+  name: string
+  description?: string
+  unit_price: number
+  created_at: string
+  updated_at: string
+}
+
 export interface Subscription {
   id: string
   user_id: string

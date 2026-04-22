@@ -52,6 +52,54 @@ const IconInfo = () => (
   </svg>
 )
 
+function AnswerRenderer({ text }: { text: string }) {
+  const blocks = text.split('\n\n')
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {blocks.map((block, i) => {
+        const lines = block.split('\n')
+        const isBulletBlock = lines.some(l => l.trimStart().startsWith('•'))
+        const isNumberedBlock = lines.some(l => /^\d+\./.test(l.trimStart()))
+
+        if (isBulletBlock) {
+          return (
+            <ul key={i} style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 5 }}>
+              {lines.map((line, j) => {
+                const clean = line.replace(/^•\s*/, '').trim()
+                if (!clean) return null
+                return (
+                  <li key={j} style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.65, listStyleType: 'none', paddingLeft: 4, position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: -14, top: 7, width: 5, height: 5, borderRadius: '50%', background: 'var(--orange)', display: 'inline-block', flexShrink: 0 }} />
+                    {clean}
+                  </li>
+                )
+              })}
+            </ul>
+          )
+        }
+
+        if (isNumberedBlock) {
+          return (
+            <ol key={i} style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 5 }}>
+              {lines.map((line, j) => {
+                const clean = line.replace(/^\d+\.\s*/, '').trim()
+                if (!clean) return null
+                return <li key={j} style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.65 }}>{clean}</li>
+              })}
+            </ol>
+          )
+        }
+
+        return (
+          <p key={i} style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+            {block}
+          </p>
+        )
+      })}
+    </div>
+  )
+}
+
 const faqGroups: FAQGroup[] = [
   {
     label: 'Statuses & Definitions',
@@ -279,7 +327,7 @@ export default function FAQPage() {
                     </button>
                     {expandedId === faq.id && (
                       <div style={{ padding: '0 20px 20px', borderTop: '1px solid var(--line)', paddingTop: 16 }}>
-                        <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0 }}>{faq.answer}</p>
+                        <AnswerRenderer text={faq.answer} />
                       </div>
                     )}
                   </div>

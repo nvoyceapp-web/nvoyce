@@ -19,6 +19,52 @@ interface FAQGroup {
 }
 
 // ── Group icons ──────────────────────────────────────────────────────────────
+function AnswerRenderer({ text }: { text: string }) {
+  const blocks = text.split('\n\n')
+  return (
+    <div className="flex flex-col gap-2.5">
+      {blocks.map((block, i) => {
+        const lines = block.split('\n')
+        const isBulletBlock = lines.some(l => l.trimStart().startsWith('•'))
+        const isNumberedBlock = lines.some(l => /^\d+\./.test(l.trimStart()))
+
+        if (isBulletBlock) {
+          return (
+            <ul key={i} className="flex flex-col gap-1.5 pl-0 m-0" style={{ listStyle: 'none' }}>
+              {lines.map((line, j) => {
+                const clean = line.replace(/^•\s*/, '').trim()
+                if (!clean) return null
+                return (
+                  <li key={j} className="flex items-start gap-2 text-gray-700 text-sm leading-relaxed">
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
+                    {clean}
+                  </li>
+                )
+              })}
+            </ul>
+          )
+        }
+
+        if (isNumberedBlock) {
+          return (
+            <ol key={i} className="flex flex-col gap-1.5 pl-5 m-0">
+              {lines.map((line, j) => {
+                const clean = line.replace(/^\d+\.\s*/, '').trim()
+                if (!clean) return null
+                return <li key={j} className="text-gray-700 text-sm leading-relaxed">{clean}</li>
+              })}
+            </ol>
+          )
+        }
+
+        return (
+          <p key={i} className="text-gray-700 text-sm leading-relaxed m-0">{block}</p>
+        )
+      })}
+    </div>
+  )
+}
+
 const IconTag = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
@@ -308,7 +354,7 @@ export default function FAQPage() {
 
                         {expandedId === faq.id && (
                           <div className="px-6 py-5 bg-gray-50 border-t border-gray-100">
-                            <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-line">{faq.answer}</p>
+                            <AnswerRenderer text={faq.answer} />
                           </div>
                         )}
                       </div>

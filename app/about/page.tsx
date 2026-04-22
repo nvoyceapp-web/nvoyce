@@ -129,6 +129,33 @@ export default async function AboutPage() {
           </div>
         </section>
 
+        {/* Founder */}
+        <section style={{ marginBottom: 72 }}>
+          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, fontWeight: 600, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>The Founder</span>
+          <h2 style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: 'clamp(28px, 3vw, 38px)', fontWeight: 700, letterSpacing: '-0.025em', color: 'var(--ink)', margin: '12px 0 32px' }}>
+            Built by someone who&apos;s seen it firsthand.
+          </h2>
+          <div style={{ display: 'flex', gap: 40, alignItems: 'flex-start', flexWrap: 'wrap' as const }}>
+            <img
+              src="/founder.png"
+              alt="Nnamdi Uzoukwu, Founder of Nvoyce"
+              style={{ width: 160, height: 160, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+            />
+            <div style={{ flex: 1, minWidth: 260 }}>
+              <p style={{ fontSize: 17, color: 'var(--muted)', lineHeight: 1.75, margin: '0 0 20px' }}>
+                Living in LA, I&apos;m surrounded by some of the most talented freelancers and gig workers in the world — photographers, designers, trainers, creatives of every kind. A lot of them are incredible at what they do, but chasing invoices and looking professional on paper? That&apos;s a different skill set entirely.
+              </p>
+              <p style={{ fontSize: 17, color: 'var(--muted)', lineHeight: 1.75, margin: '0 0 20px' }}>
+                I built Nvoyce because getting paid shouldn&apos;t be the hardest part of the job. For people running paycheck to paycheck, a slow invoice isn&apos;t just an inconvenience — it&apos;s a real problem. Nvoyce exists to close that gap: get the invoice out fast, look professional doing it, and get paid.
+              </p>
+              <div>
+                <p style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--ink)', margin: '0 0 2px' }}>Nnamdi Uzoukwu</p>
+                <p style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, color: 'var(--muted)', margin: 0, letterSpacing: '0.05em' }}>Founder, Nvoyce</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* What makes us different */}
         <section style={{ marginBottom: 72 }}>
           <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, fontWeight: 600, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Features</span>

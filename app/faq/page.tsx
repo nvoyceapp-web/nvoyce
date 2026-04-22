@@ -12,26 +12,62 @@ interface FAQ {
 
 interface FAQGroup {
   label: string
-  icon: string
+  icon: React.ReactNode
   faqs: FAQ[]
 }
+
+const IconTag = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+    <line x1="7" y1="7" x2="7.01" y2="7"/>
+  </svg>
+)
+
+const IconCreditCard = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+    <line x1="1" y1="10" x2="23" y2="10"/>
+  </svg>
+)
+
+const IconBarChart = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10"/>
+    <line x1="12" y1="20" x2="12" y2="4"/>
+    <line x1="6" y1="20" x2="6" y2="14"/>
+  </svg>
+)
+
+const IconFolder = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+  </svg>
+)
+
+const IconInfo = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" y1="16" x2="12" y2="12"/>
+    <line x1="12" y1="8" x2="12.01" y2="8"/>
+  </svg>
+)
 
 const faqGroups: FAQGroup[] = [
   {
     label: 'Statuses & Definitions',
-    icon: '📖',
+    icon: <IconTag />,
     faqs: [
       {
         id: 'invoice-statuses',
         question: 'What are the different invoice statuses?',
         answer:
-          '📝 Draft — Invoice created but not yet sent. No document number assigned yet.\n\n📤 Sent — Invoice emailed to client, awaiting payment. Days Outstanding clock starts here.\n\n💛 Partial — Client has paid some but not all of the invoice amount.\n\n🚨 Overdue — Invoice is 30+ days old and still unpaid. Payme will flag these as high priority.\n\n✓ Fully Paid — Payment received and recorded. Invoice moves out of your outstanding balance.',
+          'Draft — Invoice created but not yet sent. No document number assigned yet.\n\nSent — Invoice emailed to client, awaiting payment. Days Outstanding clock starts here.\n\nPartial — Client has paid some but not all of the invoice amount.\n\nOverdue — Invoice is 30+ days old and still unpaid. Payme will flag these as high priority.\n\nFully Paid — Payment received and recorded. Invoice moves out of your outstanding balance.',
       },
       {
         id: 'proposal-statuses',
         question: 'What are the different proposal statuses?',
         answer:
-          `📝 Draft — Proposal generated and saved. Review and edit it before sending — no document number yet.\n\n📤 Sent — You clicked "Send to Client" and the proposal was emailed. Client can now accept or decline.\n\n👁️ Received — Client has opened the proposal link.\n\n✓ Accepted — Client accepted the proposal. An invoice is automatically generated and sent to the client. You'll receive a 🎉 email notification and a real-time dashboard toast.\n\n✗ Declined — Client declined. You can create a revised proposal if needed.`,
+          `Draft — Proposal generated and saved. Review and edit it before sending — no document number yet.\n\nSent — You clicked "Send to Client" and the proposal was emailed. Client can now accept or decline.\n\nReceived — Client has opened the proposal link.\n\nAccepted — Client accepted the proposal. An invoice is automatically generated and sent to the client. You'll receive a confirmation email and a real-time dashboard notification.\n\nDeclined — Client declined. You can create a revised proposal if needed.`,
       },
       {
         id: 'days-outstanding',
@@ -43,7 +79,7 @@ const faqGroups: FAQGroup[] = [
         id: 'overdue',
         question: 'When is an invoice considered overdue?',
         answer:
-          `An invoice becomes overdue once it reaches 30+ days without payment. Payme will flag these as high priority and the row turns red in your dashboard.\n\nAt 45+ days, Payme raises the priority to "very overdue". At 60+ days, it's marked as "critical" — your top priority for follow-up.\n\nUse the Send Reminder action (in the ⋯ Actions dropdown or bulk actions bar) to send a reminder email to the client.`,
+          `An invoice becomes overdue once it reaches 30+ days without payment. Payme will flag these as high priority and the row turns red in your dashboard.\n\nAt 45+ days, Payme raises the priority to "very overdue". At 60+ days, it's marked as "critical" — your top priority for follow-up.\n\nUse the Send Reminder action in the Actions dropdown or bulk actions bar to send a reminder email to the client.`,
       },
       {
         id: 'avg-days-payment',
@@ -55,43 +91,43 @@ const faqGroups: FAQGroup[] = [
   },
   {
     label: 'Sending & Getting Paid',
-    icon: '💸',
+    icon: <IconCreditCard />,
     faqs: [
       {
         id: 'proposal-acceptance',
         question: 'How do clients accept proposals?',
         answer:
-          'Fill out the 3-step wizard and click "Generate Draft →" on step 3. This saves an editable draft and takes you to a review page.\n\nFrom the draft review page you have three options:\n• ← Back to Edit — returns you to step 3 with all your data pre-filled (the old draft is automatically replaced)\n• Save Draft — keeps it in draft status for later\n• Send to Client — assigns a document number, emails the proposal, and takes you back to your dashboard with a success confirmation\n\nYour client gets an email with a link to the proposal. They can click Accept or Decline directly — no Nvoyce account required. Once accepted, an invoice is automatically generated and sent to the client, and you receive a 🎉 email + real-time dashboard notification.',
+          'Fill out the 3-step wizard and click "Generate Draft →" on step 3. This saves an editable draft and takes you to a review page.\n\nFrom the draft review page you have three options:\n• Back to Edit — returns you to step 3 with all your data pre-filled (the old draft is automatically replaced)\n• Save Draft — keeps it in draft status for later\n• Send to Client — assigns a document number, emails the proposal, and takes you back to your dashboard with a success confirmation\n\nYour client gets an email with a link to the proposal. They can click Accept or Decline directly — no Nvoyce account required. Once accepted, an invoice is automatically generated and sent to the client, and you receive a confirmation email and real-time dashboard notification.',
       },
       {
         id: 'mark-paid',
         question: 'How do I mark an invoice as paid?',
         answer:
-          `If your client pays via the Stripe payment link in their email, the invoice updates automatically — no action needed on your end. You'll also receive a payment email and a real-time dashboard notification.\n\nFor payments made outside of Stripe (bank transfer, cash, check, etc.), open the ⋯ Actions dropdown on any invoice row and click "✓ Mark Paid". This updates the invoice status to Fully Paid in real time — no page reload needed.`,
+          `If your client pays via the Stripe payment link in their email, the invoice updates automatically — no action needed on your end. You'll also receive a payment email and a real-time dashboard notification.\n\nFor payments made outside of Stripe (bank transfer, cash, check, etc.), open the Actions dropdown on any invoice row and click "Mark Paid". This updates the invoice status to Fully Paid in real time — no page reload needed.`,
       },
       {
         id: 'copy-payment-link',
         question: 'How do I share the payment link with my client directly?',
         answer:
-          "Every invoice has a Stripe payment link generated when you send it. To share it quickly, open the ⋯ Actions dropdown on the invoice row:\n\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to your clipboard so you can paste it via text, WhatsApp, or any other channel. Handy when a client says they didn't get the email or you want to follow up fast.\n\n• 📱 Show QR Code — opens a QR code modal for the payment link. Your client can scan it with their phone camera to go straight to checkout. You can also download the QR code as a PNG to include in a printed invoice, PDF, or anywhere else.\n\nBoth options only appear for invoices that have a Stripe link attached and are not in Draft status.",
+          "Every invoice has a Stripe payment link and QR code generated when you send it. To share either, open the Actions dropdown on the invoice row:\n\n• Copy Payment Link — copies the Stripe checkout URL to your clipboard so you can paste it via text, WhatsApp, or any other channel.\n\n• Show QR Code — opens a QR code modal your client can scan with their phone camera to go straight to checkout. You can also download the QR code as a PNG.\n\nBoth options only appear for invoices that have a Stripe link attached and are not in Draft status.",
       },
       {
         id: 'notifications',
         question: 'Will I be notified when a client pays or accepts a proposal?',
         answer:
-          `Yes — two ways, both happen automatically:\n\n📧 Email notifications:\n• When a client makes any payment (partial or full), you receive a "You got paid" email with the amount, client name, and invoice number. Your client simultaneously receives a payment receipt.\n• When a client accepts a proposal, you receive a "Proposal accepted" email with a link to the auto-generated invoice.\n\n🔔 Real-time dashboard toasts:\nIf you're on the dashboard when the event happens, a slide-in notification appears bottom-right — green 💰 for payments, purple 🎉 for proposal acceptances. A badge counter also appears on your "You're Owed" card.\n\nThe badge clears once you dismiss the toast (or it auto-dismisses after 6 seconds). No manual refresh needed — the dashboard polls every 15 seconds.`,
+          `Yes — two ways, both happen automatically:\n\nEmail notifications:\n• When a client makes any payment (partial or full), you receive a "You got paid" email with the amount, client name, and invoice number. Your client simultaneously receives a payment receipt.\n• When a client accepts a proposal, you receive a "Proposal accepted" email with a link to the auto-generated invoice.\n\nReal-time dashboard toasts:\nIf you're on the dashboard when the event happens, a slide-in notification appears bottom-right — green for payments, purple for proposal acceptances. A badge counter also appears on your "You're Owed" card.\n\nThe badge clears once you dismiss the toast (or it auto-dismisses after 6 seconds). No manual refresh needed — the dashboard polls every 15 seconds.`,
       },
       {
         id: 'send-reminder',
         question: 'How do I send a payment reminder?',
         answer:
-          'Two ways:\n\n1. Individual: Open the ⋯ Actions dropdown on an overdue invoice (14+ days old) and click "📧 Send Reminder".\n\n2. Bulk: Select multiple documents using the checkboxes, then click "📧 Send Reminders (N)" in the blue bulk actions bar that appears at the top of the table.\n\nBulk reminders are smart — they automatically skip invoices that are already fully paid or in draft status, and proposals that are accepted, declined, expired, or draft. The button label shows how many will actually receive a reminder.',
+          'Two ways:\n\n1. Individual: Open the Actions dropdown on an overdue invoice (14+ days old) and click "Send Reminder".\n\n2. Bulk: Select multiple documents using the checkboxes, then click "Send Reminders (N)" in the blue bulk actions bar that appears at the top of the table.\n\nBulk reminders are smart — they automatically skip invoices that are already fully paid or in draft status, and proposals that are accepted, declined, expired, or draft. The button label shows how many will actually receive a reminder.',
       },
     ],
   },
   {
     label: 'Dashboard & Charts',
-    icon: '📊',
+    icon: <IconBarChart />,
     faqs: [
       {
         id: 'payme',
@@ -103,7 +139,7 @@ const faqGroups: FAQGroup[] = [
         id: 'charts',
         question: 'What do the dashboard charts show?',
         answer:
-          "Your dashboard has three charts in a row below the metrics strip:\n\n📈 Revenue Trend (left) — A bar + trend line chart showing how much revenue you've collected each month. The Y-axis scales to your data range so you can clearly see month-over-month variance.\n\n🍩 Invoice Status (center) — A donut chart breaking down your documents into Paid, Pending, and Overdue. Hover any segment for exact counts.\n\n👥 Top Clients (right) — A horizontal bar chart showing your top 3 clients by total billed. Useful for spotting who drives the most revenue.\n\nAll three charts filter based on the time period selected in the Overview metrics (This Month / YTD / Last 30 Days / All Time).",
+          "Your dashboard has three charts in a row below the metrics strip:\n\nRevenue Trend (left) — A bar and trend line chart showing how much revenue you've collected each month. The Y-axis scales to your data range so you can clearly see month-over-month variance.\n\nInvoice Status (center) — A donut chart breaking down your documents into Paid, Pending, and Overdue. Hover any segment for exact counts.\n\nTop Clients (right) — A horizontal bar chart showing your top 3 clients by total billed. Useful for spotting who drives the most revenue.\n\nAll three charts filter based on the time period selected in the Overview metrics (This Month / YTD / Last 30 Days / All Time).",
       },
       {
         id: 'metrics-strip',
@@ -115,37 +151,37 @@ const faqGroups: FAQGroup[] = [
         id: 'search-filter',
         question: 'How do I search and filter my documents?',
         answer:
-          'The search bar above the table searches across all document fields — client name, document number (e.g. INV-2026-001), status, document type, client email, business name, and amount. Just start typing and the table filters instantly.\n\nYou can also filter by:\n• Client — dropdown to show only documents for one client\n• Date Range — a preset dropdown with quick options: Today, This Week, This Month, Last 30 Days, Last 90 Days, Year to Date (YTD), and Custom. Selecting Custom reveals From / To date pickers so you can define a specific range.\n\nWhen any filter is active, a "✕ Clear filters" link appears below the filter row. Click it to reset everything at once. If no documents match your filters, the empty state shows a "Clear filters" button to help you recover quickly.',
+          'The search bar above the table searches across all document fields — client name, document number (e.g. INV-2026-001), status, document type, client email, business name, and amount. Just start typing and the table filters instantly.\n\nYou can also filter by:\n• Client — dropdown to show only documents for one client\n• Date Range — a preset dropdown with quick options: Today, This Week, This Month, Last 30 Days, Last 90 Days, Year to Date (YTD), and Custom. Selecting Custom reveals From / To date pickers so you can define a specific range.\n\nWhen any filter is active, a "Clear filters" link appears below the filter row. Click it to reset everything at once.',
       },
     ],
   },
   {
     label: 'Document Management',
-    icon: '📁',
+    icon: <IconFolder />,
     faqs: [
       {
         id: 'actions-dropdown',
-        question: 'What does the "⋯ Actions" dropdown do?',
+        question: 'What does the Actions dropdown do?',
         answer:
-          `The ⋯ Actions button appears in the Action column for every document. It opens a menu of available actions:\n\nFor invoices:\n• 🔗 Copy Payment Link — copies the Stripe checkout URL to clipboard (only shown if a link exists and status isn't draft)\n• 📱 Show QR Code — opens a scannable QR code for the payment link; downloadable as a PNG (only shown if a link exists)\n• ✓ Mark Paid — manually mark the invoice as fully paid\n• 📧 Send Reminder — send a follow-up email (appears for overdue invoices)\n• 👁️ View Details — opens the full document detail page\n• 🗂 Archive — move the invoice to your archive (only available once fully paid)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFor proposals:\n• 🔗 Copy Link — copies the public proposal URL\n• 📧 Send Follow-up — sends a follow-up email (for stale proposals)\n• 👁️ View Details — opens the full detail page\n• 🗂 Archive — move to archive (only available once accepted)\n• 🗑️ Delete Draft — permanently delete (only available while still a draft)\n\nFrom the draft detail page itself, you'll also see: "Save Draft", "← Back to Edit" (returns to the creation wizard with all data pre-filled), and "Send to Client".`,
+          `The Actions button appears in the Action column for every document. It opens a menu of available actions:\n\nFor invoices:\n• Copy Payment Link — copies the Stripe checkout URL to clipboard\n• Show QR Code — opens a scannable QR code for the payment link; downloadable as a PNG\n• Mark Paid — manually mark the invoice as fully paid\n• Send Reminder — send a follow-up email (appears for overdue invoices)\n• View Details — opens the full document detail page\n• Archive — move the invoice to your archive (only available once fully paid)\n• Delete Draft — permanently delete (only available while still a draft)\n\nFor proposals:\n• Copy Link — copies the public proposal URL\n• Send Follow-up — sends a follow-up email (for stale proposals)\n• View Details — opens the full detail page\n• Archive — move to archive (only available once accepted)\n• Delete Draft — permanently delete (only available while still a draft)\n\nFrom the draft detail page itself, you'll also see: "Save Draft", "Back to Edit" (returns to the creation wizard with all data pre-filled), and "Send to Client".`,
       },
       {
         id: 'bulk-actions',
         question: 'How do bulk actions work?',
         answer:
-          'Select documents using the checkboxes on the left of each row (or check the header checkbox to select all visible documents). A blue bar appears at the top of the table showing how many are selected and which bulk actions are available:\n\n• 📧 Send Reminders — sends reminders to eligible documents only (skips fully paid, accepted, draft)\n• 🗂 Archive — archives eligible documents only (invoices must be fully paid; proposals must be accepted)\n• 🗑️ Delete Drafts — permanently deletes selected documents that are still in draft status\n\nThe button labels tell you exactly how many will be affected — e.g., "Archive (3 of 5)" means 5 are selected but only 3 are eligible. Ineligible documents are silently skipped.',
+          'Select documents using the checkboxes on the left of each row (or check the header checkbox to select all visible documents). A blue bar appears at the top of the table showing how many are selected and which bulk actions are available:\n\n• Send Reminders — sends reminders to eligible documents only (skips fully paid, accepted, draft)\n• Archive — archives eligible documents only (invoices must be fully paid; proposals must be accepted)\n• Delete Drafts — permanently deletes selected documents that are still in draft status\n\nThe button labels tell you exactly how many will be affected — e.g., "Archive (3 of 5)" means 5 are selected but only 3 are eligible. Ineligible documents are silently skipped.',
       },
       {
         id: 'archive',
         question: 'How does archiving work?',
         answer:
-          `Archiving moves a document out of your active view without deleting it. It's a way to keep your dashboard clean once a job is fully wrapped up.\n\nEligibility rules:\n• Invoices — must be Fully Paid before archiving\n• Proposals — must be Accepted before archiving\n\nTo view your archived documents, click the "🗂 View Archived" button in the top-right of the document table. It switches the view to show only archived docs. Click "← Back to Active" to return.\n\nYou can unarchive any document at any time using the ⋯ Actions dropdown.`,
+          `Archiving moves a document out of your active view without deleting it. It's a way to keep your dashboard clean once a job is fully wrapped up.\n\nEligibility rules:\n• Invoices — must be Fully Paid before archiving\n• Proposals — must be Accepted before archiving\n\nTo view your archived documents, click "View Archived" in the top-right of the document table. It switches the view to show only archived docs. Click "Back to Active" to return.\n\nYou can unarchive any document at any time using the Actions dropdown.`,
       },
       {
         id: 'delete',
         question: 'Can I delete a document?',
         answer:
-          'Yes, but only drafts. Once a document has been sent to a client, it cannot be deleted — this protects the integrity of your records.\n\nTo delete a draft: open the ⋯ Actions dropdown and click "🗑️ Delete Draft".\n\nTo delete multiple drafts at once: select them using the checkboxes and click "🗑️ Delete N Drafts" in the bulk actions bar.\n\nDeletion is permanent and cannot be undone.',
+          'Yes, but only drafts. Once a document has been sent to a client, it cannot be deleted — this protects the integrity of your records.\n\nTo delete a draft: open the Actions dropdown and click "Delete Draft".\n\nTo delete multiple drafts at once: select them using the checkboxes and click "Delete N Drafts" in the bulk actions bar.\n\nDeletion is permanent and cannot be undone.',
       },
       {
         id: 'document-numbers',
@@ -157,13 +193,13 @@ const faqGroups: FAQGroup[] = [
   },
   {
     label: 'About Nvoyce',
-    icon: '🟠',
+    icon: <IconInfo />,
     faqs: [
       {
         id: 'logo-braille',
         question: 'What do the orange dots inside the N logo mean?',
         answer:
-          'They\'re not decorative — they spell "VOICE" in Braille.\n\nNvoyce is a fusion of invoice and voice. Every invoice is a freelancer\'s voice: a declaration of their work, their worth, and their right to be paid. The Braille lettering is a nod to universal access, a reminder that financial tools should work for everyone — and a small secret for those who look closely.\n\nIf you know someone who reads Braille, show them the logo.',
+          'The orange dots are Braille-inspired — a nod to the idea that financial tools should be clear, accessible, and work for everyone.\n\nNvoyce is a fusion of invoice and voice. Every invoice is a freelancer\'s voice: a declaration of their work, their worth, and their right to be paid.',
       },
       {
         id: 'name-meaning',
@@ -174,7 +210,6 @@ const faqGroups: FAQGroup[] = [
     ],
   },
 ]
-
 
 export default function FAQPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -201,10 +236,8 @@ export default function FAQPage() {
         }
       `}</style>
 
-      {/* Nav */}
       <PublicNav activePage="faq" />
 
-      {/* Content */}
       <main style={{ maxWidth: 800, margin: '0 auto', padding: '64px 28px 100px' }}>
         {/* Hero */}
         <div style={{ marginBottom: 56 }}>
@@ -225,7 +258,7 @@ export default function FAQPage() {
           {faqGroups.map((group) => (
             <div key={group.label}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <span style={{ fontSize: 16 }}>{group.icon}</span>
+                <span style={{ color: 'var(--orange)', display: 'flex', alignItems: 'center' }}>{group.icon}</span>
                 <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, fontWeight: 600, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>{group.label}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -236,7 +269,13 @@ export default function FAQPage() {
                       style={{ width: '100%', padding: '16px 20px', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, background: 'none', border: 'none', cursor: 'pointer' }}
                     >
                       <span style={{ fontWeight: 600, color: 'var(--ink)', fontSize: 14, lineHeight: 1.4 }}>{faq.question}</span>
-                      <span style={{ color: 'var(--muted)', fontSize: 11, flexShrink: 0, transform: expandedId === faq.id ? 'rotate(180deg)' : 'none', transition: 'transform 200ms' }}>▼</span>
+                      <svg
+                        width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="var(--muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                        style={{ flexShrink: 0, transition: 'transform 200ms', transform: expandedId === faq.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                      >
+                        <polyline points="6 9 12 15 18 9"/>
+                      </svg>
                     </button>
                     {expandedId === faq.id && (
                       <div style={{ padding: '0 20px 20px', borderTop: '1px solid var(--line)', paddingTop: 16 }}>

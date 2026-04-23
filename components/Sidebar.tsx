@@ -3,7 +3,7 @@
 import { useState, useImperativeHandle, forwardRef, ReactElement } from 'react'
 import Link from 'next/link'
 
-export type ActivePage = 'dashboard' | 'clients' | 'rate-card' | 'faq' | 'settings' | 'about' | 'analytics'
+export type ActivePage = 'dashboard' | 'clients' | 'rate-card' | 'faq' | 'settings' | 'about' | 'analytics' | 'expenses'
 
 export interface SidebarHandle {
   open: () => void

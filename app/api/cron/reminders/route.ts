@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { sendInvoiceOverdueReminderEmail, sendProposalExpiringEmail } from '@/lib/email'
+import { sendInvoiceOverdueReminderEmail, sendProposalExpiringEmail, sendInvoiceEmail } from '@/lib/email'
+import { assignDocumentNumber } from '@/lib/document-numbers'
 
 async function getUserLogo(userId: string): Promise<string | undefined> {
   const db = createClient(
@@ -34,6 +35,7 @@ export async function GET(req: NextRequest) {
     invoiceReminders14: 0,
     invoiceReminders30: 0,
     proposalReminders: 0,
+    recurringInvoicesSent: 0,
     errors: [] as string[],
   }
 
@@ -163,6 +165,108 @@ export async function GET(req: NextRequest) {
       results.proposalReminders++
     } catch (err) {
       results.errors.push(`Proposal ${proposal.id} expiry reminder: ${err}`)
+    }
+  }
+
+  // ─────────────────────────────────────────────────
+  // 3. RECURRING INVOICES — auto-send on due date
+  // ─────────────────────────────────────────────────
+  const todayStr = now.toISOString().slice(0, 10)
+
+  const { data: dueConfigs, error: recurringError } = await supabase
+    .from('recurring_configs')
+    .select('*')
+    .eq('active', true)
+    .lte('next_due_date', todayStr)
+
+  if (recurringError) {
+    results.errors.push(`Recurring fetch error: ${recurringError.message}`)
+  }
+
+  function calcNextDueDate(interval: string, from: Date): string {
+    const d = new Date(from)
+    switch (interval) {
+      case 'weekly':    d.setDate(d.getDate() + 7); break
+      case 'biweekly':  d.setDate(d.getDate() + 14); break
+      case 'monthly':   d.setMonth(d.getMonth() + 1); break
+      case 'quarterly': d.setMonth(d.getMonth() + 3); break
+    }
+    return d.toISOString().slice(0, 10)
+  }
+
+  for (const config of dueConfigs || []) {
+    try {
+      // Fetch source document
+      const { data: sourceDoc, error: srcError } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('id', config.source_document_id)
+        .single()
+
+      if (srcError || !sourceDoc) {
+        results.errors.push(`Recurring ${config.id}: source doc not found`)
+        continue
+      }
+
+      // Clone as a new sent invoice
+      const { data: newDoc, error: insertError } = await supabase
+        .from('documents')
+        .insert({
+          user_id: sourceDoc.user_id,
+          doc_type: 'invoice',
+          client_name: sourceDoc.client_name,
+          client_email: sourceDoc.client_email,
+          business_name: sourceDoc.business_name,
+          price: sourceDoc.price,
+          currency: sourceDoc.currency || 'USD',
+          status: 'sent',
+          generated_content: {
+            ...sourceDoc.generated_content,
+            date: now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+            dueDate: '', // will be set by payment terms logic
+          },
+          form_data: sourceDoc.form_data,
+          sent_at: now.toISOString(),
+        })
+        .select('id')
+        .single()
+
+      if (insertError || !newDoc) {
+        results.errors.push(`Recurring ${config.id}: insert failed ${insertError?.message}`)
+        continue
+      }
+
+      // Assign document number
+      await assignDocumentNumber(sourceDoc.user_id, 'invoice', newDoc.id)
+
+      // Send email to client
+      const logoUrl = await getUserLogo(sourceDoc.user_id).catch(() => undefined)
+      const invoiceLink = `${appUrl}/dashboard/documents/${newDoc.id}`
+
+      await sendInvoiceEmail({
+        clientEmail: sourceDoc.client_email,
+        clientName: sourceDoc.client_name || sourceDoc.client_email,
+        invoiceLink,
+        paymentLink: '',
+        businessName: sourceDoc.business_name || 'Your service provider',
+        amount: sourceDoc.price,
+        userId: sourceDoc.user_id,
+        ...(logoUrl ? { logoUrl } : {}),
+      })
+
+      // Advance next_due_date and record last_sent_at
+      await supabase
+        .from('recurring_configs')
+        .update({
+          last_sent_at: now.toISOString(),
+          next_due_date: calcNextDueDate(config.interval, now),
+          updated_at: now.toISOString(),
+        })
+        .eq('id', config.id)
+
+      results.recurringInvoicesSent++
+    } catch (err) {
+      results.errors.push(`Recurring ${config.id} error: ${err}`)
     }
   }
 

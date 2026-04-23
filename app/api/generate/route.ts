@@ -96,6 +96,7 @@ export async function POST(req: NextRequest) {
     paymentTerms,
     notes,
     replaceDraftId,
+    currency,
     // Pricing extras
     lineItems,
     showLineItems,
@@ -187,7 +188,8 @@ Generate a professional ${docType} in JSON format. The output must be ONLY valid
 - Client name: ${clientName}
 - Client email: ${clientEmail}
 - Service: ${serviceDescription}
-- Price: $${showLineItems ? finalPrice.toFixed(2) : price}
+- Currency: ${currency || 'USD'}
+- Price: ${showLineItems ? finalPrice.toFixed(2) : price} ${currency || 'USD'}
 - Timeline: ${timeline}
 - Payment terms: ${paymentTerms}
 - Additional notes: ${notes || 'None'}${lineItemsContext}
@@ -226,6 +228,7 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
         client_email: clientEmail,
         business_name: businessName,
         price: finalPrice,
+        currency: currency || 'USD',
         status: 'draft',
         generated_content: generatedDoc,
         form_data: body,

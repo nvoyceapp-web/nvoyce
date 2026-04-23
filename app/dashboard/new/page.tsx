@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { supabase, CURRENCIES, formatCurrency } from '@/lib/supabase'
 import type { Contact, ServiceTemplate } from '@/lib/supabase'
 
 const paymentTermsDisplayMap: Record<string, string> = {
@@ -36,9 +36,7 @@ interface FormData {
   expirationDays?: string
 }
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
-}
+// fmt is defined per-render using user's currency (see useCurrency state)
 
 function NewDocumentContent() {
   const router = useRouter()
@@ -58,6 +56,10 @@ function NewDocumentContent() {
   const [serviceTemplates, setServiceTemplates] = useState<ServiceTemplate[]>([])
   const [showServicePicker, setShowServicePicker] = useState(false)
   const [serviceSearch, setServiceSearch] = useState('')
+
+  // Currency
+  const [currency, setCurrency] = useState('USD')
+  const fmt = (n: number) => formatCurrency(n, currency)
 
   // Line items & pricing extras
   const [showLineItems, setShowLineItems] = useState(false)
@@ -104,7 +106,7 @@ function NewDocumentContent() {
     async function loadUserDefaults() {
       const { data } = await supabase
         .from('user_settings')
-        .select('business_name, default_payment_terms')
+        .select('business_name, default_payment_terms, currency')
         .eq('user_id', userId)
         .single()
       if (!data) return
@@ -115,6 +117,7 @@ function NewDocumentContent() {
           ? { paymentTerms: paymentTermsDisplayMap[data.default_payment_terms] }
           : {}),
       }))
+      if (data.currency) setCurrency(data.currency)
     }
     loadUserDefaults()
   }, [userId, prefillId])
@@ -314,6 +317,7 @@ function NewDocumentContent() {
         body: JSON.stringify({
           ...form,
           replaceDraftId,
+          currency,
           // Pricing extras
           lineItems: showLineItems ? lineItems.filter(i => i.description.trim() && i.unitPrice.trim()) : [],
           showLineItems,

@@ -24,6 +24,7 @@ export interface Document {
   document_number?: string
   stripe_payment_link?: string
   stripe_payment_intent_id?: string
+  currency?: string
   amount_paid?: number
   paid_at?: string
   sent_at?: string
@@ -91,6 +92,36 @@ export interface Expense {
   notes?: string
   created_at: string
   updated_at: string
+}
+
+export const CURRENCIES = [
+  { code: 'USD', symbol: '$',    label: 'US Dollar (USD)' },
+  { code: 'EUR', symbol: '€',    label: 'Euro (EUR)' },
+  { code: 'GBP', symbol: '£',    label: 'British Pound (GBP)' },
+  { code: 'CAD', symbol: 'CA$',  label: 'Canadian Dollar (CAD)' },
+  { code: 'AUD', symbol: 'AU$',  label: 'Australian Dollar (AUD)' },
+  { code: 'SGD', symbol: 'S$',   label: 'Singapore Dollar (SGD)' },
+  { code: 'CHF', symbol: 'CHF',  label: 'Swiss Franc (CHF)' },
+  { code: 'JPY', symbol: '¥',    label: 'Japanese Yen (JPY)' },
+  { code: 'INR', symbol: '₹',    label: 'Indian Rupee (INR)' },
+  { code: 'AED', symbol: 'AED',  label: 'UAE Dirham (AED)' },
+  { code: 'MXN', symbol: 'MX$',  label: 'Mexican Peso (MXN)' },
+  { code: 'BRL', symbol: 'R$',   label: 'Brazilian Real (BRL)' },
+] as const
+
+export type CurrencyCode = typeof CURRENCIES[number]['code']
+
+export function formatCurrency(amount: number, currencyCode: string = 'USD'): string {
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount)
+  } catch {
+    return `${currencyCode} ${amount.toFixed(2)}`
+  }
 }
 
 export const EXPENSE_CATEGORIES = [

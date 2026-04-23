@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase, type Document, type GeneratedDocument } from '@/lib/supabase'
+import { supabase, type Document, type GeneratedDocument, formatCurrency } from '@/lib/supabase'
 import QRModal from '@/components/QRModal'
 
 // Editable text field — shows plain text when sent, input when draft
@@ -63,6 +63,14 @@ export default function DocumentPage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [userLogo, setUserLogo] = useState<string | null>(null)
   const [qrModal, setQrModal] = useState(false)
+  // Client preview mode
+  const [previewMode, setPreviewMode] = useState(false)
+  // Recurring invoice
+  const [showRecurringModal, setShowRecurringModal] = useState(false)
+  const [recurringInterval, setRecurringInterval] = useState('monthly')
+  const [recurringActive, setRecurringActive] = useState(false)
+  const [recurringConfigId, setRecurringConfigId] = useState<string | null>(null)
+  const [savingRecurring, setSavingRecurring] = useState(false)
 
   useEffect(() => {
     async function fetchDoc() {
@@ -160,6 +168,49 @@ export default function DocumentPage() {
     })
     setHasUnsavedChanges(true)
   }, [])
+
+  // Load recurring config for this doc
+  useEffect(() => {
+    if (!doc || doc.doc_type !== 'invoice' || doc.status === 'draft') return
+    fetch('/api/recurring')
+      .then(r => r.json())
+      .then(data => {
+        const match = (data.configs || []).find((c: any) => c.source_document_id === doc.id)
+        if (match) {
+          setRecurringActive(true)
+          setRecurringConfigId(match.id)
+          setRecurringInterval(match.interval)
+        }
+      })
+      .catch(() => {})
+  }, [doc])
+
+  const handleSaveRecurring = async () => {
+    if (!doc) return
+    setSavingRecurring(true)
+    const res = await fetch('/api/recurring', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ documentId: doc.id, interval: recurringInterval }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      setRecurringActive(true)
+      setRecurringConfigId(data.config.id)
+      setShowRecurringModal(false)
+    }
+    setSavingRecurring(false)
+  }
+
+  const handleCancelRecurring = async () => {
+    if (!recurringConfigId) return
+    setSavingRecurring(true)
+    await fetch(`/api/recurring/${recurringConfigId}`, { method: 'DELETE' })
+    setRecurringActive(false)
+    setRecurringConfigId(null)
+    setShowRecurringModal(false)
+    setSavingRecurring(false)
+  }
 
   const saveChanges = async () => {
     if (!doc || !editingContent) return
@@ -407,6 +458,36 @@ export default function DocumentPage() {
               </svg>
               Repeat
             </Link>
+          )}
+          {!isDraft && isInvoice && (
+            <button
+              onClick={() => setShowRecurringModal(true)}
+              className={`text-sm border px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
+                recurringActive
+                  ? 'border-orange-300 text-orange-600 bg-orange-50'
+                  : 'border-gray-200 hover:bg-gray-50'
+              }`}
+              title="Set as recurring invoice"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+              <span className="hidden sm:inline">{recurringActive ? 'Recurring ✓' : 'Recurring'}</span>
+            </button>
+          )}
+          {!isDraft && (
+            <button
+              onClick={() => setPreviewMode(true)}
+              className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition hidden sm:flex items-center gap-1.5"
+              title="See what your client sees"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              Preview
+            </button>
           )}
           <button
             onClick={() => {
@@ -980,6 +1061,275 @@ export default function DocumentPage() {
           label={`${doc.client_name} — Invoice`}
           onClose={() => setQrModal(false)}
         />
+      )}
+
+      {/* Recurring Invoice Modal */}
+      {showRecurringModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRecurringModal(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-base font-semibold text-gray-900">Recurring Invoice</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Auto-send a copy on a schedule</p>
+              </div>
+              <button onClick={() => setShowRecurringModal(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">✕</button>
+            </div>
+
+            {recurringActive && (
+              <div className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-2 text-sm text-orange-700">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+                </svg>
+                <span>Recurring is active — {recurringInterval}</span>
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Send frequency</label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['weekly', 'biweekly', 'monthly', 'quarterly'] as const).map(interval => (
+                  <button
+                    key={interval}
+                    onClick={() => setRecurringInterval(interval)}
+                    className={`px-3 py-2.5 rounded-xl text-sm font-medium border transition ${
+                      recurringInterval === interval
+                        ? 'border-orange-400 bg-orange-50 text-orange-700'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                    }`}
+                  >
+                    {interval === 'biweekly' ? 'Every 2 weeks' : interval.charAt(0).toUpperCase() + interval.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl px-4 py-3 mb-5 text-sm">
+              <span className="text-gray-500">Next invoice sends: </span>
+              <span className="font-semibold text-gray-900">
+                {(() => {
+                  const d = new Date()
+                  if (recurringInterval === 'weekly') d.setDate(d.getDate() + 7)
+                  else if (recurringInterval === 'biweekly') d.setDate(d.getDate() + 14)
+                  else if (recurringInterval === 'monthly') d.setMonth(d.getMonth() + 1)
+                  else if (recurringInterval === 'quarterly') d.setMonth(d.getMonth() + 3)
+                  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                })()}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleSaveRecurring}
+                disabled={savingRecurring}
+                className="w-full bg-black text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 transition disabled:opacity-50"
+              >
+                {savingRecurring ? 'Saving...' : recurringActive ? 'Update Schedule' : 'Enable Recurring'}
+              </button>
+              {recurringActive && (
+                <button
+                  onClick={handleCancelRecurring}
+                  disabled={savingRecurring}
+                  className="w-full border border-red-200 text-red-600 py-2.5 rounded-xl text-sm font-medium hover:bg-red-50 transition disabled:opacity-50"
+                >
+                  Cancel Recurring
+                </button>
+              )}
+              <button
+                onClick={() => setShowRecurringModal(false)}
+                className="w-full text-gray-400 py-2 text-sm hover:text-gray-600 transition"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Client Preview Overlay */}
+      {previewMode && (
+        <div className="fixed inset-0 bg-gray-100 z-50 overflow-y-auto">
+          {/* Preview top bar */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-8 py-3 flex items-center justify-between shadow-sm z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-orange-400 animate-pulse" />
+              <span className="text-sm font-medium text-gray-700">Client preview — this is what {doc.client_name || 'your client'} sees</span>
+            </div>
+            <button
+              onClick={() => setPreviewMode(false)}
+              className="text-sm border border-gray-200 px-4 py-1.5 rounded-lg hover:bg-gray-50 transition font-medium text-gray-700"
+            >
+              ✕ Exit preview
+            </button>
+          </div>
+
+          {/* Document (read-only, clean) */}
+          <div className="max-w-3xl mx-auto px-3 sm:px-4 py-8 sm:py-12">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-12">
+
+              {/* Logo */}
+              <div className="text-center mb-12 pb-8 border-b border-gray-100">
+                {userLogo ? (
+                  <img src={userLogo} alt="Logo" className="max-w-sm max-h-48 mx-auto mb-2 object-contain" />
+                ) : (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 11 }}>
+                    <svg width="44" height="44" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="2" y="2" width="36" height="36" rx="9" fill="#0d1b2a" />
+                      <rect x="9" y="9" width="3.2" height="22" fill="white" />
+                      <rect x="27.8" y="9" width="3.2" height="22" fill="white" />
+                      <path d="M12.2 9 L15 9 L28 27 L28 31 L25.2 31 Z" fill="white" />
+                      <circle cx="17.5" cy="14" r="1.2" fill="#e04e1a" />
+                      <circle cx="22.5" cy="14" r="1.2" fill="#e04e1a" />
+                      <circle cx="17.5" cy="20" r="1.2" fill="#e04e1a" />
+                      <circle cx="22.5" cy="20" r="1.2" fill="#e04e1a" />
+                      <circle cx="17.5" cy="26" r="1.2" fill="#e04e1a" />
+                      <circle cx="22.5" cy="26" r="1.2" fill="#e04e1a" />
+                    </svg>
+                    <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 26, letterSpacing: '-0.03em', color: '#0d1b2a', lineHeight: 1 }}>nvoyce</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Header */}
+              <div className="flex items-start justify-between mb-8 sm:mb-10">
+                <div className="flex-1 mr-4 sm:mr-8">
+                  <p className="text-3xl font-bold text-gray-900">{content.from.name}</p>
+                  <p className="text-gray-400 text-sm mt-1">{content.from.tagline}</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-gray-900 capitalize">{doc.doc_type}</div>
+                  <div className="text-sm text-gray-400 mt-1">{doc.document_number || '—'}</div>
+                </div>
+              </div>
+
+              {/* Dates */}
+              <div className="flex flex-wrap gap-6 sm:gap-12 mb-8 sm:mb-10 text-sm">
+                <div>
+                  <div className="text-gray-400 mb-0.5">Date</div>
+                  <div className="font-medium text-gray-900">{content.date}</div>
+                </div>
+                <div>
+                  <div className="text-gray-400 mb-0.5">Due date</div>
+                  <div className="font-medium text-gray-900">{content.dueDate}</div>
+                </div>
+                <div>
+                  <div className="text-gray-400 mb-0.5">Payment terms</div>
+                  <div className="font-medium text-gray-900">{content.paymentTerms}</div>
+                </div>
+              </div>
+
+              {/* Bill to */}
+              <div className="flex flex-wrap gap-8 sm:gap-16 mb-8 sm:mb-10">
+                <div className="text-sm">
+                  <div className="text-gray-400 mb-1 uppercase text-xs font-semibold tracking-wide">From</div>
+                  <div className="font-semibold text-gray-900">{content.from.name}</div>
+                </div>
+                <div className="text-sm">
+                  <div className="text-gray-400 mb-1 uppercase text-xs font-semibold tracking-wide">Bill to</div>
+                  <div className="font-semibold text-gray-900">{content.to.name}</div>
+                  <div className="text-gray-500 mt-1">{content.to.email}</div>
+                </div>
+              </div>
+
+              {/* Subject + intro */}
+              <div className="border-t border-gray-100 pt-8 mb-8">
+                <p className="font-semibold text-gray-900 text-base mb-3">{content.subject}</p>
+                <p className="text-gray-600 text-sm leading-relaxed">{content.introduction}</p>
+              </div>
+
+              {/* Line items */}
+              <div className="mb-8 overflow-x-auto">
+                <div className="min-w-[420px]">
+                  <div className="grid grid-cols-12 text-xs font-semibold text-gray-400 uppercase tracking-wide pb-2 border-b border-gray-100">
+                    <div className="col-span-6">Description</div>
+                    <div className="col-span-2 text-right">Qty</div>
+                    <div className="col-span-2 text-right">Unit price</div>
+                    <div className="col-span-2 text-right">Total</div>
+                  </div>
+                  {content.lineItems.map((item: any, i: number) => (
+                    <div key={i} className="grid grid-cols-12 text-sm py-4 border-b border-gray-50 items-center">
+                      <div className="col-span-6 text-gray-900">{item.description}</div>
+                      <div className="col-span-2 text-right text-gray-600">{item.quantity}</div>
+                      <div className="col-span-2 text-right text-gray-600">${item.unitPrice.toLocaleString()}</div>
+                      <div className="col-span-2 text-right font-medium text-gray-900">${(item.total || 0).toLocaleString()}</div>
+                    </div>
+                  ))}
+                  <div className="mt-4 flex justify-end">
+                    <div className="w-56 text-sm space-y-2">
+                      <div className="flex justify-between text-gray-600">
+                        <span>Subtotal</span>
+                        <span>${(content.subtotal || 0).toLocaleString()}</span>
+                      </div>
+                      {content.tax > 0 && (
+                        <div className="flex justify-between text-gray-600">
+                          <span>Tax</span>
+                          <span>${content.tax.toLocaleString()}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-bold text-gray-900 text-base pt-2 border-t border-gray-200">
+                        <span>Total</span>
+                        <span>{formatCurrency(content.total || 0, doc.currency || 'USD')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              {content.timeline && (
+                <div className="bg-gray-50 rounded-xl p-5 mb-6 text-sm">
+                  <span className="font-semibold text-gray-700">Timeline: </span>
+                  <span className="text-gray-600">{content.timeline}</span>
+                </div>
+              )}
+
+              {/* Notes */}
+              {content.notes && (
+                <div className="text-sm text-gray-600 mb-8">
+                  <div className="font-semibold text-gray-700 mb-1">Notes</div>
+                  <p className="leading-relaxed">{content.notes}</p>
+                </div>
+              )}
+
+              {/* Payment CTA (invoice only) */}
+              {isInvoice && doc.stripe_payment_link && (
+                <div className="bg-[#0d1b2a] rounded-2xl p-6 mb-8 text-center">
+                  <p className="text-white font-semibold mb-1">Pay now</p>
+                  <p className="text-gray-400 text-sm mb-4">{formatCurrency(content.total || doc.price, doc.currency || 'USD')} due</p>
+                  <div className="inline-block bg-orange-500 text-white text-sm font-semibold px-6 py-2.5 rounded-xl opacity-70 cursor-not-allowed">
+                    Pay {formatCurrency(content.total || doc.price, doc.currency || 'USD')} →
+                  </div>
+                  <p className="text-xs text-gray-500 mt-3">Payment button (preview only)</p>
+                </div>
+              )}
+
+              {/* Closing */}
+              <div className="border-t border-gray-100 pt-8 text-sm text-gray-600">
+                <p className="leading-relaxed">{content.closingMessage}</p>
+                <p className="mt-4 font-semibold text-gray-900">{content.from.name}</p>
+              </div>
+
+              {/* Footer */}
+              <div className="border-t border-gray-100 mt-12 pt-8 text-center flex flex-col items-center gap-2">
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, opacity: 0.5 }}>
+                  <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="36" height="36" rx="9" fill="#0d1b2a" />
+                    <rect x="9" y="9" width="3.2" height="22" fill="white" />
+                    <rect x="27.8" y="9" width="3.2" height="22" fill="white" />
+                    <path d="M12.2 9 L15 9 L28 27 L28 31 L25.2 31 Z" fill="white" />
+                    <circle cx="17.5" cy="14" r="1.2" fill="#e04e1a" />
+                    <circle cx="22.5" cy="14" r="1.2" fill="#e04e1a" />
+                    <circle cx="17.5" cy="20" r="1.2" fill="#e04e1a" />
+                    <circle cx="22.5" cy="20" r="1.2" fill="#e04e1a" />
+                    <circle cx="17.5" cy="26" r="1.2" fill="#e04e1a" />
+                    <circle cx="22.5" cy="26" r="1.2" fill="#e04e1a" />
+                  </svg>
+                  <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontWeight: 700, fontSize: 13, letterSpacing: '-0.03em', color: '#0d1b2a', lineHeight: 1 }}>nvoyce</span>
+                </div>
+                <p className="text-xs text-gray-400">Made with nvoyce</p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -7,7 +7,7 @@ import MobileNav from '@/components/MobileNav'
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useUser, useAuth, useClerk } from '@clerk/nextjs'
 import { useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { supabase, CURRENCIES } from '@/lib/supabase'
 import { PLANS } from '@/lib/plans'
 
 const BUSINESS_TYPES = [
@@ -80,7 +80,7 @@ function SettingsContent() {
       try {
         const { data, error } = await supabase
           .from('user_settings')
-          .select('logo_url, business_name, business_type, industry, common_services, project_types, default_payment_terms, charges_tax, tax_rate, tone_preference, stripe_connect_complete, bio, contact_email')
+          .select('logo_url, business_name, business_type, industry, common_services, project_types, default_payment_terms, charges_tax, tax_rate, tone_preference, stripe_connect_complete, bio, contact_email, currency')
           .eq('user_id', userId)
           .single()
 
@@ -102,6 +102,7 @@ function SettingsContent() {
           if (data.stripe_connect_complete) setStripeConnectComplete(data.stripe_connect_complete)
           if (data.bio) setBio(data.bio)
           if (data.contact_email) setContactEmail(data.contact_email)
+          if (data.currency) setCurrency(data.currency)
         }
       } catch (err) {
         console.error('Error fetching settings:', err)
@@ -290,11 +291,12 @@ function SettingsContent() {
   const [commonServices, setCommonServices] = useState('')
   const [projectTypes, setProjectTypes] = useState<string[]>([])
   const [paymentTerms, setPaymentTerms] = useState('net_30')
+  const [currency, setCurrency] = useState('USD')
   const [chargesTax, setChargesTax] = useState(false)
   const [taxRate, setTaxRate] = useState('')
   const [tonePreference, setTonePreference] = useState('professional')
   const [profileSaving, setProfileSaving] = useState(false)
-  const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [bizMessage, setBizMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const toggleProjectType = (value: string) => {
     setProjectTypes(prev =>
@@ -316,12 +318,13 @@ function SettingsContent() {
         charges_tax: chargesTax,
         tax_rate: taxRate ? parseFloat(taxRate) : null,
         tone_preference: tonePreference,
+        currency,
         updated_at: new Date().toISOString(),
       })
-      setProfileMessage({ type: 'success', text: '✅ Business profile saved' })
-      setTimeout(() => setProfileMessage(null), 3000)
+      setBizMessage({ type: 'success', text: '✅ Business profile saved' })
+      setTimeout(() => setBizMessage(null), 3000)
     } catch {
-      setProfileMessage({ type: 'error', text: '❌ Failed to save. Try again.' })
+      setBizMessage({ type: 'error', text: '❌ Failed to save. Try again.' })
     } finally {
       setProfileSaving(false)
     }
@@ -614,9 +617,9 @@ function SettingsContent() {
                       <span className="text-xs text-gray-400 font-normal ml-1">Used by AI to generate better documents</span>
                     </h3>
 
-                    {profileMessage && (
-                      <div className={`p-3 rounded text-sm ${profileMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-                        {profileMessage.text}
+                    {bizMessage && (
+                      <div className={`p-3 rounded text-sm ${bizMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                        {bizMessage.text}
                       </div>
                     )}
 
@@ -669,17 +672,31 @@ function SettingsContent() {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Default payment terms</label>
-                      <select
-                        value={paymentTerms}
-                        onChange={e => setPaymentTerms(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400"
-                      >
-                        {PAYMENT_TERMS.map(t => (
-                          <option key={t.value} value={t.value}>{t.label}</option>
-                        ))}
-                      </select>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Default payment terms</label>
+                        <select
+                          value={paymentTerms}
+                          onChange={e => setPaymentTerms(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400"
+                        >
+                          {PAYMENT_TERMS.map(t => (
+                            <option key={t.value} value={t.value}>{t.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Billing currency</label>
+                        <select
+                          value={currency}
+                          onChange={e => setCurrency(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400"
+                        >
+                          {CURRENCIES.map(c => (
+                            <option key={c.code} value={c.code}>{c.label}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
                     <div>

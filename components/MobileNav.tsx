@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 interface MobileNavProps {
-  activePage?: 'dashboard' | 'clients' | 'rate-card' | 'faq' | 'settings' | 'about' | 'analytics'
+  activePage?: 'dashboard' | 'clients' | 'rate-card' | 'faq' | 'settings' | 'about' | 'analytics' | 'expenses'
 }
 
 export default function MobileNav({ activePage }: MobileNavProps) {

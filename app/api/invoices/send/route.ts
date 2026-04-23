@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     // Update status to sent
     const { error: updateError } = await supabase
       .from('documents')
-      .update({ status: 'sent' })
+      .update({ status: 'sent', sent_at: new Date().toISOString() })
       .eq('id', invoiceId)
 
     if (updateError) {

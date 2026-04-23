@@ -822,6 +822,122 @@ export default function DocumentPage() {
         </div>
       </div>
 
+      {/* Activity Timeline — shown for non-draft documents */}
+      {!isDraft && (
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 pb-8 print:hidden">
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-8">
+            <h3 className="text-sm font-semibold text-[#0d1b2a] mb-5">Activity</h3>
+            <div className="relative">
+              {/* Vertical line */}
+              <div className="absolute left-3.5 top-0 bottom-0 w-px bg-gray-100" />
+              <ol className="space-y-4">
+                {(() => {
+                  const events: { date: string; label: string; icon: string; color: string }[] = []
+
+                  events.push({
+                    date: doc.created_at,
+                    label: 'Draft created',
+                    icon: '📝',
+                    color: 'bg-gray-100',
+                  })
+
+                  if (doc.sent_at) {
+                    events.push({
+                      date: doc.sent_at,
+                      label: `Sent to ${doc.client_name}`,
+                      icon: '📤',
+                      color: 'bg-blue-100',
+                    })
+                  }
+
+                  if ((doc as any).reminder_14_sent_at) {
+                    events.push({
+                      date: (doc as any).reminder_14_sent_at,
+                      label: '14-day overdue reminder sent',
+                      icon: '🔔',
+                      color: 'bg-yellow-100',
+                    })
+                  }
+
+                  if ((doc as any).reminder_30_sent_at) {
+                    events.push({
+                      date: (doc as any).reminder_30_sent_at,
+                      label: '30-day overdue reminder sent',
+                      icon: '🔔',
+                      color: 'bg-orange-100',
+                    })
+                  }
+
+                  if ((doc as any).expiry_reminder_sent_at) {
+                    events.push({
+                      date: (doc as any).expiry_reminder_sent_at,
+                      label: 'Expiry reminder sent to client',
+                      icon: '⏰',
+                      color: 'bg-yellow-100',
+                    })
+                  }
+
+                  if (doc.status === 'accepted') {
+                    events.push({
+                      date: doc.updated_at,
+                      label: 'Proposal accepted by client',
+                      icon: '✅',
+                      color: 'bg-green-100',
+                    })
+                  }
+
+                  if (doc.status === 'declined') {
+                    events.push({
+                      date: doc.updated_at,
+                      label: 'Proposal declined by client',
+                      icon: '❌',
+                      color: 'bg-red-100',
+                    })
+                  }
+
+                  if (doc.status === 'expired') {
+                    events.push({
+                      date: doc.updated_at,
+                      label: 'Proposal expired',
+                      icon: '⌛',
+                      color: 'bg-gray-100',
+                    })
+                  }
+
+                  if (doc.paid_at) {
+                    events.push({
+                      date: doc.paid_at,
+                      label: doc.amount_paid && doc.amount_paid < doc.price
+                        ? `Partial payment received — $${doc.amount_paid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : `Payment received — $${doc.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                      icon: '💰',
+                      color: 'bg-green-100',
+                    })
+                  }
+
+                  // Sort chronologically
+                  events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+                  return events.map((e, i) => (
+                    <li key={i} className="flex items-start gap-4 relative">
+                      <div className={`w-7 h-7 rounded-full ${e.color} flex items-center justify-center flex-shrink-0 z-10 text-sm`}>
+                        {e.icon}
+                      </div>
+                      <div className="flex-1 min-w-0 pt-0.5">
+                        <p className="text-sm text-[#0d1b2a] font-medium">{e.label}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </li>
+                  ))
+                })()}
+              </ol>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sticky save bar — appears when there are unsaved changes */}
       {isDraft && hasUnsavedChanges && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-orange-200 px-8 py-4 flex items-center justify-between shadow-lg z-50 print:hidden">

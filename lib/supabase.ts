@@ -26,6 +26,10 @@ export interface Document {
   stripe_payment_intent_id?: string
   amount_paid?: number
   paid_at?: string
+  sent_at?: string
+  reminder_14_sent_at?: string
+  reminder_30_sent_at?: string
+  expiry_reminder_sent_at?: string
   created_at: string
   updated_at: string
 }

@@ -8,6 +8,20 @@ import type { Contact } from '@/lib/supabase'
 
 const emptyForm = { name: '', email: '', phone: '', company: '' }
 
+async function copyPortalLink(clientEmail: string) {
+  const res = await fetch('/api/portal/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clientEmail }),
+  })
+  const data = await res.json()
+  if (data.portalUrl) {
+    await navigator.clipboard.writeText(data.portalUrl)
+    return data.portalUrl
+  }
+  return null
+}
+
 export default function ClientsPage() {
   const { userId } = useAuth()
   const [contacts, setContacts] = useState<Contact[]>([])
@@ -19,6 +33,7 @@ export default function ClientsPage() {
   const [saving, setSaving] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [copiedPortal, setCopiedPortal] = useState<string | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -166,6 +181,31 @@ export default function ClientsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition flex-shrink-0">
+                      {c.email && (
+                        <button
+                          onClick={async () => {
+                            const url = await copyPortalLink(c.email!)
+                            if (url) {
+                              setCopiedPortal(c.id)
+                              setTimeout(() => setCopiedPortal(null), 2000)
+                            }
+                          }}
+                          className="p-1.5 rounded-lg hover:bg-purple-50 text-gray-500 hover:text-purple-600 transition"
+                          title="Copy portal link"
+                        >
+                          {copiedPortal === c.id ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          ) : (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                              <polyline points="16 6 12 2 8 6"/>
+                              <line x1="12" y1="2" x2="12" y2="15"/>
+                            </svg>
+                          )}
+                        </button>
+                      )}
                       <button
                         onClick={() => openEdit(c)}
                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition"

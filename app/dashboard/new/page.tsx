@@ -17,6 +17,12 @@ const paymentTermsDisplayMap: Record<string, string> = {
 
 type DocType = 'invoice' | 'proposal'
 
+interface LineItem {
+  description: string
+  quantity: string
+  unitPrice: string
+}
+
 interface FormData {
   docType: DocType
   clientName: string
@@ -30,13 +36,16 @@ interface FormData {
   expirationDays?: string
 }
 
+function fmt(n: number) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
+}
+
 function NewDocumentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { userId } = useAuth()
   const typeParam = searchParams.get('type') as DocType | null
   const prefillId = searchParams.get('prefill')
-  // Track the draft ID that came from "← Back to Edit" so we can replace it on regenerate
   const [replaceDraftId, setReplaceDraftId] = useState<string | null>(null)
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -49,6 +58,15 @@ function NewDocumentContent() {
   const [serviceTemplates, setServiceTemplates] = useState<ServiceTemplate[]>([])
   const [showServicePicker, setShowServicePicker] = useState(false)
   const [serviceSearch, setServiceSearch] = useState('')
+
+  // Line items & pricing extras
+  const [showLineItems, setShowLineItems] = useState(false)
+  const [lineItems, setLineItems] = useState<LineItem[]>([{ description: '', quantity: '1', unitPrice: '' }])
+  const [taxEnabled, setTaxEnabled] = useState(false)
+  const [taxRate, setTaxRate] = useState('8.25')
+  const [discountAmount, setDiscountAmount] = useState('')
+  const [depositPercent, setDepositPercent] = useState('')
+
   const [form, setForm] = useState<FormData>({
     docType: (typeParam && ['invoice', 'proposal'].includes(typeParam) ? typeParam : 'invoice') as DocType,
     clientName: '',
@@ -62,7 +80,25 @@ function NewDocumentContent() {
     expirationDays: '7',
   })
 
-  // Pre-fill business name and payment terms from user settings (only on fresh wizard, not prefill)
+  // Computed totals from line items
+  const lineSubtotal = lineItems.reduce((sum, item) => {
+    const qty = parseFloat(item.quantity) || 0
+    const price = parseFloat(item.unitPrice) || 0
+    return sum + qty * price
+  }, 0)
+  const lineTax = taxEnabled && taxRate ? lineSubtotal * (parseFloat(taxRate) / 100) : 0
+  const lineDiscount = discountAmount ? parseFloat(discountAmount) || 0 : 0
+  const lineTotal = lineSubtotal + lineTax - lineDiscount
+  const depositAmount = depositPercent ? lineTotal * (parseFloat(depositPercent) / 100) : 0
+
+  // Simple price computed totals
+  const simpleBase = parseFloat(form.price.replace(/,/g, '')) || 0
+  const simpleTax = taxEnabled && taxRate ? simpleBase * (parseFloat(taxRate) / 100) : 0
+  const simpleDiscount = discountAmount ? parseFloat(discountAmount) || 0 : 0
+  const simpleTotal = simpleBase + simpleTax - simpleDiscount
+  const simpleDeposit = depositPercent ? simpleTotal * (parseFloat(depositPercent) / 100) : 0
+
+  // Pre-fill business name and payment terms from user settings
   useEffect(() => {
     if (prefillId || !userId) return
     async function loadUserDefaults() {
@@ -104,7 +140,15 @@ function NewDocumentContent() {
           notes: data.form_data.notes || '',
           expirationDays: data.form_data.expirationDays || '7',
         })
-        // Remember the draft we came from — it will be deleted when a new draft is generated
+        // Restore line items state if present
+        if (data.form_data.lineItems && data.form_data.lineItems.length > 0) {
+          setLineItems(data.form_data.lineItems)
+          setShowLineItems(true)
+        }
+        if (data.form_data.taxEnabled) setTaxEnabled(data.form_data.taxEnabled)
+        if (data.form_data.taxRate) setTaxRate(data.form_data.taxRate)
+        if (data.form_data.discountAmount) setDiscountAmount(data.form_data.discountAmount)
+        if (data.form_data.depositPercent) setDepositPercent(data.form_data.depositPercent)
         if (data.status === 'draft') setReplaceDraftId(data.id)
         setStep(3)
       }
@@ -164,41 +208,68 @@ function NewDocumentContent() {
   function selectService(t: ServiceTemplate) {
     const desc = t.description ? `${t.name} — ${t.description}` : t.name
     setForm(prev => ({ ...prev, serviceDescription: desc, price: String(t.unit_price) }))
+    // Also update first line item if in line items mode
+    if (showLineItems) {
+      setLineItems(prev => {
+        const updated = [...prev]
+        updated[0] = { description: t.name, quantity: '1', unitPrice: String(t.unit_price) }
+        return updated
+      })
+    }
     setShowServicePicker(false)
     setServiceSearch('')
     setValidationErrors([])
+  }
+
+  function handleToggleLineItems() {
+    if (!showLineItems) {
+      // Pre-populate first row from service description + price
+      setLineItems([{
+        description: form.serviceDescription || '',
+        quantity: '1',
+        unitPrice: form.price || '',
+      }])
+    }
+    setShowLineItems(v => !v)
+    setValidationErrors([])
+  }
+
+  function addLineItem() {
+    setLineItems(prev => [...prev, { description: '', quantity: '1', unitPrice: '' }])
+  }
+
+  function removeLineItem(index: number) {
+    setLineItems(prev => prev.filter((_, i) => i !== index))
+  }
+
+  function updateLineItem(index: number, field: keyof LineItem, value: string) {
+    setLineItems(prev => {
+      const updated = [...prev]
+      updated[index] = { ...updated[index], [field]: value }
+      return updated
+    })
   }
 
   const validateStep = (currentStep: number): boolean => {
     const errors: string[] = []
 
     if (currentStep === 1) {
-      if (!form.businessName.trim()) {
-        errors.push('Business name is required')
-      }
-      if (!form.clientName.trim()) {
-        errors.push('Client name is required')
-      }
-      if (!form.clientEmail.trim()) {
-        errors.push('Client email is required')
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.clientEmail)) {
-        errors.push('Please enter a valid email address')
-      }
+      if (!form.businessName.trim()) errors.push('Business name is required')
+      if (!form.clientName.trim()) errors.push('Client name is required')
+      if (!form.clientEmail.trim()) errors.push('Client email is required')
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.clientEmail)) errors.push('Please enter a valid email address')
     }
 
     if (currentStep === 2) {
-      if (!form.serviceDescription.trim()) {
-        errors.push('Service description is required')
+      if (!form.serviceDescription.trim()) errors.push('Service description is required')
+      if (showLineItems) {
+        const validItems = lineItems.filter(item => item.description.trim() && item.unitPrice.trim())
+        if (validItems.length === 0) errors.push('Add at least one line item with a description and price')
+      } else {
+        if (!form.price.trim()) errors.push('Price is required')
+        else if (isNaN(parseFloat(form.price.replace(/,/g, '')))) errors.push('Price must be a valid number')
       }
-      if (!form.price.trim()) {
-        errors.push('Price is required')
-      } else if (isNaN(parseFloat(form.price.replace(/,/g, '')))) {
-        errors.push('Price must be a valid number')
-      }
-      // Timeline is only required for proposals
-      if (form.docType === 'proposal' && !form.timeline.trim()) {
-        errors.push('Timeline/deadline is required for proposals')
-      }
+      if (form.docType === 'proposal' && !form.timeline.trim()) errors.push('Timeline/deadline is required for proposals')
     }
 
     setValidationErrors(errors)
@@ -211,25 +282,23 @@ function NewDocumentContent() {
   }
 
   const handleNext = () => {
-    if (validateStep(step)) {
-      setStep((s) => s + 1)
-    }
+    if (validateStep(step)) setStep((s) => s + 1)
   }
 
   const handleGenerate = async () => {
-    // Validate all fields before submission
     const allErrors: string[] = []
-
-    // Step 1 validation
     if (!form.businessName.trim()) allErrors.push('Business name is required')
     if (!form.clientName.trim()) allErrors.push('Client name is required')
     if (!form.clientEmail.trim()) allErrors.push('Client email is required')
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.clientEmail)) allErrors.push('Please enter a valid email address')
-
-    // Step 2 validation
     if (!form.serviceDescription.trim()) allErrors.push('Service description is required')
-    if (!form.price.trim()) allErrors.push('Price is required')
-    else if (isNaN(parseFloat(form.price.replace(/,/g, '')))) allErrors.push('Price must be a valid number')
+    if (showLineItems) {
+      const validItems = lineItems.filter(item => item.description.trim() && item.unitPrice.trim())
+      if (validItems.length === 0) allErrors.push('Add at least one line item with a description and price')
+    } else {
+      if (!form.price.trim()) allErrors.push('Price is required')
+      else if (isNaN(parseFloat(form.price.replace(/,/g, '')))) allErrors.push('Price must be a valid number')
+    }
     if (form.docType === 'proposal' && !form.timeline.trim()) allErrors.push('Timeline/deadline is required for proposals')
 
     if (allErrors.length > 0) {
@@ -242,18 +311,24 @@ function NewDocumentContent() {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, replaceDraftId }),
+        body: JSON.stringify({
+          ...form,
+          replaceDraftId,
+          // Pricing extras
+          lineItems: showLineItems ? lineItems.filter(i => i.description.trim() && i.unitPrice.trim()) : [],
+          showLineItems,
+          taxEnabled,
+          taxRate: taxEnabled ? taxRate : '',
+          discountAmount,
+          depositPercent,
+        }),
       })
       const data = await res.json()
-
       if (!res.ok) {
         setValidationErrors([data.error || 'Failed to generate document. Please try again.'])
         return
       }
-
-      if (data.id) {
-        router.push(`/dashboard/documents/${data.id}`)
-      }
+      if (data.id) router.push(`/dashboard/documents/${data.id}`)
     } catch (err) {
       console.error(err)
       setValidationErrors(['Failed to generate document. Please try again.'])
@@ -261,6 +336,12 @@ function NewDocumentContent() {
       setLoading(false)
     }
   }
+
+  // Decide what to show for total in step 3 review
+  const reviewTotal = showLineItems ? lineTotal : simpleTotal
+  const reviewDeposit = showLineItems ? depositAmount : simpleDeposit
+  const reviewTax = showLineItems ? lineTax : simpleTax
+  const reviewDiscount = showLineItems ? lineDiscount : simpleDiscount
 
   return (
     <>
@@ -274,19 +355,13 @@ function NewDocumentContent() {
           ← Back
         </Link>
       </div>
-      {/* Desktop centering wrapper */}
       <div className="flex items-center justify-center py-6 sm:py-12 px-4">
       <div className="bg-white rounded-2xl shadow-sm border border-purple-100 w-full max-w-xl p-5 sm:p-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             {[1, 2, 3].map((s) => (
-              <div
-                key={s}
-                className={`h-1.5 flex-1 rounded-full transition-all ${
-                  s <= step ? 'bg-orange-600' : 'bg-gray-200'
-                }`}
-              />
+              <div key={s} className={`h-1.5 flex-1 rounded-full transition-all ${s <= step ? 'bg-orange-600' : 'bg-gray-200'}`} />
             ))}
           </div>
           <h1 className="text-xl font-bold text-gray-900">
@@ -365,10 +440,7 @@ function NewDocumentContent() {
                 autoComplete="off"
               />
               {showSuggestions && clientSuggestions.length > 0 && (
-                <div
-                  ref={suggestionsRef}
-                  className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
-                >
+                <div ref={suggestionsRef} className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
                   {clientSuggestions.slice(0, 5).map(c => (
                     <button
                       key={c.id}
@@ -405,6 +477,7 @@ function NewDocumentContent() {
         {/* Step 2 */}
         {step === 2 && (
           <div className="space-y-4">
+            {/* Service description */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-sm font-medium text-gray-700">
@@ -427,25 +500,213 @@ function NewDocumentContent() {
                 value={form.serviceDescription}
                 onChange={(e) => update('serviceDescription', e.target.value)}
                 placeholder="e.g. Brand photography session — 2 hours, 50 edited photos, delivered via Google Drive"
-                rows={4}
+                rows={3}
                 className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Price</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                <input
-                  type="text"
-                  value={form.price}
-                  onChange={(e) => update('price', e.target.value)}
-                  placeholder="1,500"
-                  className="w-full border border-gray-200 rounded-lg pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
+            {/* Price OR Line Items */}
+            {!showLineItems ? (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-sm font-medium text-gray-700">Price</label>
+                  <button
+                    type="button"
+                    onClick={handleToggleLineItems}
+                    className="text-xs text-orange-600 hover:text-orange-700 font-medium transition flex items-center gap-1"
+                  >
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Add line items
+                  </button>
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                  <input
+                    type="text"
+                    value={form.price}
+                    onChange={(e) => update('price', e.target.value)}
+                    placeholder="1,500"
+                    className="w-full border border-gray-200 rounded-lg pl-7 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
               </div>
+            ) : (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700">Line items</label>
+                  <button
+                    type="button"
+                    onClick={handleToggleLineItems}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition"
+                  >
+                    Switch to single price
+                  </button>
+                </div>
+
+                {/* Line items rows */}
+                <div className="space-y-2">
+                  {lineItems.map((item, idx) => {
+                    const rowTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0)
+                    return (
+                      <div key={idx} className="bg-gray-50 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={item.description}
+                            onChange={e => updateLineItem(idx, 'description', e.target.value)}
+                            placeholder="Description"
+                            className="flex-1 border border-gray-200 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+                          />
+                          {lineItems.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeLineItem(idx)}
+                              className="text-gray-300 hover:text-red-400 transition flex-shrink-0"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                            <span>Qty</span>
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              onChange={e => updateLineItem(idx, 'quantity', e.target.value)}
+                              min="0"
+                              step="0.5"
+                              className="w-16 border border-gray-200 rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+                            />
+                          </div>
+                          <span className="text-gray-400 text-xs">×</span>
+                          <div className="relative flex-1">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                            <input
+                              type="text"
+                              value={item.unitPrice}
+                              onChange={e => updateLineItem(idx, 'unitPrice', e.target.value)}
+                              placeholder="0.00"
+                              className="w-full border border-gray-200 rounded-md pl-6 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+                            />
+                          </div>
+                          <span className="text-xs text-gray-500 w-20 text-right font-medium">
+                            {rowTotal > 0 ? fmt(rowTotal) : '—'}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={addLineItem}
+                  className="mt-2 flex items-center gap-1.5 text-xs text-orange-600 hover:text-orange-700 font-medium transition"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Add row
+                </button>
+              </div>
+            )}
+
+            {/* Tax / Discount / Deposit */}
+            <div className="space-y-3 pt-1">
+              {/* Tax */}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setTaxEnabled(v => !v)}
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 rounded-full border-2 border-transparent transition-colors ${taxEnabled ? 'bg-orange-500' : 'bg-gray-200'}`}
+                >
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${taxEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                </button>
+                <span className="text-sm text-gray-700">Tax</span>
+                {taxEnabled && (
+                  <div className="flex items-center gap-1 ml-auto">
+                    <input
+                      type="text"
+                      value={taxRate}
+                      onChange={e => setTaxRate(e.target.value)}
+                      className="w-16 border border-gray-200 rounded-md px-2 py-1 text-sm text-center focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    />
+                    <span className="text-sm text-gray-500">%</span>
+                    <span className="text-xs text-gray-400 ml-2">
+                      = {fmt(showLineItems ? lineTax : simpleTax)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Discount */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-700 w-24">Discount</span>
+                <div className="relative flex-1">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                  <input
+                    type="text"
+                    value={discountAmount}
+                    onChange={e => setDiscountAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full border border-gray-200 rounded-md pl-6 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  />
+                </div>
+                {discountAmount && parseFloat(discountAmount) > 0 && (
+                  <span className="text-xs text-green-600 font-medium">−{fmt(parseFloat(discountAmount))}</span>
+                )}
+              </div>
+
+              {/* Deposit (invoices only) */}
+              {form.docType === 'invoice' && (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-700 w-24">Deposit</span>
+                  <div className="flex items-center gap-1 flex-1">
+                    <input
+                      type="text"
+                      value={depositPercent}
+                      onChange={e => setDepositPercent(e.target.value)}
+                      placeholder="0"
+                      className="w-16 border border-gray-200 rounded-md px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    />
+                    <span className="text-sm text-gray-500">% upfront</span>
+                  </div>
+                  {depositPercent && parseFloat(depositPercent) > 0 && (
+                    <span className="text-xs text-gray-500">
+                      = {fmt(showLineItems ? depositAmount : simpleDeposit)}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Running total */}
+              {(taxEnabled || (discountAmount && parseFloat(discountAmount) > 0) || showLineItems) && (
+                <div className="flex justify-end pt-1 border-t border-gray-100">
+                  <div className="text-right space-y-0.5">
+                    {showLineItems && (
+                      <p className="text-xs text-gray-400">Subtotal: {fmt(lineSubtotal)}</p>
+                    )}
+                    {taxEnabled && reviewTax > 0 && (
+                      <p className="text-xs text-gray-400">Tax ({taxRate}%): +{fmt(reviewTax)}</p>
+                    )}
+                    {reviewDiscount > 0 && (
+                      <p className="text-xs text-gray-400">Discount: −{fmt(reviewDiscount)}</p>
+                    )}
+                    <p className="text-sm font-bold text-[#0d1b2a]">Total: {fmt(reviewTotal)}</p>
+                    {reviewDeposit > 0 && (
+                      <p className="text-xs text-orange-600 font-medium">Deposit due: {fmt(reviewDeposit)}</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* Timeline */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-2">
                 When will service/delivery be completed? {form.docType === 'proposal' && <span className="text-red-500">*</span>}
@@ -475,6 +736,7 @@ function NewDocumentContent() {
               </div>
             </div>
 
+            {/* Payment terms */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1">Payment terms</label>
               <select
@@ -493,6 +755,7 @@ function NewDocumentContent() {
               </select>
             </div>
 
+            {/* Proposal expiration */}
             {form.docType === 'proposal' && (
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">
@@ -513,6 +776,7 @@ function NewDocumentContent() {
               </div>
             )}
 
+            {/* Notes */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1">
                 Any additional notes? <span className="text-gray-400 font-normal">(optional)</span>
@@ -536,7 +800,36 @@ function NewDocumentContent() {
               <Row label="From" value={form.businessName} />
               <Row label="To" value={`${form.clientName} (${form.clientEmail})`} />
               <Row label="Service" value={form.serviceDescription} />
-              <Row label="Amount" value={`$${form.price}`} />
+              {showLineItems ? (
+                <div className="flex gap-3">
+                  <span className="text-gray-400 w-28 shrink-0">Line items</span>
+                  <div className="space-y-1">
+                    {lineItems.filter(i => i.description.trim()).map((item, idx) => {
+                      const t = (parseFloat(item.quantity) || 1) * (parseFloat(item.unitPrice) || 0)
+                      return (
+                        <p key={idx} className="text-gray-900 font-medium">
+                          {item.description} — {item.quantity} × {fmt(parseFloat(item.unitPrice) || 0)} = {fmt(t)}
+                        </p>
+                      )
+                    })}
+                    <div className="pt-1 space-y-0.5 border-t border-gray-200 mt-1">
+                      <p className="text-gray-500">Subtotal: {fmt(lineSubtotal)}</p>
+                      {taxEnabled && lineTax > 0 && <p className="text-gray-500">Tax ({taxRate}%): +{fmt(lineTax)}</p>}
+                      {lineDiscount > 0 && <p className="text-gray-500">Discount: −{fmt(lineDiscount)}</p>}
+                      <p className="font-bold text-[#0d1b2a]">Total: {fmt(lineTotal)}</p>
+                      {depositAmount > 0 && <p className="text-orange-600 font-medium">Deposit: {fmt(depositAmount)} ({depositPercent}%)</p>}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Row label="Amount" value={fmt(simpleBase)} />
+                  {taxEnabled && simpleTax > 0 && <Row label={`Tax (${taxRate}%)`} value={`+${fmt(simpleTax)}`} />}
+                  {simpleDiscount > 0 && <Row label="Discount" value={`−${fmt(simpleDiscount)}`} />}
+                  {(taxEnabled || simpleDiscount > 0) && <Row label="Total" value={fmt(simpleTotal)} />}
+                  {simpleDeposit > 0 && <Row label="Deposit due" value={`${fmt(simpleDeposit)} (${depositPercent}%)`} />}
+                </>
+              )}
               <Row label="Timeline" value={form.timeline} />
               <Row label="Payment terms" value={form.paymentTerms} />
               {form.docType === 'proposal' && form.expirationDays && (
@@ -568,21 +861,14 @@ function NewDocumentContent() {
         {/* Footer */}
         <div className="flex items-center justify-between mt-8">
           {step > 1 ? (
-            <button
-              onClick={() => setStep((s) => s - 1)}
-              className="text-sm text-gray-500 hover:text-gray-700"
-            >
+            <button onClick={() => setStep((s) => s - 1)} className="text-sm text-gray-500 hover:text-gray-700">
               ← Back
             </button>
           ) : (
             <div />
           )}
-
           {step < 3 ? (
-            <button
-              onClick={handleNext}
-              className="bg-orange-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-orange-700 transition"
-            >
+            <button onClick={handleNext} className="bg-orange-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-orange-700 transition">
               Continue →
             </button>
           ) : (

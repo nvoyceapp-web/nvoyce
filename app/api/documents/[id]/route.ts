@@ -6,16 +6,17 @@ import { supabaseServer } from '@/lib/supabase-server'
 // Used by the Nvoyce mobile app
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { id } = await params
   const supabase = supabaseServer()
   const { data, error } = await supabase
     .from('documents')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', userId)
     .single()
 

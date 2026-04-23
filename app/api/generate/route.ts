@@ -96,7 +96,44 @@ export async function POST(req: NextRequest) {
     paymentTerms,
     notes,
     replaceDraftId,
+    // Pricing extras
+    lineItems,
+    showLineItems,
+    taxEnabled,
+    taxRate,
+    discountAmount,
+    depositPercent,
   } = body
+
+  // Compute the actual total price to store in DB
+  let finalPrice = parseFloat((price || '0').replace(/,/g, '')) || 0
+  if (showLineItems && lineItems && lineItems.length > 0) {
+    const subtotal = lineItems.reduce((sum: number, item: { quantity: string; unitPrice: string }) => {
+      return sum + (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0)
+    }, 0)
+    const tax = taxEnabled && taxRate ? subtotal * (parseFloat(taxRate) / 100) : 0
+    const discount = discountAmount ? parseFloat(discountAmount) || 0 : 0
+    finalPrice = subtotal + tax - discount
+  }
+
+  // Build line items context string for Claude
+  let lineItemsContext = ''
+  if (showLineItems && lineItems && lineItems.length > 0) {
+    const validItems = lineItems.filter((i: { description: string; unitPrice: string }) => i.description && i.unitPrice)
+    if (validItems.length > 0) {
+      const itemLines = validItems.map((i: { description: string; quantity: string; unitPrice: string }) =>
+        `  - ${i.description}: ${i.quantity || 1} × $${i.unitPrice}`
+      ).join('\n')
+      lineItemsContext += `\n\nUse EXACTLY these line items (do not invent others):\n${itemLines}`
+      if (taxEnabled && taxRate) lineItemsContext += `\nApply ${taxRate}% tax.`
+      if (discountAmount && parseFloat(discountAmount) > 0) lineItemsContext += `\nApply a $${discountAmount} discount.`
+      if (depositPercent && parseFloat(depositPercent) > 0) lineItemsContext += `\nNote a ${depositPercent}% deposit is required upfront.`
+    }
+  } else {
+    if (taxEnabled && taxRate) lineItemsContext += `\nApply ${taxRate}% tax to the total.`
+    if (discountAmount && parseFloat(discountAmount) > 0) lineItemsContext += `\nApply a $${discountAmount} discount.`
+    if (depositPercent && parseFloat(depositPercent) > 0) lineItemsContext += `\nNote a ${depositPercent}% deposit is required upfront.`
+  }
 
   // If the user is regenerating from an existing draft (via "← Back to Edit"),
   // delete that draft first so we never accumulate orphaned duplicates.
@@ -150,10 +187,10 @@ Generate a professional ${docType} in JSON format. The output must be ONLY valid
 - Client name: ${clientName}
 - Client email: ${clientEmail}
 - Service: ${serviceDescription}
-- Price: $${price}
+- Price: $${showLineItems ? finalPrice.toFixed(2) : price}
 - Timeline: ${timeline}
 - Payment terms: ${paymentTerms}
-- Additional notes: ${notes || 'None'}
+- Additional notes: ${notes || 'None'}${lineItemsContext}
 
 IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code blocks, no explanation.`
 
@@ -188,7 +225,7 @@ IMPORTANT: Return ONLY the JSON object, nothing else. No markdown, no code block
         client_name: clientName,
         client_email: clientEmail,
         business_name: businessName,
-        price: parseFloat(price.replace(',', '')),
+        price: finalPrice,
         status: 'draft',
         generated_content: generatedDoc,
         form_data: body,

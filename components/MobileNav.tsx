@@ -14,23 +14,23 @@ export default function MobileNav({ activePage }: MobileNavProps) {
   const linkClass = (page: string) =>
     `block px-3 py-2 rounded-lg text-sm transition font-medium ${
       activePage === page
-        ? 'bg-purple-100 text-[#0d1b2a] font-semibold'
-        : 'text-gray-700 hover:bg-purple-100'
+        ? 'bg-purple-100 dark:bg-purple-900/40 text-[#0d1b2a] dark:text-purple-200 font-semibold'
+        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
     }`
 
   return (
     <div className="lg:hidden sticky top-0 z-40">
       {/* Top bar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
         <Link
           href="/dashboard"
-          className="font-display font-bold text-xl text-[#0d1b2a] tracking-tight hover:opacity-80 transition-opacity"
+          className="font-display font-bold text-xl text-[#0d1b2a] dark:text-white tracking-tight hover:opacity-80 transition-opacity"
         >
           Nvoyce
         </Link>
         <button
           onClick={() => { setShowMenu(!showMenu); setShowCreateDropdown(false) }}
-          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition"
+          className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           aria-label="Toggle menu"
         >
           {showMenu ? (
@@ -47,11 +47,11 @@ export default function MobileNav({ activePage }: MobileNavProps) {
 
       {/* Dropdown menu */}
       {showMenu && (
-        <div className="bg-white border-b border-gray-200 px-4 py-3 space-y-1 shadow-sm">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3 space-y-1 shadow-sm">
           {/* Create */}
           <button
             onClick={() => setShowCreateDropdown(!showCreateDropdown)}
-            className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition font-medium flex items-center justify-between"
+            className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition font-medium flex items-center justify-between"
           >
             <span className="flex items-center gap-2">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2.5" strokeLinecap="round">
@@ -68,14 +68,14 @@ export default function MobileNav({ activePage }: MobileNavProps) {
               <Link
                 href="/dashboard/new?type=invoice"
                 onClick={() => { setShowMenu(false); setShowCreateDropdown(false) }}
-                className="block px-2 py-1.5 text-sm text-gray-600 hover:text-gray-900"
+                className="block px-2 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               >
                 Invoice
               </Link>
               <Link
                 href="/dashboard/new?type=proposal"
                 onClick={() => { setShowMenu(false); setShowCreateDropdown(false) }}
-                className="block px-2 py-1.5 text-sm text-gray-600 hover:text-gray-900"
+                className="block px-2 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               >
                 Proposal
               </Link>

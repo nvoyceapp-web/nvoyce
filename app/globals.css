@@ -16,3 +16,61 @@ body {
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+/* ── Dark mode ─────────────────────────────────────── */
+html.dark {
+  --background: #0f1117;
+  --foreground: #e5e7eb;
+}
+
+html.dark body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* ── Print / PDF ────────────────────────────────────── */
+@media print {
+  /* Force colors to render (don't strip backgrounds) */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide all UI chrome — action bars, sidebars, navs */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Reset page chrome */
+  html,
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Document card: remove shadow, remove max-width, fill the page */
+  .print-doc-card {
+    box-shadow: none !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 32px !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Remove overflow clips that clip content on print */
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  /* Avoid page breaks inside line-item rows */
+  tr, .line-item-row {
+    page-break-inside: avoid;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 0.75in;
+  }
+}

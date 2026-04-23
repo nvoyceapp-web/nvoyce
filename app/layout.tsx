@@ -22,6 +22,16 @@ export const metadata: Metadata = {
   },
 }
 
+// Injected before hydration to avoid flash of wrong theme
+const themeScript = `
+(function() {
+  try {
+    var theme = localStorage.getItem('nvoyce-theme');
+    if (theme === 'dark') document.documentElement.classList.add('dark');
+  } catch(e) {}
+})();
+`
+
 export default function RootLayout({
   children,
 }: {
@@ -30,6 +40,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className={spaceGrotesk.variable}>
+        <head>
+          <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        </head>
         <body>{children}</body>
       </html>
     </ClerkProvider>

@@ -408,8 +408,21 @@ export default function DocumentPage() {
               Repeat
             </Link>
           )}
-          <button onClick={() => window.print()} className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition hidden sm:block">
-            Print / PDF
+          <button
+            onClick={() => {
+              const docNum = doc.document_number || content.documentNumber || 'Document'
+              const prev = document.title
+              document.title = `${docNum} — ${doc.client_name || 'Client'}`
+              window.print()
+              document.title = prev
+            }}
+            className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition hidden sm:block flex items-center gap-1.5"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-1">
+              <polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/>
+              <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+            </svg>
+            Download PDF
           </button>
         </div>
       </div>
@@ -479,7 +492,7 @@ export default function DocumentPage() {
 
       {/* Document */}
       <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 sm:py-12 print:py-0 print:px-0">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-12 print:shadow-none print:border-none print:rounded-none">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-12 print-doc-card">
 
           {/* Logo Section */}
           <div className="text-center mb-12 pb-8 border-b border-gray-100">

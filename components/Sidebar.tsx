@@ -3,7 +3,7 @@
 import { useState, useImperativeHandle, forwardRef, ReactElement } from 'react'
 import Link from 'next/link'
 
-export type ActivePage = 'dashboard' | 'clients' | 'rate-card' | 'faq' | 'settings' | 'about'
+export type ActivePage = 'dashboard' | 'clients' | 'rate-card' | 'faq' | 'settings' | 'about' | 'analytics'
 
 export interface SidebarHandle {
   open: () => void
@@ -54,11 +54,19 @@ const navIcons: Record<string, ReactElement> = {
       <line x1="12" y1="16" x2="12.01" y2="16"/>
     </svg>
   ),
+  analytics: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10"/>
+      <line x1="12" y1="20" x2="12" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="14"/>
+    </svg>
+  ),
 }
 
 const navItems = [
   { key: 'dashboard', label: 'Dashboard', href: '/dashboard' },
   { key: 'create',    label: 'Create',    href: null },
+  { key: 'analytics', label: 'Analytics', href: '/dashboard/analytics' },
   { key: 'clients',   label: 'Clients',   href: '/dashboard/clients' },
   { key: 'rate-card', label: 'Rate Card', href: '/dashboard/rate-card' },
   { key: 'faq',       label: 'FAQ',       href: '/dashboard/faq' },

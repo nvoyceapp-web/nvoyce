@@ -10,6 +10,28 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Fetch a custom email template for a user, returning null if none saved
+async function getEmailTemplate(
+  userId: string,
+  templateType: string
+): Promise<{ subject: string; body: string } | null> {
+  try {
+    const { data, error } = await supabase
+      .from('email_templates')
+      .select('subject, body')
+      .eq('user_id', userId)
+      .eq('template_type', templateType)
+      .single()
+    if (!error && data) return data
+  } catch {}
+  return null
+}
+
+// Replace template variables with actual values
+function applyTemplateVars(text: string, vars: Record<string, string>): string {
+  return Object.entries(vars).reduce((t, [k, v]) => t.replaceAll(k, v), text)
+}
+
 async function getUserLogo(userId: string): Promise<string | null> {
   try {
     const { data, error } = await supabase
@@ -60,11 +82,27 @@ export async function sendInvoiceEmail({
       }
     }
 
+    // Load custom template if user has one saved
+    const templateVars = {
+      '{{clientName}}': clientName,
+      '{{businessName}}': businessName,
+      '{{invoiceNumber}}': invoiceNumber || '',
+      '{{amount}}': `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      '{{dueDate}}': dueDate || '',
+    }
+    const customTemplate = userId ? await getEmailTemplate(userId, 'invoice_sent') : null
+    const emailSubject = customTemplate
+      ? applyTemplateVars(customTemplate.subject, templateVars)
+      : `Invoice from ${businessName}`
+    const emailIntro = customTemplate
+      ? applyTemplateVars(customTemplate.body, templateVars).replace(/\n/g, '<br>')
+      : `Hi ${clientName},<br><br>Your invoice from ${businessName} is ready. Please see the details below and proceed with payment.`
+
     const result = await resend.emails.send({
       from: FROM_EMAIL,
       replyTo: SUPPORT_EMAIL,
       to: clientEmail,
-      subject: `Invoice from ${businessName}`,
+      subject: emailSubject,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <div style="text-align: center; padding: 30px 20px; border-bottom: 1px solid #e5e7eb;">
@@ -76,8 +114,7 @@ export async function sendInvoiceEmail({
             </div>
           </div>
           <div style="padding: 30px 20px;">
-            <p style="margin: 0 0 20px 0; font-size: 16px; color: #1f2937;">Hi ${clientName},</p>
-            <p style="margin: 0 0 30px 0; font-size: 14px; color: #374151; line-height: 1.6;">Your invoice from ${businessName} is ready. Please see the details below and proceed with payment.</p>
+            <p style="margin: 0 0 20px 0; font-size: 14px; color: #374151; line-height: 1.6;">${emailIntro}</p>
             <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; border-radius: 4px; margin: 0 0 30px 0;">
               <div style="display: flex; justify-content: space-between; margin: 0 0 12px 0; padding-bottom: 12px; border-bottom: 1px solid #d1fae5;">
                 <div>
@@ -250,11 +287,26 @@ export async function sendProposalSentEmail({
       }
     }
 
+    // Load custom template if user has one saved
+    const proposalTemplateVars = {
+      '{{clientName}}': clientName,
+      '{{businessName}}': businessName,
+      '{{proposalNumber}}': '',
+      '{{amount}}': `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    }
+    const customProposalTemplate = userId ? await getEmailTemplate(userId, 'proposal_sent') : null
+    const proposalSubject = customProposalTemplate
+      ? applyTemplateVars(customProposalTemplate.subject, proposalTemplateVars)
+      : `Proposal from ${businessName}`
+    const proposalIntro = customProposalTemplate
+      ? applyTemplateVars(customProposalTemplate.body, proposalTemplateVars).replace(/\n/g, '<br>')
+      : `Hi ${clientName},<br><br>We're excited to share a proposal for your project. Please review the details below and let us know if you have any questions.`
+
     const result = await resend.emails.send({
       from: FROM_EMAIL,
       replyTo: SUPPORT_EMAIL,
       to: clientEmail,
-      subject: `Proposal from ${businessName}`,
+      subject: proposalSubject,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <div style="text-align: center; padding: 30px 20px 20px; border-bottom: 1px solid #e5e7eb;">
@@ -262,8 +314,7 @@ export async function sendProposalSentEmail({
             <p style="margin: 15px 0 0 0; color: #374151; font-size: 14px;">Professional Proposals from <strong>${businessName}</strong></p>
           </div>
           <div style="padding: 30px 20px;">
-            <p style="margin: 0 0 20px 0; font-size: 16px; color: #1f2937;">Hi ${clientName},</p>
-            <p style="margin: 0 0 30px 0; font-size: 14px; color: #374151; line-height: 1.6;">We're excited to share a proposal for your project. Please review the details below and let us know if you have any questions.</p>
+            <p style="margin: 0 0 20px 0; font-size: 14px; color: #374151; line-height: 1.6;">${proposalIntro}</p>
             <div style="background-color: #f3e8ff; border-left: 4px solid #7c3aed; padding: 20px; border-radius: 4px; margin: 0 0 30px 0;">
               <div style="margin: 0 0 12px 0;">
                 <p style="margin: 0 0 8px 0; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Service</p>

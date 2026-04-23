@@ -331,6 +331,78 @@ function SettingsContent() {
   const [autoInvoices, setAutoInvoices] = useState(true)
   const [timezone, setTimezone] = useState('EST')
 
+  // Email templates
+  const TEMPLATE_DEFAULTS: Record<string, { label: string; subject: string; body: string; vars: string[] }> = {
+    invoice_sent: {
+      label: 'Invoice Sent',
+      subject: 'Invoice from {{businessName}}',
+      body: 'Hi {{clientName}},\n\nYour invoice from {{businessName}} is ready. Please see the details below and proceed with payment.\n\nThank you for your business!',
+      vars: ['{{clientName}}', '{{businessName}}', '{{invoiceNumber}}', '{{amount}}', '{{dueDate}}'],
+    },
+    proposal_sent: {
+      label: 'Proposal Sent',
+      subject: 'Proposal from {{businessName}}',
+      body: 'Hi {{clientName}},\n\nThank you for considering {{businessName}}. Please find your proposal below.\n\nFeel free to reach out with any questions.',
+      vars: ['{{clientName}}', '{{businessName}}', '{{proposalNumber}}', '{{amount}}'],
+    },
+    overdue_reminder: {
+      label: 'Overdue Invoice Reminder',
+      subject: 'Friendly reminder: Invoice from {{businessName}}',
+      body: 'Hi {{clientName}},\n\nJust a friendly reminder that your invoice from {{businessName}} is overdue. Please let us know if you have any questions.\n\nThank you!',
+      vars: ['{{clientName}}', '{{businessName}}', '{{invoiceNumber}}', '{{amount}}', '{{daysOverdue}}'],
+    },
+    expiry_reminder: {
+      label: 'Proposal Expiry Reminder',
+      subject: 'Your proposal from {{businessName}} is expiring soon',
+      body: 'Hi {{clientName}},\n\nThis is a reminder that your proposal from {{businessName}} is expiring soon. Please review and accept before it expires.\n\nThank you!',
+      vars: ['{{clientName}}', '{{businessName}}', '{{proposalNumber}}', '{{expiryDate}}'],
+    },
+  }
+
+  type TemplateType = keyof typeof TEMPLATE_DEFAULTS
+  const [templates, setTemplates] = useState<Record<string, { subject: string; body: string }>>(() =>
+    Object.fromEntries(Object.entries(TEMPLATE_DEFAULTS).map(([k, v]) => [k, { subject: v.subject, body: v.body }]))
+  )
+  const [savingTemplate, setSavingTemplate] = useState<string | null>(null)
+  const [templateMessages, setTemplateMessages] = useState<Record<string, { type: 'success' | 'error'; text: string }>>({})
+  const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!userId) return
+    async function loadTemplates() {
+      const { data } = await supabase.from('email_templates').select('template_type, subject, body').eq('user_id', userId)
+      if (data && data.length > 0) {
+        setTemplates(prev => {
+          const updated = { ...prev }
+          data.forEach(t => { updated[t.template_type] = { subject: t.subject, body: t.body } })
+          return updated
+        })
+      }
+    }
+    loadTemplates()
+  }, [userId])
+
+  async function saveTemplate(type: TemplateType) {
+    if (!userId) return
+    setSavingTemplate(type)
+    const t = templates[type]
+    const { error } = await supabase.from('email_templates').upsert(
+      { user_id: userId, template_type: type, subject: t.subject, body: t.body, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,template_type' }
+    )
+    setSavingTemplate(null)
+    setTemplateMessages(prev => ({
+      ...prev,
+      [type]: error ? { type: 'error', text: 'Failed to save' } : { type: 'success', text: 'Saved!' },
+    }))
+    setTimeout(() => setTemplateMessages(prev => { const n = { ...prev }; delete n[type]; return n }), 3000)
+  }
+
+  function resetTemplate(type: TemplateType) {
+    const def = TEMPLATE_DEFAULTS[type]
+    setTemplates(prev => ({ ...prev, [type]: { subject: def.subject, body: def.body } }))
+  }
+
   const settings = [
     {
       section: 'Notifications',
@@ -792,6 +864,125 @@ function SettingsContent() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Email Templates */}
+            <div className="mt-10 pt-8 border-t border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Email Templates
+              </h2>
+              <p className="text-sm text-gray-500 mb-5">Customize the emails sent to your clients. Use variables like <code className="bg-gray-100 px-1 rounded text-xs">{'{{clientName}}'}</code> to personalize each message.</p>
+
+              <div className="space-y-3">
+                {(Object.keys(TEMPLATE_DEFAULTS) as TemplateType[]).map(type => {
+                  const def = TEMPLATE_DEFAULTS[type]
+                  const t = templates[type]
+                  const isOpen = expandedTemplate === type
+                  const msg = templateMessages[type]
+
+                  return (
+                    <div key={type} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                      {/* Header row */}
+                      <button
+                        onClick={() => setExpandedTemplate(isOpen ? null : type)}
+                        className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e04e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-[#0d1b2a]">{def.label}</p>
+                            <p className="text-xs text-gray-400 truncate max-w-xs">{t.subject}</p>
+                          </div>
+                        </div>
+                        <svg
+                          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      {/* Expanded editor */}
+                      {isOpen && (
+                        <div className="border-t border-gray-100 px-4 py-4 space-y-3">
+                          {/* Subject */}
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-600 mb-1">Subject line</label>
+                            <input
+                              type="text"
+                              value={t.subject}
+                              onChange={e => setTemplates(prev => ({ ...prev, [type]: { ...prev[type], subject: e.target.value } }))}
+                              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            />
+                          </div>
+
+                          {/* Body */}
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-600 mb-1">Message body</label>
+                            <textarea
+                              value={t.body}
+                              onChange={e => setTemplates(prev => ({ ...prev, [type]: { ...prev[type], body: e.target.value } }))}
+                              rows={5}
+                              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none font-mono"
+                            />
+                          </div>
+
+                          {/* Variables */}
+                          <div>
+                            <p className="text-xs text-gray-400 mb-1.5">Available variables:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {def.vars.map(v => (
+                                <code
+                                  key={v}
+                                  onClick={() => {
+                                    const newBody = t.body + v
+                                    setTemplates(prev => ({ ...prev, [type]: { ...prev[type], body: newBody } }))
+                                  }}
+                                  className="text-xs bg-gray-100 hover:bg-orange-100 text-gray-600 hover:text-orange-700 px-2 py-0.5 rounded cursor-pointer transition"
+                                  title="Click to insert"
+                                >
+                                  {v}
+                                </code>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center justify-between pt-1">
+                            <button
+                              onClick={() => resetTemplate(type)}
+                              className="text-xs text-gray-400 hover:text-gray-600 transition"
+                            >
+                              Reset to default
+                            </button>
+                            <div className="flex items-center gap-3">
+                              {msg && (
+                                <span className={`text-xs font-medium ${msg.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+                                  {msg.text}
+                                </span>
+                              )}
+                              <button
+                                onClick={() => saveTemplate(type)}
+                                disabled={savingTemplate === type}
+                                className="px-4 py-1.5 rounded-lg bg-[#0d1b2a] text-white text-xs font-medium hover:bg-[#1a2d40] transition disabled:opacity-50"
+                              >
+                                {savingTemplate === type ? 'Saving...' : 'Save'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
 

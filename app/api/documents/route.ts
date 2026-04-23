@@ -8,8 +8,7 @@ export async function GET() {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const supabase = supabaseServer()
-  const { data, error } = await supabase
+  const { data, error } = await supabaseServer
     .from('documents')
     .select('*')
     .eq('user_id', userId)

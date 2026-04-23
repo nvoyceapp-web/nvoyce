@@ -12,8 +12,7 @@ export async function GET(
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const supabase = supabaseServer()
-  const { data, error } = await supabase
+  const { data, error } = await supabaseServer
     .from('documents')
     .select('*')
     .eq('id', id)

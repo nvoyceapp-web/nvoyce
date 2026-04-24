@@ -839,7 +839,8 @@ function ComparisonTable() {
           <h2 style={{ fontSize: 'clamp(30px, 3.6vw, 44px)', fontWeight: 700, letterSpacing: '-0.025em', lineHeight: 1.05, margin: '16px 0 0', color: 'var(--ink)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>Why freelancers switch.</h2>
         </div>
         <div style={{ background: 'var(--paper)', border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(4, 1fr)', fontSize: 12 }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr repeat(4, 1fr)', fontSize: 12, minWidth: 560 }}>
             <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--line)' }} />
             {cols.map((c, i) => (
               <div key={c} style={{ padding: '18px 14px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: i === 0 ? 'var(--orange)' : 'var(--muted)', borderBottom: '1px solid var(--line)', background: i === 0 ? 'var(--orange-soft)' : 'transparent', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>{c}</div>
@@ -857,6 +858,7 @@ function ComparisonTable() {
                 ))}
               </>
             ))}
+          </div>
           </div>
         </div>
       </div>
